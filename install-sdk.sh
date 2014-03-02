@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 ARCH="386"
 VERSION="1.8.9"
 
-if [ `uname -a` == *x86_64* ]
+if [[ `uname -a` == *x86_64* ]]
 then
     ARCH="amd64"
 fi

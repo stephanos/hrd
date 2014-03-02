@@ -4,7 +4,8 @@ go:
   - 1.2
 
 before_script:
-  - sh install-sdk.sh
+  - chmod +x *.sh
+  - ./install-sdk.sh
 
 install:
   - go get github.com/101loops/bdd
