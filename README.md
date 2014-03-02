@@ -7,6 +7,8 @@ This Go package extends the standard package [appengine.datastore](http://godoc.
 - omitempty: does not save empty/zero values (and thereby does not index them)
 - caching of results in local memory as well as memcache
 
+The library is used in production and actively worked on. So expect things to change.
+
 ### Installation
 `go get github.com/101loops/hrd`
 
