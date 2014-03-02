@@ -13,4 +13,5 @@ install:
   - go get github.com/101loops/reflector
 
 script:
+  - ls -la
   - goappengine/goapp test
