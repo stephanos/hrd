@@ -1,7 +1,7 @@
 hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://travis-ci.org/101loops/hrd)
 ===
 
-This Go package extends the standard package *appengine.datastore* with useful features:
+This Go package extends the standard package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore) with useful features:
 - lifecycle hooks (e.g. beforeSave)
 - fields NOT indexed by default
 - omitempty: does not save empty/zero values (and thereby does not index them)
