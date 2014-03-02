@@ -1,0 +1,16 @@
+language: go
+go:
+  - 1.0
+  - 1.1
+
+before_script:
+- wget https://googleappengine.googlecode.com/files/google_appengine_1.8.9.zip -nv
+- unzip -q google_appengine_1.8.9.zip
+
+install:
+  - go get github.com/101loops/bdd
+  - go get github.com/101loops/mcache
+  - go get github.com/101loops/reflector
+
+script:
+  - go test -v

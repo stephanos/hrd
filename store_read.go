@@ -1,0 +1,94 @@
+package hrd
+
+import (
+	"appengine"
+	"appengine/datastore"
+	"fmt"
+	"time"
+)
+
+const getMultiLimit = 1000
+
+func (self *Store) getMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
+	meta, keys, err := self.getMultiStats(kind, docs, opts)
+	if err == nil {
+		self.ctx.Infof(meta.string())
+	} else {
+		self.ctx.Errorf("%v: %v", meta.descr, err)
+	}
+	return keys, err
+}
+
+func (self *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) (*meta, []*Key, error) {
+
+	meta := &meta{}
+
+	// #1 find entity keys
+	keys := docs.keyList
+	if len(keys) == 0 {
+		return meta, nil, fmt.Errorf("no keys provided")
+	}
+
+	for i, key := range keys {
+		if key.Incomplete() {
+			return meta, nil, fmt.Errorf("incomplete key %q (%dth index)", key, i)
+		}
+		key.opts = opts
+	}
+
+	meta.descr = self.logAct("getting", "from", keys, kind)
+
+	// #2 read from cache
+	dsKeys, dsDocs := self.cache.read(keys, docs)
+	for _, key := range keys {
+		if key.source == SOURCE_MEMCACHE {
+			meta.fromGlobalCache += 1
+		} else if key.source == SOURCE_MEMORY {
+			meta.fromLocalCache += 1
+		}
+	}
+
+	// #3 load from datastore
+	docsToCache := make(map[*Key]*doc, 0)
+	for i := 0; i <= len(dsKeys)/getMultiLimit; i++ {
+		lo := i * getMultiLimit
+		hi := (i + 1) * getMultiLimit
+		if hi > len(dsKeys) {
+			hi = len(dsKeys)
+		}
+
+		dsErr := datastore.GetMulti(self.ctx, toDSKeys(dsKeys[lo:hi]), dsDocs[lo:hi])
+		var merr appengine.MultiError
+		if dsErr != nil {
+			if multi, ok := dsErr.(appengine.MultiError); ok {
+				merr = multi
+			} else {
+				return meta, keys, dsErr
+			}
+		}
+
+		now := time.Now()
+		for i, key := range dsKeys[lo:hi] {
+			if merr == nil || merr[i] == nil {
+				docsToCache[key] = dsDocs[lo+i]
+				dsDocs[lo+i].setKey(key)
+				key.source = SOURCE_DATASTORE
+				key.synced = now
+				continue
+			}
+
+			if merr[i] == datastore.ErrNoSuchEntity {
+				dsDocs[lo+i].nil() // not found: set to 'nil'
+				merr[i] = nil      // ignore error
+				continue
+			}
+
+			key.err = &merr[i]
+		}
+	}
+
+	// #4 update cache
+	self.cache.write(docsToCache)
+
+	return meta, keys, nil
+}
