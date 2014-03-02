@@ -18,6 +18,7 @@ type docs struct {
 var (
 	typeOfKey   = reflect.TypeOf(&Key{})
 	typeOfInt64 = reflect.TypeOf(int64(0))
+	typeOfStr   = reflect.TypeOf("")
 )
 
 func newReadableDocs(coll *Collection, src interface{}) (*docs, error) {
