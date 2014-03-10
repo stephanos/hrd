@@ -43,6 +43,10 @@ func (self *Store) ClearCache() {
 	self.localCache.Clear()
 }
 
+func (self *Store) CreatedAt() time.Time {
+	return self.createdAt
+}
+
 func (self *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
