@@ -9,17 +9,16 @@ This Go package extends the standard package [appengine.datastore](http://godoc.
 
 The library is used in production and actively worked on. So expect things to change.
 
+**This is still alpha quality. It may have one or two bugs and memory leaks.**
+
+Pull requests are very welcome :)
+
+
 ### Installation
 `go get github.com/101loops/hrd`
 
 ### Documentation
 [godoc.org](http://godoc.org/github.com/101loops/hrd)
-
-### Note: Be aware.
-This is still *alpha quality*. It may have one or two bugs and memory leaks.
-I use it on my side project and it will improve gradually.
-
-Pull requests are very welcome :)
 
 ### Credit
 - Google: [https://code.google.com/p/appengine-go/]
