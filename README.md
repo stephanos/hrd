@@ -2,10 +2,10 @@ hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://tra
 ===
 
 This Go package extends the standard package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore) with useful features:
+- caching in local memory as well as memcache
+- DSL for read, write and delete
 - lifecycle hooks (e.g. beforeSave)
-- fields NOT indexed by default
-- omitempty: does not save empty/zero values (and thereby does not index them)
-- caching of results in local memory as well as memcache
+- logging of all datastore actions
 
 The library is used in production and actively worked on. So expect things to change.
 
