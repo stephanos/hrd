@@ -5,53 +5,53 @@ type Deleter struct {
 }
 
 // Delete a single entity by key from the datastore.
-func (self *Deleter) Key(key *Key) error {
-	return self.delete([]*Key{key})
+func (d *Deleter) Key(key *Key) error {
+	return d.delete([]*Key{key})
 }
 
 // Delete multiple entities by key from the datastore.
-func (self *Deleter) Keys(keys []*Key) error {
-	return self.delete(keys)
+func (d *Deleter) Keys(keys []*Key) error {
+	return d.delete(keys)
 }
 
 // Delete the provided entity.
-func (self *Deleter) Entity(src interface{}) error {
-	k, err := self.coll.store.getKey(self.coll.name, src)
+func (d *Deleter) Entity(src interface{}) error {
+	k, err := d.coll.store.getKey(d.coll.name, src)
 	if err != nil {
 		return err
 	}
-	return self.delete([]*Key{k})
+	return d.delete([]*Key{k})
 }
 
 // Delete the provided entities.
-func (self *Deleter) Entities(srcs interface{}) error {
-	dsKeys, err := self.coll.store.getKeys(self.coll.name, srcs)
+func (d *Deleter) Entities(srcs interface{}) error {
+	dsKeys, err := d.coll.store.getKeys(d.coll.name, srcs)
 	if err != nil {
 		return err
 	}
-	return self.delete(dsKeys)
+	return d.delete(dsKeys)
 }
 
 // Delete a single entity by id from the datastore.
-func (self *Deleter) ID(id int64, parent ...*Key) error {
-	return self.delete([]*Key{self.coll.NewNumKey(id, parent...)})
+func (d *Deleter) ID(id int64, parent ...*Key) error {
+	return d.delete([]*Key{d.coll.NewNumKey(id, parent...)})
 }
 
 // Delete a single key by text id from the datastore.
-func (self *Deleter) TextID(id string, parent ...*Key) error {
-	return self.delete([]*Key{self.coll.NewTextKey(id, parent...)})
+func (d *Deleter) TextID(id string, parent ...*Key) error {
+	return d.delete([]*Key{d.coll.NewTextKey(id, parent...)})
 }
 
 // Delete multiple keys by id from the datastore.
-func (self *Deleter) IDs(ids ...int64) error {
-	return self.delete(self.coll.NewNumKeys(ids...))
+func (d *Deleter) IDs(ids ...int64) error {
+	return d.delete(d.coll.NewNumKeys(ids...))
 }
 
 // Delete multiple keys by text id from the datastore.
-func (self *Deleter) TextIDs(ids ...string) error {
-	return self.delete(self.coll.NewTextKeys(ids...))
+func (d *Deleter) TextIDs(ids ...string) error {
+	return d.delete(d.coll.NewTextKeys(ids...))
 }
 
-func (self *Deleter) delete(keys []*Key) error {
-	return self.coll.store.deleteMulti(self.coll.name, keys)
+func (d *Deleter) delete(keys []*Key) error {
+	return d.coll.store.deleteMulti(d.coll.name, keys)
 }

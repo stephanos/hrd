@@ -5,10 +5,10 @@ import (
 	"appengine/memcache"
 	"crypto/rand"
 	"encoding/binary"
-	"time"
 	"fmt"
 	. "github.com/101loops/bdd"
 	"testing"
+	"time"
 )
 
 var (
@@ -52,40 +52,40 @@ type SimpleModel struct {
 	createdAt time.Time `datastore:"-"`
 }
 
-func (self *SimpleModel) ID() int64 {
-	return self.id
+func (mdl *SimpleModel) ID() int64 {
+	return mdl.id
 }
 
-func (self *SimpleModel) SetID(id int64) {
-	self.id = id
+func (mdl *SimpleModel) SetID(id int64) {
+	mdl.id = id
 }
 
-func (self *SimpleModel) BeforeLoad() error {
-	self.lifecycle = "before-load"
+func (mdl *SimpleModel) BeforeLoad() error {
+	mdl.lifecycle = "before-load"
 	return nil
 }
 
-func (self *SimpleModel) AfterLoad() error {
-	self.lifecycle = "after-load"
+func (mdl *SimpleModel) AfterLoad() error {
+	mdl.lifecycle = "after-load"
 	return nil
 }
 
-func (self *SimpleModel) BeforeSave() error {
-	self.lifecycle = "before-save"
+func (mdl *SimpleModel) BeforeSave() error {
+	mdl.lifecycle = "before-save"
 	return nil
 }
 
-func (self *SimpleModel) AfterSave() error {
-	self.lifecycle = "after-save"
+func (mdl *SimpleModel) AfterSave() error {
+	mdl.lifecycle = "after-save"
 	return nil
 }
 
-func (self *SimpleModel) SetCreatedAt(t time.Time) {
-	self.createdAt = t
+func (mdl *SimpleModel) SetCreatedAt(t time.Time) {
+	mdl.createdAt = t
 }
 
-func (self *SimpleModel) SetUpdatedAt(t time.Time) {
-	self.updatedAt = t
+func (mdl *SimpleModel) SetUpdatedAt(t time.Time) {
+	mdl.updatedAt = t
 }
 
 type ComplexModel struct {
@@ -96,23 +96,23 @@ type ComplexModel struct {
 	lifecycle string `datastore:"-"`
 }
 
-func (self *ComplexModel) BeforeLoad() error {
-	self.lifecycle = "before-load"
+func (mdl *ComplexModel) BeforeLoad() error {
+	mdl.lifecycle = "before-load"
 	return nil
 }
 
-func (self *ComplexModel) AfterLoad() error {
-	self.lifecycle = "after-load"
+func (mdl *ComplexModel) AfterLoad() error {
+	mdl.lifecycle = "after-load"
 	return nil
 }
 
-func (self *ComplexModel) BeforeSave() error {
-	self.lifecycle = "before-save"
+func (mdl *ComplexModel) BeforeSave() error {
+	mdl.lifecycle = "before-save"
 	return nil
 }
 
-func (self *ComplexModel) AfterSave() error {
-	self.lifecycle = "after-save"
+func (mdl *ComplexModel) AfterSave() error {
+	mdl.lifecycle = "after-save"
 	return nil
 }
 

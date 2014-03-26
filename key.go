@@ -27,14 +27,14 @@ func newKeys(keys []*datastore.Key) []*Key {
 	return ret
 }
 
-func (self *Key) Exists() bool {
-	return !self.synced.IsZero()
+func (key *Key) Exists() bool {
+	return !key.synced.IsZero()
 }
 
-func (self *Key) IdString() (id string) {
-	id = self.StringID()
-	if id == "" && self.IntID() > 0 {
-		id = fmt.Sprintf("%v", self.IntID())
+func (key *Key) IdString() (id string) {
+	id = key.StringID()
+	if id == "" && key.IntID() > 0 {
+		id = fmt.Sprintf("%v", key.IntID())
 	}
 	return
 }

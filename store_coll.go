@@ -8,57 +8,57 @@ type Collection struct {
 	name  string
 }
 
-func (self *Collection) NewNumKey(id int64, parent ...*Key) *Key {
-	return self.store.NewNumKey(self.name, id, parent...)
+func (coll *Collection) NewNumKey(id int64, parent ...*Key) *Key {
+	return coll.store.NewNumKey(coll.name, id, parent...)
 }
 
-func (self *Collection) NewNumKeys(ids ...int64) []*Key {
-	return self.store.NewNumKeys(self.name, ids...)
+func (coll *Collection) NewNumKeys(ids ...int64) []*Key {
+	return coll.store.NewNumKeys(coll.name, ids...)
 }
 
-func (self *Collection) NewTextKey(id string, parent ...*Key) *Key {
-	return self.store.NewTextKey(self.name, id, parent...)
+func (coll *Collection) NewTextKey(id string, parent ...*Key) *Key {
+	return coll.store.NewTextKey(coll.name, id, parent...)
 }
 
-func (self *Collection) NewTextKeys(ids ...string) []*Key {
-	return self.store.NewTextKeys(self.name, ids...)
+func (coll *Collection) NewTextKeys(ids ...string) []*Key {
+	return coll.store.NewTextKeys(coll.name, ids...)
 }
 
-func (self *Collection) Store() *Store {
-	return self.store
+func (coll *Collection) Store() *Store {
+	return coll.store
 }
 
-func (self *Collection) Save() *Saver {
-	return newSaver(self)
+func (coll *Collection) Save() *Saver {
+	return newSaver(coll)
 }
 
-func (self *Collection) Load() *Loader {
-	return newLoader(self)
+func (coll *Collection) Load() *Loader {
+	return newLoader(coll)
 }
 
-func (self *Collection) Delete() *Deleter {
-	return &Deleter{self}
+func (coll *Collection) Delete() *Deleter {
+	return &Deleter{coll}
 }
 
-func (self *Collection) Query() *Query {
-	return newQuery(self)
+func (coll *Collection) Query() *Query {
+	return newQuery(coll)
 }
 
 // Deletes all entities of the collection.
-func (self *Collection) DESTROY() error {
+func (coll *Collection) DESTROY() error {
 	i := 0
 	var start string
 	for {
-		keys, cursor, err := self.Query().Limit(1000).Start(start).GetKeys()
+		keys, cursor, err := coll.Query().Limit(1000).Start(start).GetKeys()
 		if err != nil {
 			return err
 		}
 		if len(keys) == 0 {
-			self.store.ctx.Infof("destroyed collection %q (%d items)", self.name, i)
+			coll.store.ctx.Infof("destroyed collection %q (%d items)", coll.name, i)
 			return nil
 		}
 
-		err = self.Delete().Keys(keys)
+		err = coll.Delete().Keys(keys)
 		if err != nil {
 			return err
 		}
@@ -68,53 +68,53 @@ func (self *Collection) DESTROY() error {
 	}
 }
 
-func (self *Collection) getKey(src interface{}) (*Key, error) {
-	return self.store.getKey(self.name, src)
+func (coll *Collection) getKey(src interface{}) (*Key, error) {
+	return coll.store.getKey(coll.name, src)
 }
 
 // ==== CACHE
 
-func (self *Collection) NoCache() *Collection {
-	return self.NoLocalCache().NoGlobalCache()
+func (coll *Collection) NoCache() *Collection {
+	return coll.NoLocalCache().NoGlobalCache()
 }
 
-func (self *Collection) NoLocalCache() *Collection {
-	return self.NoLocalCacheWrite().NoLocalCacheRead()
+func (coll *Collection) NoLocalCache() *Collection {
+	return coll.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
-func (self *Collection) NoGlobalCache() *Collection {
-	return self.NoGlobalCacheWrite().NoGlobalCacheRead()
+func (coll *Collection) NoGlobalCache() *Collection {
+	return coll.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
-func (self *Collection) CacheExpire(exp time.Duration) *Collection {
-	self.opts = self.opts.CacheExpire(exp)
-	return self
+func (coll *Collection) CacheExpire(exp time.Duration) *Collection {
+	coll.opts = coll.opts.CacheExpire(exp)
+	return coll
 }
 
-func (self *Collection) NoCacheRead() *Collection {
-	return self.NoGlobalCacheRead().NoLocalCacheRead()
+func (coll *Collection) NoCacheRead() *Collection {
+	return coll.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
-func (self *Collection) NoLocalCacheRead() *Collection {
-	self.opts = self.opts.NoLocalCacheRead()
-	return self
+func (coll *Collection) NoLocalCacheRead() *Collection {
+	coll.opts = coll.opts.NoLocalCacheRead()
+	return coll
 }
 
-func (self *Collection) NoGlobalCacheRead() *Collection {
-	self.opts = self.opts.NoGlobalCacheRead()
-	return self
+func (coll *Collection) NoGlobalCacheRead() *Collection {
+	coll.opts = coll.opts.NoGlobalCacheRead()
+	return coll
 }
 
-func (self *Collection) NoCacheWrite() *Collection {
-	return self.NoGlobalCacheWrite().NoLocalCacheWrite()
+func (coll *Collection) NoCacheWrite() *Collection {
+	return coll.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
-func (self *Collection) NoLocalCacheWrite() *Collection {
-	self.opts = self.opts.NoLocalCacheWrite()
-	return self
+func (coll *Collection) NoLocalCacheWrite() *Collection {
+	coll.opts = coll.opts.NoLocalCacheWrite()
+	return coll
 }
 
-func (self *Collection) NoGlobalCacheWrite() *Collection {
-	self.opts = self.opts.NoGlobalCacheWrite()
-	return self
+func (coll *Collection) NoGlobalCacheWrite() *Collection {
+	coll.opts = coll.opts.NoGlobalCacheWrite()
+	return coll
 }

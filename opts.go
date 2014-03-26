@@ -31,86 +31,86 @@ func defaultOperationOpts() *operationOpts {
 	}
 }
 
-func (self *operationOpts) clone() *operationOpts {
-	opts := *self
-	return &opts
+func (opts *operationOpts) clone() *operationOpts {
+	copy := *opts
+	return &copy
 }
 
-func (self *operationOpts) Flags(flags ...Flag) *operationOpts {
-	copy := self.clone()
+func (opts *operationOpts) Flags(flags ...Flag) (ret *operationOpts) {
+	ret = opts.clone()
 	for _, f := range flags {
 		switch f {
 		case NO_CACHE:
-			copy = copy.NoCache()
+			ret = ret.NoCache()
 		case NO_LOCAL_CACHE:
-			copy = copy.NoLocalCache()
+			ret = ret.NoLocalCache()
 		case NO_GLOBAL_CACHE:
-			copy = copy.NoGlobalCache()
+			ret = ret.NoGlobalCache()
 		}
 	}
-	return copy
+	return
 }
 
-func (self *operationOpts) CompleteKeys(complete ...bool) *operationOpts {
-	opts := self.clone()
+func (opts *operationOpts) CompleteKeys(complete ...bool) (ret *operationOpts) {
+	ret = opts.clone()
 	if len(complete) == 1 {
-		opts.completeKeys = complete[0]
+		ret.completeKeys = complete[0]
 	} else {
-		opts.completeKeys = true
+		ret.completeKeys = true
 	}
-	return opts
+	return ret
 }
 
-func (self *operationOpts) XG() *operationOpts {
-	copy := self.clone()
-	copy.tx_cross_group = true
-	return copy
+func (opts *operationOpts) XG() (ret *operationOpts) {
+	ret = opts.clone()
+	ret.tx_cross_group = true
+	return ret
 }
 
-func (self *operationOpts) NoCache() *operationOpts {
-	return self.NoLocalCache().NoGlobalCache()
+func (opts *operationOpts) NoCache() *operationOpts {
+	return opts.NoLocalCache().NoGlobalCache()
 }
 
-func (self *operationOpts) NoLocalCache() *operationOpts {
-	return self.NoLocalCacheWrite().NoLocalCacheRead()
+func (opts *operationOpts) NoLocalCache() *operationOpts {
+	return opts.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
-func (self *operationOpts) NoGlobalCache() *operationOpts {
-	return self.NoGlobalCacheWrite().NoGlobalCacheRead()
+func (opts *operationOpts) NoGlobalCache() *operationOpts {
+	return opts.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
-func (self *operationOpts) CacheExpire(exp time.Duration) *operationOpts {
-	copy := self.clone()
-	copy.writeGlobalCache = exp
-	return copy
+func (opts *operationOpts) CacheExpire(exp time.Duration) (ret *operationOpts) {
+	ret = opts.clone()
+	ret.writeGlobalCache = exp
+	return ret
 }
 
-func (self *operationOpts) NoCacheRead() *operationOpts {
-	return self.NoGlobalCacheRead().NoLocalCacheRead()
+func (opts *operationOpts) NoCacheRead() *operationOpts {
+	return opts.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
-func (self *operationOpts) NoLocalCacheRead() *operationOpts {
-	copy := self.clone()
-	copy.readLocalCache = false
-	return copy
+func (opts *operationOpts) NoLocalCacheRead() (ret *operationOpts) {
+	ret = opts.clone()
+	ret.readLocalCache = false
+	return
 }
 
-func (self *operationOpts) NoGlobalCacheRead() *operationOpts {
-	copy := self.clone()
-	copy.readGlobalCache = false
-	return copy
+func (opts *operationOpts) NoGlobalCacheRead() (ret *operationOpts) {
+	ret = opts.clone()
+	ret.readGlobalCache = false
+	return
 }
 
-func (self *operationOpts) NoCacheWrite() *operationOpts {
-	return self.NoGlobalCacheWrite().NoLocalCacheWrite()
+func (opts *operationOpts) NoCacheWrite() *operationOpts {
+	return opts.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
-func (self *operationOpts) NoLocalCacheWrite() *operationOpts {
-	copy := self.clone()
-	copy.writeLocalCache = false
-	return copy
+func (opts *operationOpts) NoLocalCacheWrite() (ret *operationOpts) {
+	ret = opts.clone()
+	ret.writeLocalCache = false
+	return
 }
 
-func (self *operationOpts) NoGlobalCacheWrite() *operationOpts {
-	return self.CacheExpire(-1)
+func (opts *operationOpts) NoGlobalCacheWrite() *operationOpts {
+	return opts.CacheExpire(-1)
 }

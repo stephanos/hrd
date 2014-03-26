@@ -139,39 +139,39 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 	return ret, nil
 }
 
-func (self *docs) keys() []*Key {
-	return self.keyList
+func (docs *docs) keys() []*Key {
+	return docs.keyList
 }
 
-func (self *docs) set(idx int, src interface{}) {
-	self.list[idx].set(src)
+func (docs *docs) set(idx int, src interface{}) {
+	docs.list[idx].set(src)
 }
 
-func (self *docs) get(idx int) *doc {
-	return self.list[idx]
+func (docs *docs) get(idx int) *doc {
+	return docs.list[idx]
 }
 
-func (self *docs) nil(idx int) {
-	self.list[idx].nil()
+func (docs *docs) nil(idx int) {
+	docs.list[idx].nil()
 }
 
-func (self *docs) next() (ret *doc, err error) {
-	if self.i < len(self.list) {
-		ret = self.list[self.i]
+func (docs *docs) next() (ret *doc, err error) {
+	if docs.i < len(docs.list) {
+		ret = docs.list[docs.i]
 	} else {
-		ret, err = newDocFromType(self.elem_type)
+		ret, err = newDocFromType(docs.elem_type)
 	}
-	self.i += 1
+	docs.i += 1
 	return
 }
 
-func (self *docs) add(key *Key, d *doc) {
-	self.list = append(self.list, d)
+func (docs *docs) add(key *Key, d *doc) {
+	docs.list = append(docs.list, d)
 	d.setKey(key)
 
-	if self.src_kind == reflect.Map {
+	if docs.src_kind == reflect.Map {
 		var v reflect.Value
-		switch self.key_type {
+		switch docs.key_type {
 		case typeOfInt64:
 			v = reflect.ValueOf(key.IntID())
 		case typeOfStr:
@@ -179,8 +179,8 @@ func (self *docs) add(key *Key, d *doc) {
 		default:
 			v = reflect.ValueOf(key)
 		}
-		self.src_val.SetMapIndex(v, d.src_val)
-	} else if self.src_kind == reflect.Slice {
-		self.src_val.Set(reflect.Append(self.src_val, d.src_val))
+		docs.src_val.SetMapIndex(v, d.src_val)
+	} else if docs.src_kind == reflect.Slice {
+		docs.src_val.Set(reflect.Append(docs.src_val, d.src_val))
 	}
 }

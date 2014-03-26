@@ -53,17 +53,17 @@ func newDocFromType(typ reflect.Type) (*doc, error) {
 	return newDoc(reflect.New(typ.Elem()))
 }
 
-func (self *doc) nil() {
-	dst := self.val()
+func (doc *doc) nil() {
+	dst := doc.val()
 	dst.Set(reflect.New(dst.Type()).Elem())
 }
 
-func (self *doc) get() interface{} {
-	return self.src_val.Interface()
+func (doc *doc) get() interface{} {
+	return doc.src_val.Interface()
 }
 
-func (self *doc) set(src interface{}) {
-	dst := self.val()
+func (doc *doc) set(src interface{}) {
+	dst := doc.val()
 	v := reflect.ValueOf(src)
 	if v.Kind() == reflect.Ptr && dst.Kind() != reflect.Ptr {
 		v = v.Elem()
@@ -71,23 +71,23 @@ func (self *doc) set(src interface{}) {
 	dst.Set(v)
 }
 
-func (self *doc) setKey(k *Key) {
-	setKey(self.get(), k)
+func (doc *doc) setKey(k *Key) {
+	setKey(doc.get(), k)
 }
 
-func (self *doc) val() reflect.Value {
-	v := self.src_val
+func (doc *doc) val() reflect.Value {
+	v := doc.src_val
 	if !v.CanSet() {
-		v = self.src_val.Elem()
+		v = doc.src_val.Elem()
 	}
 	return v
 }
 
-func (self *doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
+func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
 	var props []*property
 
-	src_val := self.val()
-	for i, t := range self.codec.byIndex {
+	src_val := doc.val()
+	for i, t := range doc.codec.byIndex {
 		v := src_val.Field(i)
 		if !v.IsValid() || !v.CanSet() {
 			continue
@@ -112,7 +112,7 @@ func (self *doc) toProperties(prefix string, tags []string, multi bool) (res []*
 			continue
 		}
 
-		// otherwise, save the field itself
+		// otherwise, save the field itdoc
 		props, err = itemToProperties(name, aggrTags, multi, v)
 		if err != nil {
 			return
@@ -124,10 +124,10 @@ func (self *doc) toProperties(prefix string, tags []string, multi bool) (res []*
 }
 
 // Note: Save should close the channel when done, even if an error occurred
-func (self *doc) Save(c chan<- datastore.Property) error {
+func (doc *doc) Save(c chan<- datastore.Property) error {
 	defer close(c)
 
-	src := self.get()
+	src := doc.get()
 
 	// event: before save
 	if hook, ok := src.(beforeSaver); ok {
@@ -137,7 +137,7 @@ func (self *doc) Save(c chan<- datastore.Property) error {
 	}
 
 	// export properties
-	props, err := self.toProperties("", []string{""}, false)
+	props, err := doc.toProperties("", []string{""}, false)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (self *doc) Save(c chan<- datastore.Property) error {
 			Multiple: prop.multi,
 		}
 	}
-	self.synced = true
+	doc.synced = true
 
 	// event: after save
 	if hook, ok := src.(afterSaver); ok {
@@ -165,9 +165,9 @@ func (self *doc) Save(c chan<- datastore.Property) error {
 }
 
 // Note: Load should drain the channel until closed, even if an error occurred
-func (self *doc) Load(c <-chan datastore.Property) error {
+func (doc *doc) Load(c <-chan datastore.Property) error {
 
-	dst := self.get()
+	dst := doc.get()
 
 	// event: before load
 	if hook, ok := dst.(beforeLoader); ok {
@@ -179,7 +179,7 @@ func (self *doc) Load(c <-chan datastore.Property) error {
 	if err := datastore.LoadStruct(dst, c); err != nil {
 		return err
 	}
-	self.synced = true
+	doc.synced = true
 
 	// event: after load
 	if hook, ok := dst.(afterLoader); ok {

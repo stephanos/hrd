@@ -10,26 +10,26 @@ type Iterator struct {
 }
 
 // Cursor returns a cursor for the iterator's current location.
-func (self *Iterator) Cursor() (string, error) {
-	if c, err := self.it.Cursor(); err == nil {
+func (it *Iterator) Cursor() (string, error) {
+	if c, err := it.it.Cursor(); err == nil {
 		return c.String(), nil
 	} else {
 		return "", err
 	}
 }
 
-func (self *Iterator) GetOne(dst interface{}) (err error) {
-	_, err = self.get(dst, false)
+func (it *Iterator) GetOne(dst interface{}) (err error) {
+	_, err = it.get(dst, false)
 	return
 }
 
-func (self *Iterator) GetAll(dsts interface{}) (keys []*Key, err error) {
-	return self.get(dsts, true)
+func (it *Iterator) GetAll(dsts interface{}) (keys []*Key, err error) {
+	return it.get(dsts, true)
 }
 
-func (self *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
-	if self.qry.err != nil {
-		return nil, *self.qry.err
+func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
+	if it.qry.err != nil {
+		return nil, *it.qry.err
 	}
 
 	var docs *docs
@@ -40,8 +40,8 @@ func (self *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error)
 		}
 	}
 
-	qryType := self.qry.typeOf
-	store := self.qry.coll.store
+	qryType := it.qry.typeOf
+	store := it.qry.coll.store
 
 	toCache := make(map[*Key]*doc, 0)
 	for {
@@ -55,7 +55,7 @@ func (self *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error)
 
 		// #1 load from iterator
 		var dsKey *datastore.Key
-		dsKey, err = self.it.Next(doc)
+		dsKey, err = it.it.Next(doc)
 		if err == datastore.Done {
 			if !multi {
 				docs.nil(0)
@@ -68,7 +68,7 @@ func (self *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error)
 		}
 		key := newKey(dsKey)
 		key.source = SOURCE_DATASTORE
-		key.opts = self.qry.opts
+		key.opts = it.qry.opts
 		keys = append(keys, key)
 
 		if docs != nil {
@@ -98,7 +98,7 @@ func (self *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error)
 	}
 
 	// #3 update cache
-	self.qry.coll.store.cache.write(toCache)
+	it.qry.coll.store.cache.write(toCache)
 
 	return keys, nil
 }

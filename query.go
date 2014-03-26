@@ -30,7 +30,7 @@ const (
 	HybridQry
 )
 
-func newQuery(coll *Collection) *Query {
+func newQuery(coll *Collection) (ret *Query) {
 	return &Query{
 		coll:   coll,
 		limit:  -1,
@@ -41,195 +41,195 @@ func newQuery(coll *Collection) *Query {
 	}
 }
 
-func (self *Query) clone() *Query {
-	q := *self
-	q.opts = self.opts.clone()
-	if len(self.logs) > 0 {
-		q.logs = make([]string, len(self.logs))
-		copy(q.logs, self.logs)
+func (qry *Query) clone() *Query {
+	ret := *qry
+	ret.opts = qry.opts.clone()
+	if len(qry.logs) > 0 {
+		ret.logs = make([]string, len(qry.logs))
+		copy(ret.logs, qry.logs)
 	}
-	return &q
+	return &ret
 }
 
-func (self *Query) Flags(flags ...Flag) *Query {
-	q := self.clone()
-	q.opts = q.opts.Flags(flags...)
-	return q
+func (qry *Query) Flags(flags ...Flag) (ret *Query) {
+	ret = qry.clone()
+	ret.opts = ret.opts.Flags(flags...)
+	return
 }
 
-func (self *Query) NoHybrid() *Query {
-	return self.Hybrid(false)
+func (qry *Query) NoHybrid() *Query {
+	return qry.Hybrid(false)
 }
 
-func (self *Query) Hybrid(enabled bool) *Query {
-	q := self.clone()
+func (qry *Query) Hybrid(enabled bool) (ret *Query) {
+	ret = qry.clone()
 	if enabled {
-		if q.typeOf == FullQry {
-			q.typeOf = HybridQry
+		if ret.typeOf == FullQry {
+			ret.typeOf = HybridQry
 		}
 	} else {
-		if q.typeOf == HybridQry {
-			q.typeOf = FullQry
+		if ret.typeOf == HybridQry {
+			ret.typeOf = FullQry
 		}
 	}
-	return q
+	return ret
 }
 
-func (self *Query) Limit(limit int) *Query {
-	q := self.clone()
+func (qry *Query) Limit(limit int) (ret *Query) {
+	ret = qry.clone()
 	if limit > 0 {
-		q.log("LIMIT %v", limit)
+		ret.log("LIMIT %v", limit)
 	} else {
 		limit = -1
-		q.log("NO LIMIT")
+		ret.log("NO LIMIT")
 	}
-	q.qry = q.qry.Limit(limit)
-	q.limit = limit
-	return q
+	ret.qry = ret.qry.Limit(limit)
+	ret.limit = limit
+	return ret
 }
 
-func (self *Query) NoLimit() *Query {
-	return self.Limit(-1)
+func (qry *Query) NoLimit() (ret *Query) {
+	return qry.Limit(-1)
 }
 
-func (self *Query) Ancestor(k *Key) *Query {
-	q := self.clone()
-	q.log("ANCESTOR '%v'", k.IdString())
-	q.qry = q.qry.Ancestor(k.Key)
-	return q
+func (qry *Query) Ancestor(k *Key) (ret *Query) {
+	ret = qry.clone()
+	ret.log("ANCESTOR '%v'", k.IdString())
+	ret.qry = ret.qry.Ancestor(k.Key)
+	return ret
 }
 
-func (self *Query) Project(s ...string) *Query {
-	q := self.clone()
-	q.log("PROJECT '%v'", strings.Join(s, "', '"))
-	q.qry = q.qry.Project(s...)
-	q.typeOf = ProjQry
-	return q
+func (qry *Query) Project(s ...string) (ret *Query) {
+	ret = qry.clone()
+	ret.log("PROJECT '%v'", strings.Join(s, "', '"))
+	ret.qry = ret.qry.Project(s...)
+	ret.typeOf = ProjQry
+	return ret
 }
 
-func (self *Query) End(c string) *Query {
-	q := self.clone()
+func (qry *Query) End(c string) (ret *Query) {
+	ret = qry.clone()
 	if c != "" {
 		if cursor, err := datastore.DecodeCursor(c); err == nil {
-			q.log("END CURSOR")
-			q.qry = q.qry.End(cursor)
+			ret.log("END CURSOR")
+			ret.qry = ret.qry.End(cursor)
 		} else {
 			err = fmt.Errorf("invalid end cursor (%v)", err)
-			q.err = &err
+			ret.err = &err
 		}
 	}
-	return q
+	return ret
 }
 
-func (self *Query) Start(c string) *Query {
-	q := self.clone()
+func (qry *Query) Start(c string) (ret *Query) {
+	ret = qry.clone()
 	if c != "" {
 		if cursor, err := datastore.DecodeCursor(c); err == nil {
-			q.log("START CURSOR")
-			q.qry = q.qry.Start(cursor)
+			ret.log("START CURSOR")
+			ret.qry = ret.qry.Start(cursor)
 		} else {
 			err = fmt.Errorf("invalid start cursor (%v)", err)
-			q.err = &err
+			ret.err = &err
 		}
 	}
-	return q
+	return ret
 }
 
-func (self *Query) Offset(off int) *Query {
-	q := self.clone()
-	q.log("OFFSET %v", off)
-	q.qry = q.qry.Offset(off)
-	return q
+func (qry *Query) Offset(off int) (ret *Query) {
+	ret = qry.clone()
+	ret.log("OFFSET %v", off)
+	ret.qry = ret.qry.Offset(off)
+	return
 }
 
-func (self *Query) OrderAsc(s string) *Query {
-	q := self.clone()
-	q.log("ORDER ASC %v", s)
-	q.qry = q.qry.Order(s)
-	return q
+func (qry *Query) OrderAsc(s string) (ret *Query) {
+	ret = qry.clone()
+	ret.log("ORDER ASC %v", s)
+	ret.qry = ret.qry.Order(s)
+	return ret
 }
 
-func (self *Query) OrderDesc(s string) *Query {
-	q := self.clone()
-	q.log("ORDER DESC %v", s)
-	q.qry = q.qry.Order("-" + s)
-	return q
+func (qry *Query) OrderDesc(s string) (ret *Query) {
+	ret = qry.clone()
+	ret.log("ORDER DESC %v", s)
+	ret.qry = ret.qry.Order("-" + s)
+	return
 }
 
-func (self *Query) Filter(qry string, val interface{}) *Query {
-	q := self.clone()
-	q.log("FILTER '%v %v'", qry, val)
-	q.qry = q.qry.Filter(qry, val)
-	return q
+func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
+	ret = qry.clone()
+	ret.log("FILTER '%v %v'", q, val)
+	ret.qry = ret.qry.Filter(q, val)
+	return
 }
 
 // ==== CACHE
 
-func (self *Query) NoCache() *Query {
-	return self.NoLocalCache().NoGlobalCache()
+func (qry *Query) NoCache() (ret *Query) {
+	return qry.NoLocalCache().NoGlobalCache()
 }
 
-func (self *Query) NoLocalCache() *Query {
-	return self.NoLocalCacheWrite().NoLocalCacheRead()
+func (qry *Query) NoLocalCache() (ret *Query) {
+	return qry.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
-func (self *Query) NoGlobalCache() *Query {
-	return self.NoGlobalCacheWrite().NoGlobalCacheRead()
+func (qry *Query) NoGlobalCache() (ret *Query) {
+	return qry.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
-func (self *Query) CacheExpire(exp time.Duration) *Query {
-	q := self.clone()
+func (qry *Query) CacheExpire(exp time.Duration) (ret *Query) {
+	q := qry.clone()
 	q.opts = q.opts.CacheExpire(exp)
 	return q
 }
 
-func (self *Query) NoCacheRead() *Query {
-	return self.NoGlobalCacheRead().NoLocalCacheRead()
+func (qry *Query) NoCacheRead() (ret *Query) {
+	return qry.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
-func (self *Query) NoLocalCacheRead() *Query {
-	q := self.clone()
+func (qry *Query) NoLocalCacheRead() (ret *Query) {
+	q := qry.clone()
 	q.opts = q.opts.NoLocalCacheRead()
 	return q
 }
 
-func (self *Query) NoGlobalCacheRead() *Query {
-	q := self.clone()
+func (qry *Query) NoGlobalCacheRead() (ret *Query) {
+	q := qry.clone()
 	q.opts = q.opts.NoGlobalCacheRead()
 	return q
 }
 
-func (self *Query) NoCacheWrite() *Query {
-	return self.NoGlobalCacheWrite().NoLocalCacheWrite()
+func (qry *Query) NoCacheWrite() (ret *Query) {
+	return qry.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
-func (self *Query) NoLocalCacheWrite() *Query {
-	q := self.clone()
+func (qry *Query) NoLocalCacheWrite() (ret *Query) {
+	q := qry.clone()
 	q.opts = q.opts.NoLocalCacheWrite()
 	return q
 }
 
-func (self *Query) NoGlobalCacheWrite() *Query {
-	q := self.clone()
+func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
+	q := qry.clone()
 	q.opts = q.opts.NoGlobalCacheWrite()
 	return q
 }
 
 // ==== EXECUTE
 
-func (self *Query) GetCount() (int, error) {
-	self.log("COUNT")
-	self.coll.store.ctx.Infof(self.getLog())
+func (qry *Query) GetCount() (int, error) {
+	qry.log("COUNT")
+	qry.coll.store.ctx.Infof(qry.getLog())
 
-	if self.err != nil {
-		return 0, *self.err
+	if qry.err != nil {
+		return 0, *qry.err
 	}
-	return self.qry.Count(self.coll.store.ctx)
+	return qry.qry.Count(qry.coll.store.ctx)
 }
 
 // Runs the query as keys-only: No entities are retrieved, just their keys.
-func (self *Query) GetKeys() ([]*Key, string, error) {
-	q := self.clone()
+func (qry *Query) GetKeys() ([]*Key, string, error) {
+	q := qry.clone()
 	q.qry = q.qry.KeysOnly()
 	q.log("KEYS-ONLY")
 
@@ -248,20 +248,20 @@ func (self *Query) GetKeys() ([]*Key, string, error) {
 // This means that first a keys-only query is executed and then the keys are used to lookup the
 // local and global cache as well as the datastore eventually. For a warm cache this usually is
 // faster and cheaper than the regular query.
-func (self *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
-	if self.err != nil {
-		return nil, "", *self.err
+func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
+	if qry.err != nil {
+		return nil, "", *qry.err
 	}
 
-	if self.limit != 1 && self.typeOf == HybridQry && self.opts.readGlobalCache {
-		keys, cursor, err := self.GetKeys()
+	if qry.limit != 1 && qry.typeOf == HybridQry && qry.opts.readGlobalCache {
+		keys, cursor, err := qry.GetKeys()
 		if err == nil && len(keys) > 0 {
-			keys, err = newLoader(self.coll).Keys(keys...).GetAll(dsts)
+			keys, err = newLoader(qry.coll).Keys(keys...).GetAll(dsts)
 		}
 		return keys, cursor, err
 	}
 
-	it := self.Run()
+	it := qry.Run()
 	keys, err := it.GetAll(dsts)
 	if err != nil {
 		return nil, "", err
@@ -272,20 +272,20 @@ func (self *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 }
 
 // Runs the query and writes the result's first entity to the passed destination.
-func (self *Query) GetFirst(dst interface{}) (err error) {
-	return self.Run().GetOne(dst)
+func (qry *Query) GetFirst(dst interface{}) (err error) {
+	return qry.Run().GetOne(dst)
 }
 
 // Runs the query and returns an Iterator.
-func (self *Query) Run() *Iterator {
-	self.coll.store.ctx.Infof(self.getLog())
-	return &Iterator{self, self.qry.Run(self.coll.store.ctx)}
+func (qry *Query) Run() *Iterator {
+	qry.coll.store.ctx.Infof(qry.getLog())
+	return &Iterator{qry, qry.qry.Run(qry.coll.store.ctx)}
 }
 
-func (self *Query) log(s string, values ...interface{}) {
-	self.logs = append(self.logs, fmt.Sprintf(s, values...))
+func (qry *Query) log(s string, values ...interface{}) {
+	qry.logs = append(qry.logs, fmt.Sprintf(s, values...))
 }
 
-func (self *Query) getLog() string {
-	return fmt.Sprintf("running query \"%v\"", strings.Join(self.logs, " | "))
+func (qry *Query) getLog() string {
+	return fmt.Sprintf("running query \"%v\"", strings.Join(qry.logs, " | "))
 }

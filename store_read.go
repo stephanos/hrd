@@ -9,17 +9,17 @@ import (
 
 const getMultiLimit = 1000
 
-func (self *Store) getMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
-	meta, keys, err := self.getMultiStats(kind, docs, opts)
+func (store *Store) getMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
+	meta, keys, err := store.getMultiStats(kind, docs, opts)
 	if err == nil {
-		self.ctx.Infof(meta.string())
+		store.ctx.Infof(meta.string())
 	} else {
-		self.ctx.Errorf("%v: %v", meta.descr, err)
+		store.ctx.Errorf("%v: %v", meta.descr, err)
 	}
 	return keys, err
 }
 
-func (self *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) (*meta, []*Key, error) {
+func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) (*meta, []*Key, error) {
 
 	meta := &meta{}
 
@@ -36,10 +36,10 @@ func (self *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) (
 		key.opts = opts
 	}
 
-	meta.descr = self.logAct("getting", "from", keys, kind)
+	meta.descr = store.logAct("getting", "from", keys, kind)
 
 	// #2 read from cache
-	dsKeys, dsDocs := self.cache.read(keys, docs)
+	dsKeys, dsDocs := store.cache.read(keys, docs)
 	for _, key := range keys {
 		if key.source == SOURCE_MEMCACHE {
 			meta.fromGlobalCache += 1
@@ -57,7 +57,7 @@ func (self *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) (
 			hi = len(dsKeys)
 		}
 
-		dsErr := datastore.GetMulti(self.ctx, toDSKeys(dsKeys[lo:hi]), dsDocs[lo:hi])
+		dsErr := datastore.GetMulti(store.ctx, toDSKeys(dsKeys[lo:hi]), dsDocs[lo:hi])
 		var merr appengine.MultiError
 		if dsErr != nil {
 			if multi, ok := dsErr.(appengine.MultiError); ok {
@@ -88,7 +88,7 @@ func (self *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) (
 	}
 
 	// #4 update cache
-	self.cache.write(docsToCache)
+	store.cache.write(docsToCache)
 
 	return meta, keys, nil
 }

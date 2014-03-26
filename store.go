@@ -26,55 +26,55 @@ func NewStore(ctx appengine.Context) *Store {
 	return store
 }
 
-func (self *Store) Coll(name string) *Collection {
+func (store *Store) Coll(name string) *Collection {
 	return &Collection{
-		store: self,
+		store: store,
 		name:  name,
-		opts:  self.opts.clone(),
+		opts:  store.opts.clone(),
 	}
 }
 
-func (self *Store) TX() *Transactor {
-	return newTransactor(self)
+func (store *Store) TX() *Transactor {
+	return newTransactor(store)
 }
 
 // Clear the store's local memory cache.
-func (self *Store) ClearCache() {
-	self.localCache.Clear()
+func (store *Store) ClearCache() {
+	store.localCache.Clear()
 }
 
-func (self *Store) CreatedAt() time.Time {
-	return self.createdAt
+func (store *Store) CreatedAt() time.Time {
+	return store.createdAt
 }
 
-func (self *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
+func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
 		parentKey = parent[0].Key
 	}
-	return newKey(datastore.NewKey(self.ctx, kind, "", id, parentKey))
+	return newKey(datastore.NewKey(store.ctx, kind, "", id, parentKey))
 }
 
-func (self *Store) NewNumKeys(kind string, ids ...int64) []*Key {
+func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 	keys := make([]*Key, len(ids))
 	for i, id := range ids {
-		keys[i] = self.NewNumKey(kind, id)
+		keys[i] = store.NewNumKey(kind, id)
 	}
 	return keys
 }
 
-func (self *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
+func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
 		parentKey = parent[0].Key
 	}
-	return newKey(datastore.NewKey(self.ctx, kind, id, 0, parentKey))
+	return newKey(datastore.NewKey(store.ctx, kind, id, 0, parentKey))
 }
 
-func (self *Store) NewTextKeys(kind string, ids ...string) []*Key {
+func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 	keys := make([]*Key, len(ids))
 	for i, id := range ids {
-		keys[i] = self.NewTextKey(kind, id)
+		keys[i] = store.NewTextKey(kind, id)
 	}
 	return keys
 }
@@ -85,11 +85,11 @@ func (self *Store) NewTextKeys(kind string, ids ...string) []*Key {
 //
 // Otherwise similar to appengine/datastore.RunInTransaction:
 // https://developers.google.com/appengine/docs/go/datastore/reference#RunInTransaction
-func (self *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (keys []*Key, err error) {
+func (store *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (keys []*Key, err error) {
 
 	// execute TX
 	var txStore *Store
-	err = datastore.RunInTransaction(self.ctx, func(tc appengine.Context) error {
+	err = datastore.RunInTransaction(store.ctx, func(tc appengine.Context) error {
 		var dsErr error
 		txStore = &Store{
 			ctx:  tc,
@@ -103,31 +103,31 @@ func (self *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (k
 
 	if err == nil {
 		// update cache after successful transaction
-		txStore.cache.writeTo(self.cache)
+		txStore.cache.writeTo(store.cache)
 	}
 
 	return
 }
 
-func (self *Store) getKey(kind string, src interface{}) (*Key, error) {
+func (store *Store) getKey(kind string, src interface{}) (*Key, error) {
 	var parentKey *datastore.Key
 	if parented, ok := src.(numParent); ok {
-		parentKey = datastore.NewKey(self.ctx, parented.ParentKind(), "", parented.Parent(), nil)
+		parentKey = datastore.NewKey(store.ctx, parented.ParentKind(), "", parented.Parent(), nil)
 	}
 	if parented, ok := src.(textParent); ok {
-		parentKey = datastore.NewKey(self.ctx, parented.ParentKind(), parented.Parent(), 0, nil)
+		parentKey = datastore.NewKey(store.ctx, parented.ParentKind(), parented.Parent(), 0, nil)
 	}
 
 	if ident, ok := src.(numIdentifier); ok {
-		return newKey(datastore.NewKey(self.ctx, kind, "", ident.ID(), parentKey)), nil
+		return newKey(datastore.NewKey(store.ctx, kind, "", ident.ID(), parentKey)), nil
 	}
 	if ident, ok := src.(textIdentifier); ok {
-		return newKey(datastore.NewKey(self.ctx, kind, ident.ID(), 0, parentKey)), nil
+		return newKey(datastore.NewKey(store.ctx, kind, ident.ID(), 0, parentKey)), nil
 	}
 	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))
 }
 
-func (self *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
+func (store *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
 	src_val := reflect.Indirect(reflect.ValueOf(src))
 	src_kind := src_val.Kind()
 	if src_kind != reflect.Slice && src_kind != reflect.Map {
@@ -140,7 +140,7 @@ func (self *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
 	if src_val.Kind() == reflect.Slice {
 		for i := 0; i < coll_len; i++ {
 			v := src_val.Index(i)
-			key, err := self.getKey(kind, v.Interface())
+			key, err := store.getKey(kind, v.Interface())
 			if err != nil {
 				return nil, err
 			}
@@ -151,7 +151,7 @@ func (self *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
 
 	for i, key := range src_val.MapKeys() {
 		v := src_val.MapIndex(key)
-		key, err := self.getKey(kind, v.Interface())
+		key, err := store.getKey(kind, v.Interface())
 		if err != nil {
 			return nil, err
 		}
@@ -160,13 +160,13 @@ func (self *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
 	return keys, nil
 }
 
-func (self *Store) logErr(e interface{}) error {
+func (store *Store) logErr(e interface{}) error {
 	err := fmt.Errorf("%v", e)
-	self.ctx.Errorf("%v", err)
+	store.ctx.Errorf("%v", err)
 	return err
 }
 
-func (self *Store) logAct(verb string, prop string, keys []*Key, kind string) string {
+func (store *Store) logAct(verb string, prop string, keys []*Key, kind string) string {
 	if len(keys) == 1 {
 		id := keys[0].IdString()
 		if id == "" {

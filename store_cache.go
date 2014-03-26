@@ -30,59 +30,59 @@ func newStoreCache(store *Store) *cache {
 	}
 }
 
-func (self *cache) writeTo(dst *cache) {
+func (c *cache) writeTo(dst *cache) {
 	var toDelete []*Key
-	for _, k := range self.toDelete {
-		if _, ok := self.toPut[k]; !ok {
+	for _, k := range c.toDelete {
+		if _, ok := c.toPut[k]; !ok {
 			toDelete = append(toDelete, k)
 		}
 	}
 	dst.delete(toDelete)
 
-	dst.write(self.toPut)
+	dst.write(c.toPut)
 }
 
-func (self *cache) write(toCache map[*Key]*doc) {
+func (c *cache) write(toCache map[*Key]*doc) {
 	if len(toCache) > 0 {
-		if self.store.inTX {
+		if c.store.inTX {
 			for k, doc := range toCache {
 				if k.opts.writeLocalCache || k.opts.writeGlobalCache >= 0 {
-					self.toPut[k] = doc
+					c.toPut[k] = doc
 				}
 			}
 		} else {
 			for key, doc := range toCache {
 				if key.opts.writeLocalCache {
-					self.putMemory(key, doc)
+					c.putMemory(key, doc)
 				}
 			}
-			self.putMemcache(toCache)
+			c.putMemcache(toCache)
 		}
 	}
 }
 
-func (self *cache) delete(keys []*Key) {
+func (c *cache) delete(keys []*Key) {
 	if len(keys) > 0 {
-		if self.store.inTX {
+		if c.store.inTX {
 			for _, k := range keys {
-				self.toDelete = append(self.toDelete, k)
+				c.toDelete = append(c.toDelete, k)
 			}
 		} else {
 			i := 0
 			memKeys := make([]string, len(keys))
 			for _, k := range keys {
 				memKey := toMemKey(k)
-				self.localCache.Delete(memKey)
+				c.localCache.Delete(memKey)
 				memKeys[i] = memKey
 				i += 1
 			}
 
-			memcache.DeleteMulti(self.store.ctx, memKeys) // ignore errors
+			memcache.DeleteMulti(c.store.ctx, memKeys) // ignore errors
 		}
 	}
 }
 
-func (self *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) {
+func (c *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) {
 
 	// #1 populate result from local cache (memory)
 	var memIds []int
@@ -92,8 +92,8 @@ func (self *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) 
 		mKey := toMemKey(key)
 
 		// lookup key in memory
-		if key.opts.readLocalCache && !self.store.inTX {
-			if src, ok := self.getMemory(key); ok && src != nil {
+		if key.opts.readLocalCache && !c.store.inTX {
+			if src, ok := c.getMemory(key); ok && src != nil {
 				key.source = SOURCE_MEMORY
 				docs.set(i, src)
 				continue
@@ -106,9 +106,9 @@ func (self *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) 
 	}
 
 	// #2 populate result from global cache (memcache)
-	memVals, err := memcache.GetMulti(self.store.ctx, memKeys)
+	memVals, err := memcache.GetMulti(c.store.ctx, memKeys)
 	if err != nil {
-		self.store.logErr(err)
+		c.store.logErr(err)
 	}
 
 	for i, mKey := range memKeys {
@@ -117,16 +117,16 @@ func (self *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) 
 		doc := docs.get(dstId)
 
 		// lookup key in global cache result
-		if key.opts.readGlobalCache && !self.store.inTX {
+		if key.opts.readGlobalCache && !c.store.inTX {
 			if item, ok := memVals[mKey]; ok && item.Value != nil {
 				if err := fromGob(doc, item.Value); err == nil {
 					key.source = SOURCE_MEMCACHE
 					if key.opts.writeLocalCache {
-						self.putMemory(key, doc) // copy to local cache as well
+						c.putMemory(key, doc) // copy to local cache as well
 					}
 					continue
 				} else {
-					self.store.logErr(err)
+					c.store.logErr(err)
 				}
 			}
 		}
@@ -139,7 +139,7 @@ func (self *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) 
 	return
 }
 
-func (self *cache) putMemcache(toPut map[*Key]*doc) {
+func (c *cache) putMemcache(toPut map[*Key]*doc) {
 	var items []*memcache.Item
 	for key, doc := range toPut {
 		expire := key.opts.writeGlobalCache
@@ -155,23 +155,23 @@ func (self *cache) putMemcache(toPut map[*Key]*doc) {
 				Expiration: key.opts.writeGlobalCache,
 			})
 		} else {
-			self.store.logErr(err)
+			c.store.logErr(err)
 		}
 	}
 	if len(items) > 0 {
-		err := memcache.SetMulti(self.store.ctx, items)
+		err := memcache.SetMulti(c.store.ctx, items)
 		if err != nil {
-			self.store.logErr(err)
+			c.store.logErr(err)
 		}
 	}
 }
 
-func (self *cache) getMemory(key *Key) (interface{}, bool) {
-	return self.localCache.Get(toMemKey(key))
+func (c *cache) getMemory(key *Key) (interface{}, bool) {
+	return c.localCache.Get(toMemKey(key))
 }
 
-func (self *cache) putMemory(key *Key, doc *doc) {
-	self.localCache.PutP(toMemKey(key), doc.get())
+func (c *cache) putMemory(key *Key, doc *doc) {
+	c.localCache.PutP(toMemKey(key), doc.get())
 }
 
 func toGob(doc *doc) ([]byte, error) {

@@ -21,105 +21,105 @@ func newLoader(coll *Collection) *Loader {
 }
 
 // Load a single entity by key from the datastore.
-func (self *Loader) Key(key *Key) *SingleLoader {
-	self.keys = []*Key{key}
-	return &SingleLoader{self}
+func (l *Loader) Key(key *Key) *SingleLoader {
+	l.keys = []*Key{key}
+	return &SingleLoader{l}
 }
 
 // Load multiple entities by key from the datastore.
-func (self *Loader) Keys(keys ...*Key) *MultiLoader {
-	self.keys = keys
-	return &MultiLoader{self}
+func (l *Loader) Keys(keys ...*Key) *MultiLoader {
+	l.keys = keys
+	return &MultiLoader{l}
 }
 
 // Load a single entity by id from the datastore.
-func (self *Loader) ID(id int64, parent ...*Key) *SingleLoader {
-	self.keys = []*Key{self.coll.NewNumKey(id, parent...)}
-	return &SingleLoader{self}
+func (l *Loader) ID(id int64, parent ...*Key) *SingleLoader {
+	l.keys = []*Key{l.coll.NewNumKey(id, parent...)}
+	return &SingleLoader{l}
 }
 
 // Load a single key by text id from the datastore.
-func (self *Loader) TextID(id string, parent ...*Key) *SingleLoader {
-	self.keys = []*Key{self.coll.NewTextKey(id, parent...)}
-	return &SingleLoader{self}
+func (l *Loader) TextID(id string, parent ...*Key) *SingleLoader {
+	l.keys = []*Key{l.coll.NewTextKey(id, parent...)}
+	return &SingleLoader{l}
 }
 
 // Load multiple keys by id from the datastore.
-func (self *Loader) IDs(ids ...int64) *MultiLoader {
-	self.keys = self.coll.NewNumKeys(ids...)
-	return &MultiLoader{self}
+func (l *Loader) IDs(ids ...int64) *MultiLoader {
+	l.keys = l.coll.NewNumKeys(ids...)
+	return &MultiLoader{l}
 }
 
 // Load multiple keys by text id from the datastore.
-func (self *Loader) TextIDs(ids ...string) *MultiLoader {
-	self.keys = self.coll.NewTextKeys(ids...)
-	return &MultiLoader{self}
+func (l *Loader) TextIDs(ids ...string) *MultiLoader {
+	l.keys = l.coll.NewTextKeys(ids...)
+	return &MultiLoader{l}
 }
 
-func (self *Loader) Flags(flags ...Flag) *Loader {
-	self.opts = self.opts.Flags(flags...)
-	return self
+func (l *Loader) Flags(flags ...Flag) *Loader {
+	l.opts = l.opts.Flags(flags...)
+	return l
 }
 
 // ==== CACHE
 
-func (self *Loader) NoCache() *Loader {
-	return self.NoLocalCache().NoGlobalCache()
+func (l *Loader) NoCache() *Loader {
+	return l.NoLocalCache().NoGlobalCache()
 }
 
-func (self *Loader) NoLocalCache() *Loader {
-	return self.NoLocalCacheWrite().NoLocalCacheRead()
+func (l *Loader) NoLocalCache() *Loader {
+	return l.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
-func (self *Loader) NoGlobalCache() *Loader {
-	return self.NoGlobalCacheWrite().NoGlobalCacheRead()
+func (l *Loader) NoGlobalCache() *Loader {
+	return l.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
-func (self *Loader) CacheExpire(exp time.Duration) *Loader {
-	self.opts = self.opts.CacheExpire(exp)
-	return self
+func (l *Loader) CacheExpire(exp time.Duration) *Loader {
+	l.opts = l.opts.CacheExpire(exp)
+	return l
 }
 
-func (self *Loader) NoCacheRead() *Loader {
-	return self.NoGlobalCacheRead().NoLocalCacheRead()
+func (l *Loader) NoCacheRead() *Loader {
+	return l.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
-func (self *Loader) NoLocalCacheRead() *Loader {
-	self.opts = self.opts.NoLocalCacheRead()
-	return self
+func (l *Loader) NoLocalCacheRead() *Loader {
+	l.opts = l.opts.NoLocalCacheRead()
+	return l
 }
 
-func (self *Loader) NoGlobalCacheRead() *Loader {
-	self.opts = self.opts.NoGlobalCacheRead()
-	return self
+func (l *Loader) NoGlobalCacheRead() *Loader {
+	l.opts = l.opts.NoGlobalCacheRead()
+	return l
 }
 
-func (self *Loader) NoCacheWrite() *Loader {
-	return self.NoGlobalCacheWrite().NoLocalCacheWrite()
+func (l *Loader) NoCacheWrite() *Loader {
+	return l.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
-func (self *Loader) NoLocalCacheWrite() *Loader {
-	self.opts = self.opts.NoLocalCacheWrite()
-	return self
+func (l *Loader) NoLocalCacheWrite() *Loader {
+	l.opts = l.opts.NoLocalCacheWrite()
+	return l
 }
 
-func (self *Loader) NoGlobalCacheWrite() *Loader {
-	self.opts = self.opts.NoGlobalCacheWrite()
-	return self
+func (l *Loader) NoGlobalCacheWrite() *Loader {
+	l.opts = l.opts.NoGlobalCacheWrite()
+	return l
 }
 
 // ==== EXECUTE
 
-// TODO: func (self *Loader) GetEntity(dst interface{}) ([]*Key, error)
-// TODO: func (self *Loader) GetEntities(dsts interface{}) ([]*Key, error)
+// TODO: func (l *Loader) GetEntity(dst interface{}) ([]*Key, error)
+// TODO: func (l *Loader) GetEntities(dsts interface{}) ([]*Key, error)
 
-func (self *MultiLoader) GetAll(dsts interface{}) ([]*Key, error) {
-	return self.loader.get(dsts, true)
+func (l *MultiLoader) GetAll(dsts interface{}) ([]*Key, error) {
+	return l.loader.get(dsts, true)
 }
 
-func (self *SingleLoader) GetOne(dst interface{}) (*Key, error) {
+func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 	var key *Key
-	keys, err := self.loader.get(dst, false)
+	keys, err := l.loader.get(dst, false)
 	if len(keys) == 1 {
 		if keys[0].Exists() {
 			key = keys[0]
@@ -128,10 +128,10 @@ func (self *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 	return key, err
 }
 
-func (self *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
-	docs, err := newWriteableDocs(dst, self.keys, multi)
+func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
+	docs, err := newWriteableDocs(dst, l.keys, multi)
 	if err != nil {
 		return nil, err
 	}
-	return self.coll.store.getMulti(self.coll.name, docs, self.opts)
+	return l.coll.store.getMulti(l.coll.name, docs, l.opts)
 }

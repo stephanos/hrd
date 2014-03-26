@@ -9,7 +9,7 @@ import (
 const putMultiLimit = 500
 const deleteMultiLimit = 500
 
-func (self *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
+func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
 
 	// #1 timestamp documents
 	for _, d := range docs.list {
@@ -37,7 +37,7 @@ func (self *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*Ke
 		}
 	}
 
-	self.ctx.Infof(self.logAct("putting", "in", keys, kind))
+	store.ctx.Infof(store.logAct("putting", "in", keys, kind))
 
 	// #3 put into datastore
 	toCache := make(map[*Key]*doc, len(keys))
@@ -48,9 +48,9 @@ func (self *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*Ke
 			hi = len(keys)
 		}
 
-		dsKeys, err := datastore.PutMulti(self.ctx, toDSKeys(keys[lo:hi]), docs.list[lo:hi])
+		dsKeys, err := datastore.PutMulti(store.ctx, toDSKeys(keys[lo:hi]), docs.list[lo:hi])
 		if err != nil {
-			return nil, self.logErr(err)
+			return nil, store.logErr(err)
 		}
 
 		now := time.Now()
@@ -70,17 +70,17 @@ func (self *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*Ke
 	}
 
 	// #4 update cache
-	self.cache.write(toCache)
+	store.cache.write(toCache)
 
 	return keys, nil
 }
 
-func (self *Store) deleteMulti(kind string, keys []*Key) error {
+func (store *Store) deleteMulti(kind string, keys []*Key) error {
 
-	self.ctx.Infof(self.logAct("deleting", "from", keys, kind))
+	store.ctx.Infof(store.logAct("deleting", "from", keys, kind))
 
 	// #1 delete from cache
-	defer self.cache.delete(keys)
+	defer store.cache.delete(keys)
 
 	// #2 delete from datastore
 	for i := 0; i <= len(keys)/deleteMultiLimit; i++ {
@@ -89,7 +89,7 @@ func (self *Store) deleteMulti(kind string, keys []*Key) error {
 		if hi > len(keys) {
 			hi = len(keys)
 		}
-		if err := datastore.DeleteMulti(self.ctx, toDSKeys(keys[lo:hi])); err != nil {
+		if err := datastore.DeleteMulti(store.ctx, toDSKeys(keys[lo:hi])); err != nil {
 			return err
 		}
 	}

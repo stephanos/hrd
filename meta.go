@@ -15,12 +15,12 @@ const (
 	SOURCE_DATASTORE = "dstore"
 )
 
-func (self *meta) string() (s string) {
-	s = self.descr
-	if s != "" {
-		s += " "
+func (m *meta) string() (ret string) {
+	ret = m.descr
+	if ret != "" {
+		ret += " "
 	}
-	s += self.stats.string()
+	ret += m.stats.string()
 	return
 }
 
@@ -30,27 +30,27 @@ type stats struct {
 	fromDatastore   int
 }
 
-func (self *stats) string() (s string) {
-	total := int(self.fromLocalCache + self.fromGlobalCache + self.fromDatastore)
+func (s *stats) string() (ret string) {
+	total := int(s.fromLocalCache + s.fromGlobalCache + s.fromDatastore)
 	if total > 0 {
-		if self.fromLocalCache == total {
-			s = "[" + SOURCE_MEMORY + "]"
-		} else if self.fromDatastore == total {
-			s = "[" + SOURCE_DATASTORE + "]"
-		} else if self.fromGlobalCache == total {
-			s = "[" + SOURCE_MEMCACHE + "]"
+		if s.fromLocalCache == total {
+			ret = "[" + SOURCE_MEMORY + "]"
+		} else if s.fromDatastore == total {
+			ret = "[" + SOURCE_DATASTORE + "]"
+		} else if s.fromGlobalCache == total {
+			ret = "[" + SOURCE_MEMCACHE + "]"
 		} else {
-			s = "[ "
-			if self.fromLocalCache > 0 {
-				s += fmt.Sprintf(SOURCE_MEMORY+" %d", self.fromLocalCache/total*100.0) + "%% "
+			ret = "[ "
+			if s.fromLocalCache > 0 {
+				ret += fmt.Sprintf(SOURCE_MEMORY+" %d", s.fromLocalCache/total*100.0) + "%% "
 			}
-			if self.fromDatastore > 0 {
-				s += fmt.Sprintf(SOURCE_DATASTORE+" %d", self.fromDatastore/total*100.0) + "%% "
+			if s.fromDatastore > 0 {
+				ret += fmt.Sprintf(SOURCE_DATASTORE+" %d", s.fromDatastore/total*100.0) + "%% "
 			}
-			if self.fromGlobalCache > 0 {
-				s += fmt.Sprintf(SOURCE_MEMCACHE+" %d", self.fromGlobalCache/total*100.0) + "%% "
+			if s.fromGlobalCache > 0 {
+				ret += fmt.Sprintf(SOURCE_MEMCACHE+" %d", s.fromGlobalCache/total*100.0) + "%% "
 			}
-			s += "]"
+			ret += "]"
 		}
 	}
 	return
