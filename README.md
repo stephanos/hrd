@@ -19,8 +19,8 @@ Pull requests are very welcome :)
 
 ### Documentation
 
-The [Documentation](http://godoc.org/github.com/101loops/hrd) is still quite sparse.
-Please have a look at the E2E tests to see how it is used.
+The [documentation](http://godoc.org/github.com/101loops/hrd) is still quite incomplete.
+I suggest having a look at the E2E tests to see how it is used.
 
 ### Credit
 - Google: [https://code.google.com/p/appengine-go/]
