@@ -75,6 +75,8 @@ func (qry *Query) Hybrid(enabled bool) (ret *Query) {
 	return ret
 }
 
+// Limit returns a derivative query that has a limit on the number of results returned.
+// A negative value means unlimited.
 func (qry *Query) Limit(limit int) (ret *Query) {
 	ret = qry.clone()
 	if limit > 0 {
@@ -88,10 +90,13 @@ func (qry *Query) Limit(limit int) (ret *Query) {
 	return ret
 }
 
+// NoLimit returns a derivative query that has no limit on the number of results returned.
 func (qry *Query) NoLimit() (ret *Query) {
 	return qry.Limit(-1)
 }
 
+// Ancestor returns a derivative query with an ancestor filter.
+// The ancestor should not be nil.
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ANCESTOR '%v'", k.IdString())
@@ -99,6 +104,8 @@ func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	return ret
 }
 
+// Project returns a derivative query that yields only the given fields.
+// It cannot be used in a keys-only query.
 func (qry *Query) Project(s ...string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("PROJECT '%v'", strings.Join(s, "', '"))
@@ -107,6 +114,7 @@ func (qry *Query) Project(s ...string) (ret *Query) {
 	return ret
 }
 
+// End returns a derivative query with the given end point.
 func (qry *Query) End(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
@@ -121,6 +129,7 @@ func (qry *Query) End(c string) (ret *Query) {
 	return ret
 }
 
+// Start returns a derivative query with the given start point.
 func (qry *Query) Start(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
@@ -135,6 +144,8 @@ func (qry *Query) Start(c string) (ret *Query) {
 	return ret
 }
 
+// Offset returns a derivative query that has an offset of how many keys to skip over before returning results.
+// A negative value is invalid.
 func (qry *Query) Offset(off int) (ret *Query) {
 	ret = qry.clone()
 	ret.log("OFFSET %v", off)
@@ -142,6 +153,8 @@ func (qry *Query) Offset(off int) (ret *Query) {
 	return
 }
 
+// OrderAsc returns a derivative query with a field-based sort order, ascending.
+// Orders are applied in the order they are added.
 func (qry *Query) OrderAsc(s string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ORDER ASC %v", s)
@@ -149,6 +162,8 @@ func (qry *Query) OrderAsc(s string) (ret *Query) {
 	return ret
 }
 
+// OrderDesc returns a derivative query with a field-based sort order, descending.
+// Orders are applied in the order they are added.
 func (qry *Query) OrderDesc(s string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ORDER DESC %v", s)
@@ -156,6 +171,11 @@ func (qry *Query) OrderDesc(s string) (ret *Query) {
 	return
 }
 
+// Filter returns a derivative query with a field-based filter.
+// The filterStr argument must be a field name followed by optional space,
+// followed by an operator, one of ">", "<", ">=", "<=", or "=".
+// Fields are compared against the provided value using the operator.
+// Multiple filters are AND'ed together.
 func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 	ret = qry.clone()
 	ret.log("FILTER '%v %v'", q, val)
@@ -217,6 +237,7 @@ func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
 
 // ==== EXECUTE
 
+// Count returns the number of results for the query.
 func (qry *Query) GetCount() (int, error) {
 	qry.log("COUNT")
 	qry.coll.store.ctx.Infof(qry.getLog())
@@ -227,7 +248,7 @@ func (qry *Query) GetCount() (int, error) {
 	return qry.qry.Count(qry.coll.store.ctx)
 }
 
-// Runs the query as keys-only: No entities are retrieved, just their keys.
+// GetKeys executes the query as keys-only: No entities are retrieved, just their keys.
 func (qry *Query) GetKeys() ([]*Key, string, error) {
 	q := qry.clone()
 	q.qry = q.qry.KeysOnly()
@@ -271,12 +292,12 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	return keys, cursor, err
 }
 
-// Runs the query and writes the result's first entity to the passed destination.
+// GetFirst executes the query and writes the result's first entity to the passed destination.
 func (qry *Query) GetFirst(dst interface{}) (err error) {
 	return qry.Run().GetOne(dst)
 }
 
-// Runs the query and returns an Iterator.
+// Run executes the query and returns an Iterator.
 func (qry *Query) Run() *Iterator {
 	qry.coll.store.ctx.Infof(qry.getLog())
 	return &Iterator{qry, qry.qry.Run(qry.coll.store.ctx)}

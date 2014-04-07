@@ -20,42 +20,43 @@ func newLoader(coll *Collection) *Loader {
 	return &Loader{coll: coll, opts: coll.opts.clone()}
 }
 
-// Load a single entity by key from the datastore.
+// Key load a single entity by key from the datastore.
 func (l *Loader) Key(key *Key) *SingleLoader {
 	l.keys = []*Key{key}
 	return &SingleLoader{l}
 }
 
-// Load multiple entities by key from the datastore.
+// Keys load multiple entities by key from the datastore.
 func (l *Loader) Keys(keys ...*Key) *MultiLoader {
 	l.keys = keys
 	return &MultiLoader{l}
 }
 
-// Load a single entity by id from the datastore.
+// ID loads a single entity by id from the datastore.
 func (l *Loader) ID(id int64, parent ...*Key) *SingleLoader {
 	l.keys = []*Key{l.coll.NewNumKey(id, parent...)}
 	return &SingleLoader{l}
 }
 
-// Load a single key by text id from the datastore.
+// TextID loads a single key by text id from the datastore.
 func (l *Loader) TextID(id string, parent ...*Key) *SingleLoader {
 	l.keys = []*Key{l.coll.NewTextKey(id, parent...)}
 	return &SingleLoader{l}
 }
 
-// Load multiple keys by id from the datastore.
+// IDs load multiple keys by id from the datastore.
 func (l *Loader) IDs(ids ...int64) *MultiLoader {
 	l.keys = l.coll.NewNumKeys(ids...)
 	return &MultiLoader{l}
 }
 
-// Load multiple keys by text id from the datastore.
+// TextIDs load multiple keys by text id from the datastore.
 func (l *Loader) TextIDs(ids ...string) *MultiLoader {
 	l.keys = l.coll.NewTextKeys(ids...)
 	return &MultiLoader{l}
 }
 
+// Flags applies the sequence of flags to the Loader's options.
 func (l *Loader) Flags(flags ...Flag) *Loader {
 	l.opts = l.opts.Flags(flags...)
 	return l
@@ -63,46 +64,66 @@ func (l *Loader) Flags(flags ...Flag) *Loader {
 
 // ==== CACHE
 
+// NoCache prevents reading/writing entities from/to
+// the in-memory cache or memcache in this load operation.
 func (l *Loader) NoCache() *Loader {
 	return l.NoLocalCache().NoGlobalCache()
 }
 
+// NoLocalCache prevents reading/writing entities from/to
+// the in-memory cache in this load operation.
 func (l *Loader) NoLocalCache() *Loader {
 	return l.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
+// NoGlobalCache prevents reading/writing entities from/to
+// memcache in this load operation.
 func (l *Loader) NoGlobalCache() *Loader {
 	return l.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
+// CacheExpire sets the expiration time in memcache for entities
+// that are cached after loading them to the datastore.
 func (l *Loader) CacheExpire(exp time.Duration) *Loader {
 	l.opts = l.opts.CacheExpire(exp)
 	return l
 }
 
+// NoCacheRead prevents reading entities from
+// the in-memory cache or memcache in this load operation.
 func (l *Loader) NoCacheRead() *Loader {
 	return l.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
+// NoLocalCacheRead prevents reading entities from
+// the in-memory cache in this load operation.
 func (l *Loader) NoLocalCacheRead() *Loader {
 	l.opts = l.opts.NoLocalCacheRead()
 	return l
 }
 
+// NoGlobalCacheRead prevents reading entities from
+// memcache in this load operation.
 func (l *Loader) NoGlobalCacheRead() *Loader {
 	l.opts = l.opts.NoGlobalCacheRead()
 	return l
 }
 
+// NoCacheWrite prevents writing entities to
+// the in-memory cache or memcache in this load operation.
 func (l *Loader) NoCacheWrite() *Loader {
 	return l.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
+// NoLocalCacheWrite prevents writing entities to
+// the in-memory cache in this load operation.
 func (l *Loader) NoLocalCacheWrite() *Loader {
 	l.opts = l.opts.NoLocalCacheWrite()
 	return l
 }
 
+// NoGlobalCacheWrite prevents writing entities to
+// memcache in this load operation.
 func (l *Loader) NoGlobalCacheWrite() *Loader {
 	l.opts = l.opts.NoGlobalCacheWrite()
 	return l
@@ -113,10 +134,12 @@ func (l *Loader) NoGlobalCacheWrite() *Loader {
 // TODO: func (l *Loader) GetEntity(dst interface{}) ([]*Key, error)
 // TODO: func (l *Loader) GetEntities(dsts interface{}) ([]*Key, error)
 
+// GetAll loads entities from the datastore into dsts.
 func (l *MultiLoader) GetAll(dsts interface{}) ([]*Key, error) {
 	return l.loader.get(dsts, true)
 }
 
+// GetOne loads an entity from the datastore into dst.
 func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 	var key *Key
 	keys, err := l.loader.get(dst, false)

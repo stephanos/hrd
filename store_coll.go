@@ -28,23 +28,28 @@ func (coll *Collection) Store() *Store {
 	return coll.store
 }
 
+// Save returns a Saver action object allowing to save entities to the datastore.
 func (coll *Collection) Save() *Saver {
 	return newSaver(coll)
 }
 
+// Load returns a Loader action object allowing to load entities from the datastore.
 func (coll *Collection) Load() *Loader {
 	return newLoader(coll)
 }
 
+// Delete returns a Deleter action object allowing to delete entities from the datastore.
 func (coll *Collection) Delete() *Deleter {
 	return &Deleter{coll}
 }
 
+// Query returns a Query object allowing to query entities from the datastore.
 func (coll *Collection) Query() *Query {
 	return newQuery(coll)
 }
 
-// Deletes all entities of the collection.
+// DESTROY deletes all entities of the collection.
+// Proceed with caution.
 func (coll *Collection) DESTROY() error {
 	i := 0
 	var start string
@@ -74,17 +79,21 @@ func (coll *Collection) getKey(src interface{}) (*Key, error) {
 
 // ==== CACHE
 
+// NoCache prevents entities of this collection to be cached in-memory or in memcache.
 func (coll *Collection) NoCache() *Collection {
 	return coll.NoLocalCache().NoGlobalCache()
 }
 
+// NoCache prevents entities of this collection to be cached in-memory.
 func (coll *Collection) NoLocalCache() *Collection {
 	return coll.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
+// NoCache prevents entities of this collection to be cached in memcache.
 func (coll *Collection) NoGlobalCache() *Collection {
 	return coll.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
+
 
 func (coll *Collection) CacheExpire(exp time.Duration) *Collection {
 	coll.opts = coll.opts.CacheExpire(exp)
