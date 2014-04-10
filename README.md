@@ -7,9 +7,7 @@ This Go package extends the standard package [appengine.datastore](http://godoc.
 - lifecycle hooks (e.g. beforeSave)
 - logging of all datastore actions
 
-The library is used in production and actively worked on. So expect things to change.
-
-**This is still alpha quality. It may have one or two bugs and memory leaks.**
+**This is still alpha quality.**
 
 Pull requests are very welcome :)
 
