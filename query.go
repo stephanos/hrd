@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Query represents a datastore query.
 type Query struct {
 	err    *error
 	coll   *Collection
@@ -21,13 +22,13 @@ type qryType int
 
 const (
 	// normal query
-	FullQry qryType = 1 + iota
+	fullQry qryType = 1 + iota
 
 	// only query projected fields
-	ProjQry
+	projectQry
 
 	// fetch keys first, then use batch get to only load uncached entities
-	HybridQry
+	hybridQry
 )
 
 // newQuery creates a new Query for the passed collection.
@@ -36,7 +37,7 @@ func newQuery(coll *Collection) (ret *Query) {
 	return &Query{
 		coll:   coll,
 		limit:  -1,
-		typeOf: HybridQry,
+		typeOf: hybridQry,
 		opts:   defaultOperationOpts(),
 		qry:    datastore.NewQuery(coll.name),
 		logs:   []string{"KIND " + coll.name},
@@ -66,12 +67,12 @@ func (qry *Query) NoHybrid() *Query {
 func (qry *Query) Hybrid(enabled bool) (ret *Query) {
 	ret = qry.clone()
 	if enabled {
-		if ret.typeOf == FullQry {
-			ret.typeOf = HybridQry
+		if ret.typeOf == fullQry {
+			ret.typeOf = hybridQry
 		}
 	} else {
-		if ret.typeOf == HybridQry {
-			ret.typeOf = FullQry
+		if ret.typeOf == hybridQry {
+			ret.typeOf = fullQry
 		}
 	}
 	return ret
@@ -113,7 +114,7 @@ func (qry *Query) Project(s ...string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("PROJECT '%v'", strings.Join(s, "', '"))
 	ret.qry = ret.qry.Project(s...)
-	ret.typeOf = ProjQry
+	ret.typeOf = projectQry
 	return ret
 }
 
@@ -298,7 +299,7 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 		return nil, "", *qry.err
 	}
 
-	if qry.limit != 1 && qry.typeOf == HybridQry && qry.opts.readGlobalCache {
+	if qry.limit != 1 && qry.typeOf == hybridQry && qry.opts.readGlobalCache {
 		keys, cursor, err := qry.GetKeys()
 		if err == nil && len(keys) > 0 {
 			keys, err = newLoader(qry.coll).Keys(keys...).GetAll(dsts)

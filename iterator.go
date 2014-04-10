@@ -74,7 +74,7 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 		keys = append(keys, key)
 
 		if docs != nil {
-			if qryType != ProjQry && !store.tx {
+			if qryType != projectQry && !store.tx {
 
 				// #2 try to read entity from local cache
 				fromCache := false
