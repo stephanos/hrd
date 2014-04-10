@@ -62,9 +62,9 @@ func (l *Loader) TextIDs(ids ...string) *MultiLoader {
 	return &MultiLoader{l}
 }
 
-// Flags applies the sequence of flags to the Loader's options.
-func (l *Loader) Flags(flags ...Flag) *Loader {
-	l.opts = l.opts.Flags(flags...)
+// Opts applies a sequence of Opt the Loader's options.
+func (l *Loader) Opts(opts ...Opt) *Loader {
+	l.opts = l.opts.Apply(opts...)
 	return l
 }
 

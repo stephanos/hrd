@@ -15,9 +15,9 @@ func newSaver(coll *Collection) *Saver {
 	return &Saver{coll, coll.opts.clone()}
 }
 
-// Flags applies the passed sequence of flags to the Saver's options.
-func (s *Saver) Flags(flags ...Flag) *Saver {
-	s.opts = s.opts.Flags(flags...)
+// Opts applies the passed sequence of Opt to the Saver's options.
+func (s *Saver) Opts(opts ...Opt) *Saver {
+	s.opts = s.opts.Apply(opts...)
 	return s
 }
 

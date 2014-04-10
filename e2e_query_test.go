@@ -19,7 +19,7 @@ var _ = Describe("HRD Query", func() {
 	})
 })
 
-func queryTests(hybrid bool, flags ...Flag) {
+func queryTests(hybrid bool, opts ...Opt) {
 
 	var (
 		coll  *Collection
@@ -47,7 +47,7 @@ func queryTests(hybrid bool, flags ...Flag) {
 			Check(keys[3].IntID(), IsNum, 4)
 
 			clearCache()
-			query = coll.Query().Hybrid(hybrid).Flags(flags...)
+			query = coll.Query().Hybrid(hybrid).Opts(opts...)
 		})
 
 		It("loads all entities", func() {

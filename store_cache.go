@@ -11,8 +11,10 @@ type cache struct {
 	store      *Store
 	localCache *mcache.MCache
 
-	// in transaction:
+	// toDelete contains keys to delete.
 	toDelete []*Key
+
+	// toPut contains entities to cache.
 	toPut    map[*Key]*doc
 }
 
@@ -38,7 +40,6 @@ func (c *cache) writeTo(dst *cache) {
 		}
 	}
 	dst.delete(toDelete)
-
 	dst.write(c.toPut)
 }
 

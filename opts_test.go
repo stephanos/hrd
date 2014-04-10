@@ -21,7 +21,7 @@ var _ = Describe("Action Options", func() {
 		Check(opts3.readLocalCache, IsFalse)
 		Check(opts3.writeLocalCache, IsFalse)
 
-		opts4 := opts.Flags(NO_CACHE)
+		opts4 := opts.Apply(NO_CACHE)
 		Check(opts4.readLocalCache, IsFalse)
 		Check(opts4.writeLocalCache, IsFalse)
 	})
@@ -41,7 +41,7 @@ var _ = Describe("Action Options", func() {
 		Check(opts3.readGlobalCache, IsFalse)
 		Check(opts3.writeGlobalCache, IsNum, -1)
 
-		opts4 := opts.Flags(NO_CACHE)
+		opts4 := opts.Apply(NO_CACHE)
 		Check(opts4.readGlobalCache, IsFalse)
 		Check(opts4.writeGlobalCache, IsNum, -1)
 	})

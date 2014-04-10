@@ -23,7 +23,7 @@ var _ = Describe("HRD Read/Write", func() {
 	})
 })
 
-func basicTests(flags ...Flag) {
+func basicTests(opts ...Opt) {
 
 	var (
 		genId  int64
@@ -48,7 +48,7 @@ func basicTests(flags ...Flag) {
 		Check(entity.lifecycle, Equals, "after-save")
 
 		clearCache()
-		loader = coll.Load().Flags(flags...)
+		loader = coll.Load().Opts(opts...)
 	})
 
 	It("saves an entity (with id)", func() {

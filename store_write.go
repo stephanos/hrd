@@ -49,6 +49,7 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 		}
 
 		dsKeys, err := datastore.PutMulti(store.ctx, toDSKeys(keys[lo:hi]), docs.list[lo:hi])
+		// TODO: appengine.MultiError
 		if err != nil {
 			return nil, store.logErr(err)
 		}
@@ -89,7 +90,9 @@ func (store *Store) deleteMulti(kind string, keys []*Key) (err error) {
 		if hi > len(keys) {
 			hi = len(keys)
 		}
-		if err = datastore.DeleteMulti(store.ctx, toDSKeys(keys[lo:hi])); err != nil {
+		err = datastore.DeleteMulti(store.ctx, toDSKeys(keys[lo:hi]))
+		// TODO: appengine.MultiError
+		if err != nil {
 			return err
 		}
 	}

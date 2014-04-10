@@ -70,7 +70,8 @@ func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
 	return newKey(datastore.NewKey(store.ctx, kind, "", id, parentKey))
 }
 
-// NewNumKeys returns a sequence of keys for the passed kind and sequence of numeric IDs.
+// NewNumKeys returns a sequence of key for the passed kind and
+// sequence of numeric ID.
 func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 	keys := make([]*Key, len(ids))
 	for i, id := range ids {
@@ -79,7 +80,7 @@ func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 	return keys
 }
 
-// NewNumKey returns a key for the passed kind and string ID.
+// NewTextKey returns a key for the passed kind and string ID.
 // It can also receive an optional parent key.
 func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
 	var parentKey *datastore.Key
@@ -89,7 +90,8 @@ func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
 	return newKey(datastore.NewKey(store.ctx, kind, id, 0, parentKey))
 }
 
-// NewNumKeys returns a sequence of keys for the passed kind and sequence of string IDs.
+// NewTextKeys returns a sequence of keys for the passed kind and
+// sequence of string ID.
 func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 	keys := make([]*Key, len(ids))
 	for i, id := range ids {

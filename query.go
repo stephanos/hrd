@@ -53,9 +53,9 @@ func (qry *Query) clone() *Query {
 	return &ret
 }
 
-func (qry *Query) Flags(flags ...Flag) (ret *Query) {
+func (qry *Query) Opts(opts ...Opt) (ret *Query) {
 	ret = qry.clone()
-	ret.opts = ret.opts.Flags(flags...)
+	ret.opts = ret.opts.Apply(opts...)
 	return
 }
 

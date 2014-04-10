@@ -13,9 +13,9 @@ func newTransactor(store *Store) *Transactor {
 	return &Transactor{store, store.opts.clone()}
 }
 
-// Flags applies the sequence of flags to the Transactor's options.
-func (tx *Transactor) Flags(flags ...Flag) *Transactor {
-	tx.opts = tx.opts.Flags(flags...)
+// Opts applies the sequence of Opt to the Transactor's options.
+func (tx *Transactor) Opts(opts ...Opt) *Transactor {
+	tx.opts = tx.opts.Apply(opts...)
 	return tx
 }
 

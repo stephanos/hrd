@@ -23,10 +23,10 @@ type operationOpts struct {
 	writeGlobalCache time.Duration
 }
 
-type Flag int
+type Opt int
 
 const (
-	NO_CACHE Flag = iota
+	NO_CACHE Opt = iota
 	NO_LOCAL_CACHE
 	NO_GLOBAL_CACHE
 )
@@ -40,12 +40,14 @@ func defaultOperationOpts() *operationOpts {
 	}
 }
 
+// clone returns a deep copy.
 func (opts *operationOpts) clone() *operationOpts {
 	copy := *opts
 	return &copy
 }
 
-func (opts *operationOpts) Flags(flags ...Flag) (ret *operationOpts) {
+// Flags applies a sequence of Flag.
+func (opts *operationOpts) Apply(flags ...Opt) (ret *operationOpts) {
 	ret = opts.clone()
 	for _, f := range flags {
 		switch f {

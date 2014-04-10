@@ -25,9 +25,9 @@ var _ = Describe("Cache", func() {
 	})
 
 	Describe("CRUD", func() {
-		crudTest := func(source string, flags ...Flag) {
+		crudTest := func(source string, opts ...Opt) {
 			var entities []*SimpleModel
-			keys, err := coll.Load().Flags(flags...).IDs(1, 2).GetAll(&entities)
+			keys, err := coll.Load().Opts(opts...).IDs(1, 2).GetAll(&entities)
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 2)

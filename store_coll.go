@@ -8,18 +8,24 @@ type Collection struct {
 	name  string
 }
 
+// NewNumKey returns a key for the passed numeric ID.
+// It can also receive an optional parent key.
 func (coll *Collection) NewNumKey(id int64, parent ...*Key) *Key {
 	return coll.store.NewNumKey(coll.name, id, parent...)
 }
 
+// NewNumKeys returns a sequence of key for the sequence of numeric ID.
 func (coll *Collection) NewNumKeys(ids ...int64) []*Key {
 	return coll.store.NewNumKeys(coll.name, ids...)
 }
 
+// NewTextKey returns a key for the passed string ID.
+// It can also receive an optional parent key.
 func (coll *Collection) NewTextKey(id string, parent ...*Key) *Key {
 	return coll.store.NewTextKey(coll.name, id, parent...)
 }
 
+// NewTextKeys returns a sequence of keys for the passed sequence of string ID.
 func (coll *Collection) NewTextKeys(ids ...string) []*Key {
 	return coll.store.NewTextKeys(coll.name, ids...)
 }
