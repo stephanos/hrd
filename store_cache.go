@@ -17,7 +17,7 @@ type cache struct {
 }
 
 func newStoreCache(store *Store) *cache {
-	if store.inTX {
+	if store.tx {
 		return &cache{
 			store: store,
 			toPut: make(map[*Key]*doc),
@@ -44,7 +44,7 @@ func (c *cache) writeTo(dst *cache) {
 
 func (c *cache) write(toCache map[*Key]*doc) {
 	if len(toCache) > 0 {
-		if c.store.inTX {
+		if c.store.tx {
 			for k, doc := range toCache {
 				if k.opts.writeLocalCache || k.opts.writeGlobalCache >= 0 {
 					c.toPut[k] = doc
@@ -63,7 +63,7 @@ func (c *cache) write(toCache map[*Key]*doc) {
 
 func (c *cache) delete(keys []*Key) {
 	if len(keys) > 0 {
-		if c.store.inTX {
+		if c.store.tx {
 			for _, k := range keys {
 				c.toDelete = append(c.toDelete, k)
 			}
@@ -92,7 +92,7 @@ func (c *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) {
 		mKey := toMemKey(key)
 
 		// lookup key in memory
-		if key.opts.readLocalCache && !c.store.inTX {
+		if key.opts.readLocalCache && !c.store.tx {
 			if src, ok := c.getMemory(key); ok && src != nil {
 				key.source = SOURCE_MEMORY
 				docs.set(i, src)
@@ -117,7 +117,7 @@ func (c *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) {
 		doc := docs.get(dstId)
 
 		// lookup key in global cache result
-		if key.opts.readGlobalCache && !c.store.inTX {
+		if key.opts.readGlobalCache && !c.store.tx {
 			if item, ok := memVals[mKey]; ok && item.Value != nil {
 				if err := fromGob(doc, item.Value); err == nil {
 					key.source = SOURCE_MEMCACHE

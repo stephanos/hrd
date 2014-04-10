@@ -9,16 +9,21 @@ type Saver struct {
 	opts *operationOpts
 }
 
+// newSaver creates a new Saver for the passed store.
+// The collection's options are used as default options.
 func newSaver(coll *Collection) *Saver {
 	return &Saver{coll, coll.opts.clone()}
 }
 
+// Flags applies the passed sequence of flags to the Saver's options.
 func (s *Saver) Flags(flags ...Flag) *Saver {
 	s.opts = s.opts.Flags(flags...)
 	return s
 }
 
-func (s *Saver) WithKey(complete ...bool) *Saver {
+// ReqKey defines whether an entity requires a complete key.
+// If no parameter is passed, true is assumed.
+func (s *Saver) ReqKey(complete ...bool) *Saver {
 	s.opts = s.opts.CompleteKeys(complete...)
 	return s
 }

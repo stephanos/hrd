@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// Key represents the datastore key for a stored entity.
+// It embeds the datastore's key; also it adds several internal
+// fields.
 type Key struct {
 	*datastore.Key
 	err     *error
@@ -66,22 +69,24 @@ func setKey(src interface{}, key *Key) {
 	}
 }
 
-// Convert a Key to string.
+// toMemKey converts a Key to a string. It includes the entity's version
+// to prevent reading old versions of an entity from memcache.
 func toMemKey(k *Key) string {
 	return fmt.Sprintf("%v-%v", k.Encode(), k.version)
 }
 
-// Convert a slice of Keys to a slice of strings.
-func toMemKeys(keys []*Key) (memKeys []string) {
-	for _, k := range keys {
+// toMemKeys converts a sequence of Keys to a sequence of strings.
+func toMemKeys(keys []*Key) []string {
+	ret := make([]string, len(keys))
+	for i, k := range keys {
 		if !k.Incomplete() {
-			memKeys = append(memKeys, toMemKey(k))
+			ret[i] = toMemKey(k)
 		}
 	}
-	return
+	return ret
 }
 
-// Convert a slice of Keys to a slice of datastore Keys.
+// toDSKeys converts a sequence of Keys to a sequence of datastore Keys.
 func toDSKeys(keys []*Key) []*datastore.Key {
 	ret := make([]*datastore.Key, len(keys))
 	for i, k := range keys {

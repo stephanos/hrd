@@ -18,11 +18,13 @@ func (it *Iterator) Cursor() (string, error) {
 	}
 }
 
+// GetOne loads an entity from the iterator into dst.
 func (it *Iterator) GetOne(dst interface{}) (err error) {
 	_, err = it.get(dst, false)
 	return
 }
 
+// GetAll loads all entities from the iterator into dsts.
 func (it *Iterator) GetAll(dsts interface{}) (keys []*Key, err error) {
 	return it.get(dsts, true)
 }
@@ -72,7 +74,7 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 		keys = append(keys, key)
 
 		if docs != nil {
-			if qryType != ProjQry && !store.inTX {
+			if qryType != ProjQry && !store.tx {
 
 				// #2 try to read entity from local cache
 				fromCache := false

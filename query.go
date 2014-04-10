@@ -30,6 +30,8 @@ const (
 	HybridQry
 )
 
+// newQuery creates a new Query for the passed collection.
+// The collection's options are used as default options.
 func newQuery(coll *Collection) (ret *Query) {
 	return &Query{
 		coll:   coll,
@@ -75,8 +77,8 @@ func (qry *Query) Hybrid(enabled bool) (ret *Query) {
 	return ret
 }
 
-// Limit returns a derivative query that has a limit on the number of results returned.
-// A negative value means unlimited.
+// Limit returns a derivative query that has a limit on the number
+// of results returned. A negative value means unlimited.
 func (qry *Query) Limit(limit int) (ret *Query) {
 	ret = qry.clone()
 	if limit > 0 {
@@ -90,7 +92,8 @@ func (qry *Query) Limit(limit int) (ret *Query) {
 	return ret
 }
 
-// NoLimit returns a derivative query that has no limit on the number of results returned.
+// NoLimit returns a derivative query that has no limit on the number
+// of results returned.
 func (qry *Query) NoLimit() (ret *Query) {
 	return qry.Limit(-1)
 }
@@ -104,7 +107,7 @@ func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	return ret
 }
 
-// Project returns a derivative query that yields only the given fields.
+// Project returns a derivative query that yields only the passed fields.
 // It cannot be used in a keys-only query.
 func (qry *Query) Project(s ...string) (ret *Query) {
 	ret = qry.clone()
@@ -114,7 +117,7 @@ func (qry *Query) Project(s ...string) (ret *Query) {
 	return ret
 }
 
-// End returns a derivative query with the given end point.
+// End returns a derivative query with the passed end point.
 func (qry *Query) End(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
@@ -129,7 +132,7 @@ func (qry *Query) End(c string) (ret *Query) {
 	return ret
 }
 
-// Start returns a derivative query with the given start point.
+// Start returns a derivative query with the passed start point.
 func (qry *Query) Start(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
@@ -144,8 +147,8 @@ func (qry *Query) Start(c string) (ret *Query) {
 	return ret
 }
 
-// Offset returns a derivative query that has an offset of how many keys to skip over before returning results.
-// A negative value is invalid.
+// Offset returns a derivative query that has an offset of how many keys
+// to skip over before returning results. A negative value is invalid.
 func (qry *Query) Offset(off int) (ret *Query) {
 	ret = qry.clone()
 	ret.log("OFFSET %v", off)
@@ -185,50 +188,70 @@ func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 
 // ==== CACHE
 
+// NoCache prevents reading/writing entities from/to
+// the in-memory cache or memcache in this load operation.
 func (qry *Query) NoCache() (ret *Query) {
 	return qry.NoLocalCache().NoGlobalCache()
 }
 
+// NoLocalCache prevents reading/writing entities from/to
+// the in-memory cache in this load operation.
 func (qry *Query) NoLocalCache() (ret *Query) {
 	return qry.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
+// NoGlobalCache prevents reading/writing entities from/to
+// memcache in this load operation.
 func (qry *Query) NoGlobalCache() (ret *Query) {
 	return qry.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
+// CacheExpire sets the expiration time in memcache for entities
+// that are cached after loading them to the datastore.
 func (qry *Query) CacheExpire(exp time.Duration) (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.CacheExpire(exp)
 	return q
 }
 
+// NoCacheRead prevents reading entities from
+// the in-memory cache or memcache in this load operation.
 func (qry *Query) NoCacheRead() (ret *Query) {
 	return qry.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
+// NoLocalCacheRead prevents reading entities from
+// the in-memory cache in this load operation.
 func (qry *Query) NoLocalCacheRead() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoLocalCacheRead()
 	return q
 }
 
+// NoGlobalCacheRead prevents reading entities from
+// memcache in this load operation.
 func (qry *Query) NoGlobalCacheRead() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoGlobalCacheRead()
 	return q
 }
 
+// NoCacheWrite prevents writing entities to
+// the in-memory cache or memcache in this load operation.
 func (qry *Query) NoCacheWrite() (ret *Query) {
 	return qry.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
+// NoLocalCacheWrite prevents writing entities to
+// the in-memory cache in this load operation.
 func (qry *Query) NoLocalCacheWrite() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoLocalCacheWrite()
 	return q
 }
 
+// NoGlobalCacheWrite prevents writing entities to
+// memcache in this load operation.
 func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoGlobalCacheWrite()
@@ -237,7 +260,7 @@ func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
 
 // ==== EXECUTE
 
-// Count returns the number of results for the query.
+// GetCount returns the number of results for the query.
 func (qry *Query) GetCount() (int, error) {
 	qry.log("COUNT")
 	qry.coll.store.ctx.Infof(qry.getLog())
@@ -263,11 +286,12 @@ func (qry *Query) GetKeys() ([]*Key, string, error) {
 	return keys, cursor, err
 }
 
-// Runs the query and writes the entities to the passed destination.
+// GetAll runs the query and writes the entities to the passed destination.
 //
-// Note that, if not manually disabled, queries for more than 1 item use a "hybrid query".
-// This means that first a keys-only query is executed and then the keys are used to lookup the
-// local and global cache as well as the datastore eventually. For a warm cache this usually is
+// Note that, if not manually disabled, queries for more than 1 item use
+// a "hybrid query". This means that first a keys-only query is executed
+// and then the keys are used to lookup the local and global cache as well
+// as the datastore eventually. For a warm cache this usually is
 // faster and cheaper than the regular query.
 func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	if qry.err != nil {
@@ -292,7 +316,8 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	return keys, cursor, err
 }
 
-// GetFirst executes the query and writes the result's first entity to the passed destination.
+// GetFirst executes the query and writes the result's first entity
+// to the passed destination.
 func (qry *Query) GetFirst(dst interface{}) (err error) {
 	return qry.Run().GetOne(dst)
 }

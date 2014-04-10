@@ -75,7 +75,7 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 	return keys, nil
 }
 
-func (store *Store) deleteMulti(kind string, keys []*Key) error {
+func (store *Store) deleteMulti(kind string, keys []*Key) (err error) {
 
 	store.ctx.Infof(store.logAct("deleting", "from", keys, kind))
 
@@ -89,10 +89,10 @@ func (store *Store) deleteMulti(kind string, keys []*Key) error {
 		if hi > len(keys) {
 			hi = len(keys)
 		}
-		if err := datastore.DeleteMulti(store.ctx, toDSKeys(keys[lo:hi])); err != nil {
+		if err = datastore.DeleteMulti(store.ctx, toDSKeys(keys[lo:hi])); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return
 }

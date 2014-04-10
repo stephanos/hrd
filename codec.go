@@ -10,10 +10,11 @@ import (
 	"unicode"
 )
 
+// codec describes how to convert a struct to and from a sequence of properties.
 type codec struct {
 	// byIndex gives the tagCodec for the i'th field.
 	byIndex map[int]tagCodec
-	// byName gives the field codec for the tagCodec with the given name.
+	// byName gives the field codec for the tagCodec with the passed name.
 	byName map[string]fieldCodec
 	// hasSlice is whether a struct or any of its nested or embedded structs
 	// has a slice-typed field (other than []byte).
@@ -48,7 +49,7 @@ func getCodec(obj interface{}) (*codec, error) {
 	return getCodecLocked(obj)
 }
 
-// The codecDictMutex must be held when calling this function.
+// Note: codecDictMutex must be held when calling this function.
 func getCodecLocked(obj interface{}) (*codec, error) {
 	refl, err := reflector.NewStructCodec(obj)
 	if err != nil {
@@ -57,7 +58,7 @@ func getCodecLocked(obj interface{}) (*codec, error) {
 	return getCodecStructLocked(refl)
 }
 
-// The codecDictMutex must be held when calling this function.
+// Note: codecDictMutex must be held when calling this function.
 func getCodecStructLocked(refl *reflector.StructCodec) (*codec, error) {
 
 	t := refl.Type()

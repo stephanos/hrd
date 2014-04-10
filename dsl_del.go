@@ -4,6 +4,12 @@ type Deleter struct {
 	coll *Collection
 }
 
+// newDeleter creates a new Deleter for the passed collection.
+// The collection's options are used as default options.
+func newDeleter(coll *Collection) *Deleter {
+	return &Deleter{coll: coll}
+}
+
 // Key deletes a single entity by key from the datastore.
 func (d *Deleter) Key(key *Key) error {
 	return d.delete([]*Key{key})

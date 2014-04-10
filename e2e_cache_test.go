@@ -19,7 +19,7 @@ var _ = Describe("Cache", func() {
 			&SimpleModel{id: 2, Text: "text2"},
 		}
 
-		keys, err := coll.Save().WithKey().Entities(entities)
+		keys, err := coll.Save().ReqKey().Entities(entities)
 		Check(err, IsNil)
 		Check(keys, HasLen, 2)
 	})

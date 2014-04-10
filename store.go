@@ -8,14 +8,23 @@ import (
 	"time"
 )
 
+// There should only be one store for each request.
 type Store struct {
 	*cache
-	ctx       appengine.Context
-	opts      *operationOpts
+	ctx appengine.Context
+
+	// opts is a collection of options.
+	// It controls the store's operations.
+	opts *operationOpts
+
+	// createdAt is the time of the store's creation
 	createdAt time.Time
-	inTX      bool
+
+	// tx is whether the store is within a transaction.
+	tx bool
 }
 
+// NewStore creates a new store for the passed App Engine context.
 func NewStore(ctx appengine.Context) *Store {
 	store := &Store{
 		ctx:       ctx,
@@ -26,6 +35,8 @@ func NewStore(ctx appengine.Context) *Store {
 	return store
 }
 
+// Coll returns a Collection for the passed name ("kind").
+// The store's options are used as default options.
 func (store *Store) Coll(name string) *Collection {
 	return &Collection{
 		store: store,
@@ -34,19 +45,23 @@ func (store *Store) Coll(name string) *Collection {
 	}
 }
 
+// TX creates a Transactor to run a transaction on the store.
 func (store *Store) TX() *Transactor {
 	return newTransactor(store)
 }
 
-// Clear the store's local memory cache.
+// ClearCache clears the store's in-memory cache.
 func (store *Store) ClearCache() {
 	store.localCache.Clear()
 }
 
+// CreatedAt returns the time the store was created.
 func (store *Store) CreatedAt() time.Time {
 	return store.createdAt
 }
 
+// NewNumKey returns a key for the passed kind and numeric ID.
+// It can also receive an optional parent key.
 func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
@@ -55,6 +70,7 @@ func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
 	return newKey(datastore.NewKey(store.ctx, kind, "", id, parentKey))
 }
 
+// NewNumKeys returns a sequence of keys for the passed kind and sequence of numeric IDs.
 func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 	keys := make([]*Key, len(ids))
 	for i, id := range ids {
@@ -63,6 +79,8 @@ func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 	return keys
 }
 
+// NewNumKey returns a key for the passed kind and string ID.
+// It can also receive an optional parent key.
 func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
@@ -71,6 +89,7 @@ func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
 	return newKey(datastore.NewKey(store.ctx, kind, id, 0, parentKey))
 }
 
+// NewNumKeys returns a sequence of keys for the passed kind and sequence of string IDs.
 func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 	keys := make([]*Key, len(ids))
 	for i, id := range ids {
@@ -79,9 +98,10 @@ func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 	return keys
 }
 
-// runTX runs f in a transaction. It calls f with a transaction context that should be
-// used for all App Engine operations. Neither the local nor the global cache is touched
-// during a transaction - they are updated only after a successful completion.
+// runTX runs f in a transaction. It calls f with a transaction context that
+// should be used for all App Engine operations. Neither the local nor the
+// global cache is touched during a transaction - they are updated only after
+// a successful completion.
 //
 // Otherwise similar to appengine/datastore.RunInTransaction:
 // https://developers.google.com/appengine/docs/go/datastore/reference#RunInTransaction
@@ -93,7 +113,7 @@ func (store *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (
 		var dsErr error
 		txStore = &Store{
 			ctx:  tc,
-			inTX: true,
+			tx:   true,
 			opts: opts,
 		}
 		txStore.cache = newStoreCache(txStore)

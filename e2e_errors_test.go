@@ -38,7 +38,7 @@ var _ = Describe("HRD Errors", func() {
 
 		It("does not save complete entity without Id", func() {
 			entity := &SimpleModel{}
-			_, err := coll.Save().WithKey().Entity(entity)
+			_, err := coll.Save().ReqKey().Entity(entity)
 
 			Check(err, Contains, "incomplete key")
 		})

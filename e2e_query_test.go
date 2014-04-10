@@ -38,7 +38,7 @@ func queryTests(hybrid bool, flags ...Flag) {
 				coll = randomColl()
 			}
 
-			keys, err := coll.Save().WithKey().Entities(simpleMdls)
+			keys, err := coll.Save().ReqKey().Entities(simpleMdls)
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
 			Check(keys[0].IntID(), IsNum, 1)
@@ -54,7 +54,7 @@ func queryTests(hybrid bool, flags ...Flag) {
 			// step is required because of 'eventual consistency'
 			var entities []*SimpleModel
 			coll.Load().IDs(-1).GetAll(&entities)
-			coll.Store().ClearCache()
+			coll.store.ClearCache()
 		})
 
 		It("counts entities", func() {

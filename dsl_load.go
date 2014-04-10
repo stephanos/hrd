@@ -8,14 +8,20 @@ type Loader struct {
 	keys []*Key
 }
 
+// SingleLoader is a special Loader that allows to
+// fetch exactly one entity from the datastore.
 type SingleLoader struct {
 	loader *Loader
 }
 
+// MultiLoader is a special Loader that allows to
+// fetch multiple entities from the datastore.
 type MultiLoader struct {
 	loader *Loader
 }
 
+// newLoader creates a new Loader for the passed collection.
+// The collection's options are used as default options.
 func newLoader(coll *Collection) *Loader {
 	return &Loader{coll: coll, opts: coll.opts.clone()}
 }

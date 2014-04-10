@@ -9,17 +9,32 @@ import (
 	"time"
 )
 
+// doc is a reader and writer for a datastore entity.
+// It implements the datastore's PropertyLoadSaver.
+//
+// It is based on:
+// https://code.google.com/p/appengine-go/source/browse/appengine/datastore/prop.go
 type doc struct {
+	// reference to entity.
 	src_val reflect.Value
+
+	// codec of entity.
 	codec   *codec
-	synced  bool
 }
 
+// property is a name/value pair plus some metadata.
 type property struct {
-	name    string
-	value   interface{}
+	// name is the property name.
+	name string
+
+	// value is the property value.
+	value interface{}
+
+	// indexed is whether the datastore indexes this property.
 	indexed bool
-	multi   bool
+
+	// multi is whether the entity can have multiple properties with the same name.
+	multi bool
 }
 
 func newDoc(src_val reflect.Value) (*doc, error) {
@@ -42,7 +57,7 @@ func newDoc(src_val reflect.Value) (*doc, error) {
 		return nil, err
 	}
 
-	return &doc{src_val, codec, false}, nil
+	return &doc{src_val, codec}, nil
 }
 
 func newDocFromInst(src interface{}) (*doc, error) {
@@ -53,15 +68,18 @@ func newDocFromType(typ reflect.Type) (*doc, error) {
 	return newDoc(reflect.New(typ.Elem()))
 }
 
+// nil sets the value of the entity to nil.
 func (doc *doc) nil() {
 	dst := doc.val()
 	dst.Set(reflect.New(dst.Type()).Elem())
 }
 
+// get returns the entity.
 func (doc *doc) get() interface{} {
 	return doc.src_val.Interface()
 }
 
+// set sets the entity.
 func (doc *doc) set(src interface{}) {
 	dst := doc.val()
 	v := reflect.ValueOf(src)
@@ -123,7 +141,8 @@ func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	return
 }
 
-// Note: Save should close the channel when done, even if an error occurred
+//
+// Note: Save should close the channel when done, even if an error occurred.
 func (doc *doc) Save(c chan<- datastore.Property) error {
 	defer close(c)
 
@@ -151,7 +170,6 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 			Multiple: prop.multi,
 		}
 	}
-	doc.synced = true
 
 	// event: after save
 	if hook, ok := src.(afterSaver); ok {
@@ -164,7 +182,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 	return nil
 }
 
-// Note: Load should drain the channel until closed, even if an error occurred
+// Note: Load should drain the channel until closed, even if an error occurred.
 func (doc *doc) Load(c <-chan datastore.Property) error {
 
 	dst := doc.get()
@@ -179,7 +197,6 @@ func (doc *doc) Load(c <-chan datastore.Property) error {
 	if err := datastore.LoadStruct(dst, c); err != nil {
 		return err
 	}
-	doc.synced = true
 
 	// event: after load
 	if hook, ok := dst.(afterLoader); ok {

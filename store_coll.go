@@ -24,32 +24,32 @@ func (coll *Collection) NewTextKeys(ids ...string) []*Key {
 	return coll.store.NewTextKeys(coll.name, ids...)
 }
 
-func (coll *Collection) Store() *Store {
-	return coll.store
-}
-
-// Save returns a Saver action object allowing to save entities to the datastore.
+// Save returns a Saver action object.
+// It allows to save entities to the datastore.
 func (coll *Collection) Save() *Saver {
 	return newSaver(coll)
 }
 
-// Load returns a Loader action object allowing to load entities from the datastore.
+// Load returns a Loader action object.
+// It allows to load entities from the datastore.
 func (coll *Collection) Load() *Loader {
 	return newLoader(coll)
 }
 
-// Delete returns a Deleter action object allowing to delete entities from the datastore.
+// Delete returns a Deleter action object.
+// It allows to delete entities from the datastore.
 func (coll *Collection) Delete() *Deleter {
-	return &Deleter{coll}
+	return newDeleter(coll)
 }
 
-// Query returns a Query object allowing to query entities from the datastore.
+// Query returns a Query object
+// It allows to query entities from the datastore.
 func (coll *Collection) Query() *Query {
 	return newQuery(coll)
 }
 
 // DESTROY deletes all entities of the collection.
-// Proceed with caution.
+// Proceed with extreme caution!
 func (coll *Collection) DESTROY() error {
 	i := 0
 	var start string
@@ -94,35 +94,41 @@ func (coll *Collection) NoGlobalCache() *Collection {
 	return coll.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
 
-
+// CacheExpire sets the expiration time for entities written to memcache.
 func (coll *Collection) CacheExpire(exp time.Duration) *Collection {
 	coll.opts = coll.opts.CacheExpire(exp)
 	return coll
 }
 
+// NoCacheRead prevents reading entities from the in-memory cache or memcache.
 func (coll *Collection) NoCacheRead() *Collection {
 	return coll.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
+// NoLocalCacheRead prevents reading entities from the in-memory cache.
 func (coll *Collection) NoLocalCacheRead() *Collection {
 	coll.opts = coll.opts.NoLocalCacheRead()
 	return coll
 }
 
+// NoGlobalCacheRead prevents reading entities from memcache.
 func (coll *Collection) NoGlobalCacheRead() *Collection {
 	coll.opts = coll.opts.NoGlobalCacheRead()
 	return coll
 }
 
+// NoCacheWrite prevents writing entities to the in-memory cache or memcache.
 func (coll *Collection) NoCacheWrite() *Collection {
 	return coll.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
+// NoLocalCacheWrite prevents writing entities to the in-memory cache.
 func (coll *Collection) NoLocalCacheWrite() *Collection {
 	coll.opts = coll.opts.NoLocalCacheWrite()
 	return coll
 }
 
+// NoGlobalCacheWrite prevents writing entities to memcache.
 func (coll *Collection) NoGlobalCacheWrite() *Collection {
 	coll.opts = coll.opts.NoGlobalCacheWrite()
 	return coll

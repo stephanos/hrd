@@ -53,7 +53,7 @@ func basicTests(flags ...Flag) {
 
 	It("saves an entity (with id)", func() {
 		entity.SetID(42)
-		key, err := coll.Save().WithKey().Entity(entity)
+		key, err := coll.Save().ReqKey().Entity(entity)
 
 		Check(err, IsNil)
 		Check(key, NotNil)
