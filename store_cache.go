@@ -7,14 +7,15 @@ import (
 	"github.com/101loops/mcache"
 )
 
+// cache manages the caching of a Store.
 type cache struct {
 	store      *Store
 	localCache *mcache.MCache
 
-	// toDelete contains keys to delete.
+	// toDelete contains keys to delete after a successful transaction.
 	toDelete []*Key
 
-	// toPut contains entities to cache.
+	// toPut contains entities to cache after a successful transaction.
 	toPut    map[*Key]*doc
 }
 

@@ -2,6 +2,7 @@ package hrd
 
 import "time"
 
+// Collection represents a datastore kind.
 type Collection struct {
 	opts  *operationOpts
 	store *Store

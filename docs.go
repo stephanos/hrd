@@ -5,7 +5,6 @@ import (
 	"reflect"
 )
 
-//
 type docs struct {
 	i         int
 	list      []*doc

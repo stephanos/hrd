@@ -18,13 +18,13 @@ func (it *Iterator) Cursor() (string, error) {
 	}
 }
 
-// GetOne loads an entity from the iterator into dst.
+// GetOne loads an entity from the iterator into the passed destination.
 func (it *Iterator) GetOne(dst interface{}) (err error) {
 	_, err = it.get(dst, false)
 	return
 }
 
-// GetAll loads all entities from the iterator into dsts.
+// GetAll loads all entities from the iterator into the passed destination.
 func (it *Iterator) GetAll(dsts interface{}) (keys []*Key, err error) {
 	return it.get(dsts, true)
 }

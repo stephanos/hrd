@@ -1,5 +1,6 @@
 package hrd
 
+// Deleter can delete entities from a Collection.
 type Deleter struct {
 	coll *Collection
 }

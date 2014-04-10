@@ -2,6 +2,7 @@ package hrd
 
 import "time"
 
+// Transactor can run multiple datastore operations inside a transaction.
 type Transactor struct {
 	store *Store
 	opts  *operationOpts

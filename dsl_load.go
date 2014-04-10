@@ -2,20 +2,21 @@ package hrd
 
 import "time"
 
+// Loader can load entities from a Collection.
 type Loader struct {
 	coll *Collection
 	opts *operationOpts
 	keys []*Key
 }
 
-// SingleLoader is a special Loader that allows to
-// fetch exactly one entity from the datastore.
+// SingleLoader is a special Loader that allows to fetch exactly one entity
+// from the datastore.
 type SingleLoader struct {
 	loader *Loader
 }
 
-// MultiLoader is a special Loader that allows to
-// fetch multiple entities from the datastore.
+// MultiLoader is a special Loader that allows to fetch multiple entities
+// from the datastore.
 type MultiLoader struct {
 	loader *Loader
 }
@@ -26,7 +27,7 @@ func newLoader(coll *Collection) *Loader {
 	return &Loader{coll: coll, opts: coll.opts.clone()}
 }
 
-// Key load a single entity by key from the datastore.
+// Key loads a single entity by key from the datastore.
 func (l *Loader) Key(key *Key) *SingleLoader {
 	l.keys = []*Key{key}
 	return &SingleLoader{l}
@@ -89,7 +90,7 @@ func (l *Loader) NoGlobalCache() *Loader {
 }
 
 // CacheExpire sets the expiration time in memcache for entities
-// that are cached after loading them to the datastore.
+// that are cached after loading them from the datastore.
 func (l *Loader) CacheExpire(exp time.Duration) *Loader {
 	l.opts = l.opts.CacheExpire(exp)
 	return l
@@ -140,12 +141,12 @@ func (l *Loader) NoGlobalCacheWrite() *Loader {
 // TODO: func (l *Loader) GetEntity(dst interface{}) ([]*Key, error)
 // TODO: func (l *Loader) GetEntities(dsts interface{}) ([]*Key, error)
 
-// GetAll loads entities from the datastore into dsts.
+// GetAll loads entities from the datastore into the passed destination.
 func (l *MultiLoader) GetAll(dsts interface{}) ([]*Key, error) {
 	return l.loader.get(dsts, true)
 }
 
-// GetOne loads an entity from the datastore into dst.
+// GetOne loads an entity from the datastore into the passed destination.
 func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 	var key *Key
 	keys, err := l.loader.get(dst, false)

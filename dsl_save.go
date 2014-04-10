@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Saver can save entities to a Collection.
 type Saver struct {
 	coll *Collection
 	opts *operationOpts
