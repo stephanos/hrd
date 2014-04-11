@@ -259,28 +259,6 @@ func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
 	return q
 }
 
-// NoCacheWrite prevents writing entities to
-// the in-memory cache or memcache in this load operation.
-func (qry *Query) NoCacheWrite() (ret *Query) {
-	return qry.NoGlobalCacheWrite().NoLocalCacheWrite()
-}
-
-// NoLocalCacheWrite prevents writing entities to
-// the in-memory cache in this load operation.
-func (qry *Query) NoLocalCacheWrite() (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.NoLocalCacheWrite()
-	return q
-}
-
-// NoGlobalCacheWrite prevents writing entities to
-// memcache in this load operation.
-func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.NoGlobalCacheWrite()
-	return q
-}
-
 // ==== EXECUTE
 
 // GetCount returns the number of results for the query.
