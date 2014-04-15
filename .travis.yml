@@ -8,11 +8,11 @@ before_script:
   - ./install-sdk.sh
 
 install:
-  - go get github.com/101loops/bdd
-  - go get github.com/101loops/mcache
-  - go get github.com/101loops/reflector
-  - go get code.google.com/p/go.tools/cmd/cover
-  - go get github.com/mattn/goveralls
+  - go get -u github.com/101loops/bdd
+  - go get -u github.com/101loops/mcache
+  - go get -u github.com/101loops/reflector
+  - go get -u code.google.com/p/go.tools/cmd/cover
+  - go get -u github.com/mattn/goveralls
 
 script:
   - go_appengine/goapp test -covermode=count -coverprofile=profile.cov
