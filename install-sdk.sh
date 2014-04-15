@@ -11,5 +11,5 @@ fi
 file=go_appengine_sdk_linux_$ARCH-$VERSION.zip
 echo "downloading '$file'"
 
-wget https://googleappengine.googlecode.com/files/$file -nv
+wget https://commondatastorage.googleapis.com/appengine-sdks/featured/
 unzip -q $file -d .
