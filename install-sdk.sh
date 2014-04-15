@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ARCH="386"
-VERSION="1.8.9"
+VERSION="1.9.2"
 
 if [[ `uname -a` == *x86_64* ]]
 then
