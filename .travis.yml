@@ -11,6 +11,9 @@ install:
   - go get github.com/101loops/bdd
   - go get github.com/101loops/mcache
   - go get github.com/101loops/reflector
+  - go get code.google.com/p/go.tools/cmd/cover
+  - go get github.com/mattn/goveralls
 
 script:
-  - go_appengine/goapp test
+  - go_appengine/goapp test -covermode=count -coverprofile=profile.cov
+  - goveralls -coverprofile=profile.cov -service=travis-ci
