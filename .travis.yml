@@ -14,5 +14,5 @@ install:
   - go get -u github.com/mattn/goveralls
 
 script:
-  - go_appengine/goapp test -covermode=count -coverprofile=profile.cov ./...
+  - go_appengine/goapp test -covermode=count -coverprofile=profile.cov .
   - goveralls -coverprofile=profile.cov -service=travis-ci
