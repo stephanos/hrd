@@ -15,4 +15,4 @@ install:
 
 script:
   - go_appengine/goapp test -covermode=count -coverprofile=profile.cov .
-  - goveralls -coverprofile=profile.cov -service=travis-ci
+  #- goveralls -coverprofile=profile.cov -service=travis-ci
