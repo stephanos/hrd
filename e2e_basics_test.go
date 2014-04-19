@@ -57,8 +57,8 @@ func basicTests(opts ...Opt) {
 
 		Check(err, IsNil)
 		Check(key, NotNil)
-		Check(key.IntID(), IsNum, 42)
-		Check(entity.ID(), IsNum, 42)
+		Check(key.IntID(), EqualsNum, 42)
+		Check(entity.ID(), EqualsNum, 42)
 	})
 
 	It("loads an entity", func() {
@@ -68,7 +68,7 @@ func basicTests(opts ...Opt) {
 		Check(err, IsNil)
 		Check(key, NotNil)
 		Check(entity, NotNil)
-		Check(entity.ID(), IsNum, 42)
+		Check(entity.ID(), EqualsNum, 42)
 		Check(entity.Text, Equals, "text")
 		Check(entity.lifecycle, Equals, "after-load")
 	})
@@ -81,15 +81,15 @@ func basicTests(opts ...Opt) {
 		Check(keys, HasLen, 3)
 		Check(entities, HasLen, 3)
 
-		Check(keys[0].IntID(), IsNum, 1)
+		Check(keys[0].IntID(), EqualsNum, 1)
 		Check(keys[0].source, Equals, "")
 		Check(keys[0].Exists(), IsFalse)
 
-		Check(keys[1].IntID(), IsNum, 42)
+		Check(keys[1].IntID(), EqualsNum, 42)
 		Check(keys[1].source, Equals, SOURCE_DATASTORE)
 		Check(entities[1].Text, Equals, "text")
 
-		Check(keys[2].IntID(), IsNum, genId)
+		Check(keys[2].IntID(), EqualsNum, genId)
 		Check(keys[2].source, Equals, SOURCE_DATASTORE)
 		Check(entities[2].Text, Equals, "text")
 	})

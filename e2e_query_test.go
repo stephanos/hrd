@@ -41,10 +41,10 @@ func queryTests(hybrid bool, opts ...Opt) {
 			keys, err := coll.Save().ReqKey().Entities(simpleMdls)
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
-			Check(keys[0].IntID(), IsNum, 1)
-			Check(keys[1].IntID(), IsNum, 2)
-			Check(keys[2].IntID(), IsNum, 3)
-			Check(keys[3].IntID(), IsNum, 4)
+			Check(keys[0].IntID(), EqualsNum, 1)
+			Check(keys[1].IntID(), EqualsNum, 2)
+			Check(keys[2].IntID(), EqualsNum, 3)
+			Check(keys[3].IntID(), EqualsNum, 4)
 
 			clearCache()
 			query = coll.Query().Hybrid(hybrid).Opts(opts...)
@@ -61,7 +61,7 @@ func queryTests(hybrid bool, opts ...Opt) {
 			count, err := query.GetCount()
 
 			Check(err, IsNil)
-			Check(count, IsNum, 4)
+			Check(count, EqualsNum, 4)
 		})
 
 		It("queries entity keys", func() {
@@ -69,8 +69,8 @@ func queryTests(hybrid bool, opts ...Opt) {
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
-			Check(keys[0].IntID(), IsNum, 1)
-			Check(keys[3].IntID(), IsNum, 4)
+			Check(keys[0].IntID(), EqualsNum, 1)
+			Check(keys[3].IntID(), EqualsNum, 4)
 		})
 
 		It("queries no entity", func() {
@@ -87,7 +87,7 @@ func queryTests(hybrid bool, opts ...Opt) {
 
 			Check(err, IsNil)
 			Check(entity, NotNil)
-			Check(entity.id, IsNum, 1)
+			Check(entity.id, EqualsNum, 1)
 			Check(entity.Text, Equals, "text1")
 		})
 
@@ -97,7 +97,7 @@ func queryTests(hybrid bool, opts ...Opt) {
 
 			Check(err, IsNil)
 			Check(entity, NotNil)
-			Check(entity.id, IsNum, 1)
+			Check(entity.id, EqualsNum, 1)
 			Check(entity.Data, IsEmpty)
 			Check(entity.Text, Equals, "text1")
 		})
@@ -109,7 +109,7 @@ func queryTests(hybrid bool, opts ...Opt) {
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
 			Check(entities, HasLen, 4)
-			Check(entities[0].id, IsNum, 1)
+			Check(entities[0].id, EqualsNum, 1)
 			Check(keys[0].source, Equals, SOURCE_DATASTORE)
 		})
 
@@ -131,9 +131,9 @@ func queryTests(hybrid bool, opts ...Opt) {
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
 			Check(entities, HasLen, 4)
-			Check(entities[0].id, IsNum, 1)
+			Check(entities[0].id, EqualsNum, 1)
 			Check(entities[0].Text, Equals, "text1")
-			Check(entities[3].id, IsNum, 4)
+			Check(entities[3].id, EqualsNum, 4)
 			Check(entities[3].Text, Equals, "text4")
 		})
 
@@ -145,9 +145,9 @@ func queryTests(hybrid bool, opts ...Opt) {
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
 			Check(entities, HasLen, 4)
-			Check(entities[0].id, IsNum, 4)
+			Check(entities[0].id, EqualsNum, 4)
 			Check(entities[0].Text, Equals, "text4")
-			Check(entities[3].id, IsNum, 1)
+			Check(entities[3].id, EqualsNum, 1)
 			Check(entities[3].Text, Equals, "text1")
 		})
 

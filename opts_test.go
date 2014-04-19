@@ -29,20 +29,20 @@ var _ = Describe("Action Options", func() {
 	It("configures global cache", func() {
 		opts := defaultOperationOpts()
 		Check(opts.readGlobalCache, IsTrue)
-		Check(opts.writeGlobalCache, IsNum, 0)
+		Check(opts.writeGlobalCache, EqualsNum, 0)
 
 		opts1 := opts.NoGlobalCacheRead()
 		Check(opts1.readGlobalCache, IsFalse)
 
 		opts2 := opts.NoGlobalCacheWrite()
-		Check(opts2.writeGlobalCache, IsNum, -1)
+		Check(opts2.writeGlobalCache, EqualsNum, -1)
 
 		opts3 := opts.NoGlobalCache()
 		Check(opts3.readGlobalCache, IsFalse)
-		Check(opts3.writeGlobalCache, IsNum, -1)
+		Check(opts3.writeGlobalCache, EqualsNum, -1)
 
 		opts4 := opts.Apply(NO_CACHE)
 		Check(opts4.readGlobalCache, IsFalse)
-		Check(opts4.writeGlobalCache, IsNum, -1)
+		Check(opts4.writeGlobalCache, EqualsNum, -1)
 	})
 })
