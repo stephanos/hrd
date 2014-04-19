@@ -12,19 +12,19 @@ type Key struct {
 	*datastore.Key
 
 	// source describes where the entity was read from.
-	source  string
+	source string
 
 	// version is the entity's version.
 	version int64
 
 	// synced is the last time the entity was read/written.
-	synced  time.Time
+	synced time.Time
 
 	// opts are the options to use for reading/writing the entity.
-	opts    *operationOpts
+	opts *operationOpts
 
 	// err contains an error if the entity could not be loaded/saved.
-	err     *error
+	err *error
 }
 
 // newKey creates a Key from a datastore Key.

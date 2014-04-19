@@ -19,7 +19,7 @@ type doc struct {
 	src_val reflect.Value
 
 	// codec of entity.
-	codec   *codec
+	codec *codec
 }
 
 // property is a name/value pair plus some metadata.

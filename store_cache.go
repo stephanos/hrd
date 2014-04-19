@@ -16,7 +16,7 @@ type cache struct {
 	toDelete []*Key
 
 	// toPut contains entities to cache after a successful transaction.
-	toPut    map[*Key]*doc
+	toPut map[*Key]*doc
 }
 
 func newStoreCache(store *Store) *cache {

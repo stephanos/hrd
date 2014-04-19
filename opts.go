@@ -10,13 +10,13 @@ type operationOpts struct {
 	tx_cross_group bool
 
 	// readLocalCache is whether the in-memory cache is read from.
-	readLocalCache  bool
+	readLocalCache bool
 
 	// writeLocalCache is whether the in-memory cache is written to.
 	writeLocalCache bool
 
 	// readGlobalCache is whether memcache is read from.
-	readGlobalCache  bool
+	readGlobalCache bool
 
 	// writeGlobalCache defines an entity's expiration date
 	// in memcache. A negative value skips the write.
