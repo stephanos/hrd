@@ -11,22 +11,22 @@ var _ = Describe("HRD Read/Write", func() {
 	})
 
 	With("w/o cache", func() {
-		basicTests(NO_CACHE)
+		basicTests(NoCache)
 	})
 
 	With("w/o local cache", func() {
-		basicTests(NO_LOCAL_CACHE)
+		basicTests(NoLocalCache)
 	})
 
 	With("w/o global cache", func() {
-		basicTests(NO_GLOBAL_CACHE)
+		basicTests(NoGlobalCache)
 	})
 })
 
 func basicTests(opts ...Opt) {
 
 	var (
-		genId  int64
+		genID  int64
 		coll   *Collection
 		loader *Loader
 		entity *SimpleModel
@@ -42,9 +42,9 @@ func basicTests(opts ...Opt) {
 
 		Check(err, IsNil)
 		Check(key, NotNil)
-		genId = key.IntID()
-		Check(genId, IsGreaterThan, 0)
-		Check(entity.ID(), Equals, genId)
+		genID = key.IntID()
+		Check(genID, IsGreaterThan, 0)
+		Check(entity.ID(), Equals, genID)
 		Check(entity.lifecycle, Equals, "after-save")
 
 		clearCache()
@@ -75,7 +75,7 @@ func basicTests(opts ...Opt) {
 
 	It("loads all entities into slice of struct pointers", func() {
 		var entities []*SimpleModel
-		keys, err := coll.Load().IDs(1, 42, genId).GetAll(&entities)
+		keys, err := coll.Load().IDs(1, 42, genID).GetAll(&entities)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 3)
@@ -86,17 +86,17 @@ func basicTests(opts ...Opt) {
 		Check(keys[0].Exists(), IsFalse)
 
 		Check(keys[1].IntID(), EqualsNum, 42)
-		Check(keys[1].source, Equals, SOURCE_DATASTORE)
+		Check(keys[1].source, Equals, sourceDatastore)
 		Check(entities[1].Text, Equals, "text")
 
-		Check(keys[2].IntID(), EqualsNum, genId)
-		Check(keys[2].source, Equals, SOURCE_DATASTORE)
+		Check(keys[2].IntID(), EqualsNum, genID)
+		Check(keys[2].source, Equals, sourceDatastore)
 		Check(entities[2].Text, Equals, "text")
 	})
 
 	It("loads all entities into map of type Key -> struct pointers", func() {
 		var entities map[*Key]*SimpleModel
-		keys, err := coll.Load().IDs(1, 42, genId).GetAll(&entities)
+		keys, err := coll.Load().IDs(1, 42, genID).GetAll(&entities)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 3)
@@ -105,7 +105,7 @@ func basicTests(opts ...Opt) {
 
 	It("loads all entities into map of type int64 -> struct pointers", func() {
 		var entities map[int64]*SimpleModel
-		keys, err := coll.Load().IDs(1, 42, genId).GetAll(&entities)
+		keys, err := coll.Load().IDs(1, 42, genID).GetAll(&entities)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 3)

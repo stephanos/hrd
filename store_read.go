@@ -31,7 +31,7 @@ func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) 
 
 	for i, key := range keys {
 		if key.Incomplete() {
-			return meta, nil, fmt.Errorf("incomplete key %q (%dth index)", key, i)
+			return meta, nil, fmt.Errorf("incomplete key '%v' (%dth index)", key, i)
 		}
 		key.opts = opts
 	}
@@ -41,10 +41,10 @@ func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) 
 	// #2 read from cache
 	dsKeys, dsDocs := store.cache.read(keys, docs)
 	for _, key := range keys {
-		if key.source == SOURCE_MEMCACHE {
-			meta.fromGlobalCache += 1
-		} else if key.source == SOURCE_MEMORY {
-			meta.fromLocalCache += 1
+		if key.source == sourceMemcache {
+			meta.fromGlobalCache++
+		} else if key.source == sourceMemory {
+			meta.fromLocalCache++
 		}
 	}
 
@@ -72,7 +72,7 @@ func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) 
 			if merr == nil || merr[i] == nil {
 				docsToCache[key] = dsDocs[lo+i]
 				dsDocs[lo+i].setKey(key)
-				key.source = SOURCE_DATASTORE
+				key.source = sourceDatastore
 				key.synced = now
 				continue
 			}

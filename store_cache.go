@@ -25,11 +25,11 @@ func newStoreCache(store *Store) *cache {
 			store: store,
 			toPut: make(map[*Key]*doc),
 		}
-	} else {
-		return &cache{
-			store:      store,
-			localCache: mcache.NewMemoryCache(false),
-		}
+	}
+
+	return &cache{
+		store:      store,
+		localCache: mcache.NewMemoryCache(false),
 	}
 }
 
@@ -76,7 +76,7 @@ func (c *cache) delete(keys []*Key) {
 				memKey := toMemKey(k)
 				c.localCache.Delete(memKey)
 				memKeys[i] = memKey
-				i += 1
+				i++
 			}
 
 			memcache.DeleteMulti(c.store.ctx, memKeys) // ignore errors
@@ -96,7 +96,7 @@ func (c *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) {
 		// lookup key in memory
 		if key.opts.readLocalCache && !c.store.tx {
 			if src, ok := c.getMemory(key); ok && src != nil {
-				key.source = SOURCE_MEMORY
+				key.source = sourceMemory
 				docs.set(i, src)
 				continue
 			}
@@ -114,15 +114,15 @@ func (c *cache) read(keys []*Key, docs *docs) (dsKeys []*Key, dsDocs []*doc) {
 	}
 
 	for i, mKey := range memKeys {
-		dstId := memIds[i]
-		key := keys[dstId]
-		doc := docs.get(dstId)
+		dstID := memIds[i]
+		key := keys[dstID]
+		doc := docs.get(dstID)
 
 		// lookup key in global cache result
 		if key.opts.readGlobalCache && !c.store.tx {
 			if item, ok := memVals[mKey]; ok && item.Value != nil {
 				if err := fromGob(doc, item.Value); err == nil {
-					key.source = SOURCE_MEMCACHE
+					key.source = sourceMemcache
 					if key.opts.writeLocalCache {
 						c.putMemory(key, doc) // copy to local cache as well
 					}

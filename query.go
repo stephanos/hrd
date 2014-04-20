@@ -54,16 +54,20 @@ func (qry *Query) clone() *Query {
 	return &ret
 }
 
+// Opts returns a derivative Query with all passed-in options applied.
 func (qry *Query) Opts(opts ...Opt) (ret *Query) {
 	ret = qry.clone()
 	ret.opts = ret.opts.Apply(opts...)
 	return
 }
 
+// NoHybrid returns a derivative Query that will not run a hybrid query.
 func (qry *Query) NoHybrid() *Query {
 	return qry.Hybrid(false)
 }
 
+// Hybrid returns a derivative Query which will run as a hybrid or non-hybrid
+// query depending on the passed-in argument.
 func (qry *Query) Hybrid(enabled bool) (ret *Query) {
 	ret = qry.clone()
 	if enabled {
@@ -78,7 +82,7 @@ func (qry *Query) Hybrid(enabled bool) (ret *Query) {
 	return ret
 }
 
-// Limit returns a derivative query that has a limit on the number
+// Limit returns a derivative Query that has a limit on the number
 // of results returned. A negative value means unlimited.
 func (qry *Query) Limit(limit int) (ret *Query) {
 	ret = qry.clone()
@@ -93,22 +97,22 @@ func (qry *Query) Limit(limit int) (ret *Query) {
 	return ret
 }
 
-// NoLimit returns a derivative query that has no limit on the number
+// NoLimit returns a derivative Query that has no limit on the number
 // of results returned.
 func (qry *Query) NoLimit() (ret *Query) {
 	return qry.Limit(-1)
 }
 
-// Ancestor returns a derivative query with an ancestor filter.
+// Ancestor returns a derivative Query with an ancestor filter.
 // The ancestor should not be nil.
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
-	ret.log("ANCESTOR '%v'", k.IdString())
+	ret.log("ANCESTOR '%v'", k.IDString())
 	ret.qry = ret.qry.Ancestor(k.Key)
 	return ret
 }
 
-// Project returns a derivative query that yields only the passed fields.
+// Project returns a derivative Query that yields only the passed fields.
 // It cannot be used in a keys-only query.
 func (qry *Query) Project(s ...string) (ret *Query) {
 	ret = qry.clone()
@@ -118,7 +122,7 @@ func (qry *Query) Project(s ...string) (ret *Query) {
 	return ret
 }
 
-// End returns a derivative query with the passed end point.
+// End returns a derivative Query with the passed end point.
 func (qry *Query) End(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
@@ -133,7 +137,7 @@ func (qry *Query) End(c string) (ret *Query) {
 	return ret
 }
 
-// Start returns a derivative query with the passed start point.
+// Start returns a derivative Query with the passed start point.
 func (qry *Query) Start(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
@@ -148,7 +152,7 @@ func (qry *Query) Start(c string) (ret *Query) {
 	return ret
 }
 
-// Offset returns a derivative query that has an offset of how many keys
+// Offset returns a derivative Query that has an offset of how many keys
 // to skip over before returning results. A negative value is invalid.
 func (qry *Query) Offset(off int) (ret *Query) {
 	ret = qry.clone()
@@ -157,7 +161,7 @@ func (qry *Query) Offset(off int) (ret *Query) {
 	return
 }
 
-// OrderAsc returns a derivative query with a field-based sort order, ascending.
+// OrderAsc returns a derivative Query with a field-based sort order, ascending.
 // Orders are applied in the order they are added.
 func (qry *Query) OrderAsc(s string) (ret *Query) {
 	ret = qry.clone()
@@ -166,7 +170,7 @@ func (qry *Query) OrderAsc(s string) (ret *Query) {
 	return ret
 }
 
-// OrderDesc returns a derivative query with a field-based sort order, descending.
+// OrderDesc returns a derivative Query with a field-based sort order, descending.
 // Orders are applied in the order they are added.
 func (qry *Query) OrderDesc(s string) (ret *Query) {
 	ret = qry.clone()
@@ -175,7 +179,7 @@ func (qry *Query) OrderDesc(s string) (ret *Query) {
 	return
 }
 
-// Filter returns a derivative query with a field-based filter.
+// Filter returns a derivative Query with a field-based filter.
 // The filterStr argument must be a field name followed by optional space,
 // followed by an operator, one of ">", "<", ">=", "<=", or "=".
 // Fields are compared against the provided value using the operator.

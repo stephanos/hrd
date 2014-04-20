@@ -40,15 +40,15 @@ var _ = Describe("Cache", func() {
 		}
 
 		It("uses memory cache", func() {
-			crudTest(SOURCE_MEMORY)
+			crudTest(sourceMemory)
 		})
 
 		It("uses memcache", func() {
-			crudTest(SOURCE_MEMCACHE, NO_LOCAL_CACHE)
+			crudTest(sourceMemcache, NoLocalCache)
 		})
 
 		It("ignores cache", func() {
-			crudTest(SOURCE_DATASTORE, NO_CACHE)
+			crudTest(sourceDatastore, NoCache)
 		})
 	})
 

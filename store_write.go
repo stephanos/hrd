@@ -30,9 +30,9 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 	}
 
 	if opts.completeKeys {
-		for i, k := range keys {
-			if k.Incomplete() {
-				return nil, fmt.Errorf("incomplete key %q for %q (%dth index)", k, kind, i)
+		for i, key := range keys {
+			if key.Incomplete() {
+				return nil, fmt.Errorf("incomplete key %v for %q (%dth index)", key, kind, i)
 			}
 		}
 	}
@@ -55,7 +55,7 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 		}
 
 		now := time.Now()
-		for i, _ := range keys[lo:hi] {
+		for i := range keys[lo:hi] {
 			doc := docs.list[lo+i]
 
 			if keys[i].Incomplete() {

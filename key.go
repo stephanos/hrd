@@ -46,8 +46,8 @@ func (key *Key) Exists() bool {
 	return !key.synced.IsZero()
 }
 
-// IdString returns the ID of this Key as a string.
-func (key *Key) IdString() (id string) {
+// IDString returns the ID of this Key as a string.
+func (key *Key) IDString() (id string) {
 	id = key.StringID()
 	if id == "" && key.IntID() > 0 {
 		id = fmt.Sprintf("%v", key.IntID())

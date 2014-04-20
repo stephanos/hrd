@@ -10,9 +10,9 @@ type meta struct {
 }
 
 const (
-	SOURCE_MEMORY    = "memory"
-	SOURCE_MEMCACHE  = "mcache"
-	SOURCE_DATASTORE = "dstore"
+	sourceMemory    = "memory"
+	sourceMemcache  = "mcache"
+	sourceDatastore = "dstore"
 )
 
 func (m *meta) string() (ret string) {
@@ -34,21 +34,21 @@ func (s *stats) string() (ret string) {
 	total := int(s.fromLocalCache + s.fromGlobalCache + s.fromDatastore)
 	if total > 0 {
 		if s.fromLocalCache == total {
-			ret = "[" + SOURCE_MEMORY + "]"
+			ret = "[" + sourceMemory + "]"
 		} else if s.fromDatastore == total {
-			ret = "[" + SOURCE_DATASTORE + "]"
+			ret = "[" + sourceDatastore + "]"
 		} else if s.fromGlobalCache == total {
-			ret = "[" + SOURCE_MEMCACHE + "]"
+			ret = "[" + sourceMemcache + "]"
 		} else {
 			ret = "[ "
 			if s.fromLocalCache > 0 {
-				ret += fmt.Sprintf(SOURCE_MEMORY+" %d", s.fromLocalCache/total*100.0) + "%% "
+				ret += fmt.Sprintf(sourceMemory+" %d", s.fromLocalCache/total*100.0) + "%% "
 			}
 			if s.fromDatastore > 0 {
-				ret += fmt.Sprintf(SOURCE_DATASTORE+" %d", s.fromDatastore/total*100.0) + "%% "
+				ret += fmt.Sprintf(sourceDatastore+" %d", s.fromDatastore/total*100.0) + "%% "
 			}
 			if s.fromGlobalCache > 0 {
-				ret += fmt.Sprintf(SOURCE_MEMCACHE+" %d", s.fromGlobalCache/total*100.0) + "%% "
+				ret += fmt.Sprintf(sourceMemcache+" %d", s.fromGlobalCache/total*100.0) + "%% "
 			}
 			ret += "]"
 		}

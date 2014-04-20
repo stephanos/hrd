@@ -66,7 +66,7 @@ func (tx *Transactor) NoLocalCacheRead() *Transactor {
 	return tx
 }
 
-// NoGlobalCache prevents writing entities to
+// NoGlobalCacheRead prevents reading entities from
 // memcache in this transaction.
 func (tx *Transactor) NoGlobalCacheRead() *Transactor {
 	tx.opts = tx.opts.NoGlobalCacheRead()

@@ -15,7 +15,7 @@ var _ = Describe("HRD Query", func() {
 	})
 
 	With("w/o cache", func() {
-		queryTests(true, NO_CACHE)
+		queryTests(true, NoCache)
 	})
 })
 
@@ -110,7 +110,7 @@ func queryTests(hybrid bool, opts ...Opt) {
 			Check(keys, HasLen, 4)
 			Check(entities, HasLen, 4)
 			Check(entities[0].id, EqualsNum, 1)
-			Check(keys[0].source, Equals, SOURCE_DATASTORE)
+			Check(keys[0].source, Equals, sourceDatastore)
 		})
 
 		It("queries filtered entities", func() {

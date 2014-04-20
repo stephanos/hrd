@@ -6,13 +6,13 @@ import (
 )
 
 type docs struct {
-	i         int
-	list      []*doc
-	keyList   []*Key
-	src_val   reflect.Value
-	src_kind  reflect.Kind
-	key_type  reflect.Type
-	elem_type reflect.Type
+	i        int
+	list     []*doc
+	keyList  []*Key
+	srcVal   reflect.Value
+	srcKind  reflect.Kind
+	keyType  reflect.Type
+	elemType reflect.Type
 }
 
 var (
@@ -22,29 +22,29 @@ var (
 )
 
 func newReadableDocs(coll *Collection, src interface{}) (*docs, error) {
-	src_val := reflect.ValueOf(src)
-	if src == nil || (src_val.Kind() == reflect.Ptr && src_val.IsNil()) {
+	srcVal := reflect.ValueOf(src)
+	if src == nil || (srcVal.Kind() == reflect.Ptr && srcVal.IsNil()) {
 		return nil, fmt.Errorf("value must be non-nil")
 	}
 
-	src_kind := src_val.Kind()
-	switch src_kind {
+	srcKind := srcVal.Kind()
+	switch srcKind {
 	case reflect.Slice, reflect.Map:
 	default:
 		// wrap single entity in a slice
 		src = []interface{}{src}
-		src_val = reflect.ValueOf(src)
+		srcVal = reflect.ValueOf(src)
 	}
 
 	// read collection
-	src_coll := reflect.Indirect(src_val)
-	src_coll_len := src_coll.Len()
+	srcColl := reflect.Indirect(srcVal)
+	srcCollLen := srcColl.Len()
 
 	// generate list of doc
-	keys := make([]*Key, src_coll_len)
-	list := make([]*doc, src_coll_len)
-	for i := 0; i < src_coll_len; i++ {
-		entity := src_coll.Index(i).Interface()
+	keys := make([]*Key, srcCollLen)
+	list := make([]*doc, srcCollLen)
+	for i := 0; i < srcCollLen; i++ {
+		entity := srcColl.Index(i).Interface()
 
 		d, err := newDocFromInst(entity)
 		if err != nil {
@@ -68,54 +68,54 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 	keysLen := len(keys)
 
 	// resolve pointer
-	src_val := reflect.ValueOf(src)
-	src_kind := src_val.Kind()
-	if src_kind != reflect.Ptr || src == nil || src_val.IsNil() {
-		return nil, fmt.Errorf("invalid value kind %q (wanted non-nil pointer)", src_kind)
+	srcVal := reflect.ValueOf(src)
+	srcKind := srcVal.Kind()
+	if srcKind != reflect.Ptr || src == nil || srcVal.IsNil() {
+		return nil, fmt.Errorf("invalid value kind %q (wanted non-nil pointer)", srcKind)
 	}
-	src_val = src_val.Elem()
-	src_type := src_val.Type()
+	srcVal = srcVal.Elem()
+	srcType := srcVal.Type()
 
 	if multi {
 		// create and validate collection
-		src_kind = src_val.Kind()
-		switch src_kind {
+		srcKind = srcVal.Kind()
+		switch srcKind {
 		case reflect.Slice:
 			// create new slice
-			src_val.Set(reflect.MakeSlice(src_type, 0, keysLen))
+			srcVal.Set(reflect.MakeSlice(srcType, 0, keysLen))
 		case reflect.Map:
 			// validate type of map key
-			ret.key_type = src_type.Key()
-			switch ret.key_type {
+			ret.keyType = srcType.Key()
+			switch ret.keyType {
 			case typeOfInt64, typeOfStr, typeOfKey:
 			default:
-				return nil, fmt.Errorf("invalid value key %q (wanted string, int64 or *hrd.Key)", src_kind)
+				return nil, fmt.Errorf("invalid value key %q (wanted string, int64 or *hrd.Key)", srcKind)
 			}
 			// create new map
-			src_val.Set(reflect.MakeMap(src_type))
+			srcVal.Set(reflect.MakeMap(srcType))
 		default:
-			return nil, fmt.Errorf("invalid value kind %q (wanted map or slice)", src_kind)
+			return nil, fmt.Errorf("invalid value kind %q (wanted map or slice)", srcKind)
 		}
-		ret.src_kind = src_kind
+		ret.srcKind = srcKind
 
 		// make sure the collection's elements are structs
-		ret.elem_type = src_type.Elem()
-		coll_elem_kind := ret.elem_type.Kind()
-		switch coll_elem_kind {
+		ret.elemType = srcType.Elem()
+		collElemKind := ret.elemType.Kind()
+		switch collElemKind {
 		case reflect.Struct:
 		case reflect.Ptr:
-			coll_elem_kind := ret.elem_type.Elem().Kind()
-			if coll_elem_kind != reflect.Struct {
-				return nil, fmt.Errorf("invalid value element kind (%q)", coll_elem_kind)
+			collElemKind := ret.elemType.Elem().Kind()
+			if collElemKind != reflect.Struct {
+				return nil, fmt.Errorf("invalid value element kind (%q)", collElemKind)
 			}
 		default:
-			return nil, fmt.Errorf("invalid value element kind (%q)", coll_elem_kind)
+			return nil, fmt.Errorf("invalid value element kind (%q)", collElemKind)
 		}
 
 		// generate list of doc
-		ret.src_val = src_val
+		ret.srcVal = srcVal
 		for _, key := range keys {
-			d, err := newDocFromType(ret.elem_type)
+			d, err := newDocFromType(ret.elemType)
 			if err != nil {
 				return nil, err
 			}
@@ -126,14 +126,14 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 			return nil, fmt.Errorf("wanted exactly 1 key (got %d)", keysLen)
 		}
 
-		src_val.Set(reflect.New(src_type.Elem()))
-		d, err := newDoc(src_val)
+		srcVal.Set(reflect.New(srcType.Elem()))
+		d, err := newDoc(srcVal)
 		if err != nil {
 			return nil, err
 		}
 
 		ret.list = []*doc{d}
-		ret.elem_type = src_type
+		ret.elemType = srcType
 	}
 
 	return ret, nil
@@ -159,9 +159,9 @@ func (docs *docs) next() (ret *doc, err error) {
 	if docs.i < len(docs.list) {
 		ret = docs.list[docs.i]
 	} else {
-		ret, err = newDocFromType(docs.elem_type)
+		ret, err = newDocFromType(docs.elemType)
 	}
-	docs.i += 1
+	docs.i++
 	return
 }
 
@@ -169,9 +169,9 @@ func (docs *docs) add(key *Key, d *doc) {
 	docs.list = append(docs.list, d)
 	d.setKey(key)
 
-	if docs.src_kind == reflect.Map {
+	if docs.srcKind == reflect.Map {
 		var v reflect.Value
-		switch docs.key_type {
+		switch docs.keyType {
 		case typeOfInt64:
 			v = reflect.ValueOf(key.IntID())
 		case typeOfStr:
@@ -179,8 +179,8 @@ func (docs *docs) add(key *Key, d *doc) {
 		default:
 			v = reflect.ValueOf(key)
 		}
-		docs.src_val.SetMapIndex(v, d.src_val)
-	} else if docs.src_kind == reflect.Slice {
-		docs.src_val.Set(reflect.Append(docs.src_val, d.src_val))
+		docs.srcVal.SetMapIndex(v, d.srcVal)
+	} else if docs.srcKind == reflect.Slice {
+		docs.srcVal.Set(reflect.Append(docs.srcVal, d.srcVal))
 	}
 }

@@ -122,7 +122,7 @@ func (store *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (
 		txStore.cache = newStoreCache(txStore)
 		keys, dsErr = f(txStore)
 		return dsErr
-	}, &datastore.TransactionOptions{XG: opts.tx_cross_group})
+	}, &datastore.TransactionOptions{XG: opts.txCrossGroup})
 
 	if err == nil {
 		// update cache after successful transaction
@@ -151,18 +151,18 @@ func (store *Store) getKey(kind string, src interface{}) (*Key, error) {
 }
 
 func (store *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
-	src_val := reflect.Indirect(reflect.ValueOf(src))
-	src_kind := src_val.Kind()
-	if src_kind != reflect.Slice && src_kind != reflect.Map {
+	srcVal := reflect.Indirect(reflect.ValueOf(src))
+	srcKind := srcVal.Kind()
+	if srcKind != reflect.Slice && srcKind != reflect.Map {
 		return nil, fmt.Errorf("value must be a slice or map")
 	}
 
-	coll_len := src_val.Len()
-	keys := make([]*Key, coll_len)
+	collLen := srcVal.Len()
+	keys := make([]*Key, collLen)
 
-	if src_val.Kind() == reflect.Slice {
-		for i := 0; i < coll_len; i++ {
-			v := src_val.Index(i)
+	if srcVal.Kind() == reflect.Slice {
+		for i := 0; i < collLen; i++ {
+			v := srcVal.Index(i)
 			key, err := store.getKey(kind, v.Interface())
 			if err != nil {
 				return nil, err
@@ -172,8 +172,8 @@ func (store *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
 		return keys, nil
 	}
 
-	for i, key := range src_val.MapKeys() {
-		v := src_val.MapIndex(key)
+	for i, key := range srcVal.MapKeys() {
+		v := srcVal.MapIndex(key)
 		key, err := store.getKey(kind, v.Interface())
 		if err != nil {
 			return nil, err
@@ -191,7 +191,7 @@ func (store *Store) logErr(e interface{}) error {
 
 func (store *Store) logAct(verb string, prop string, keys []*Key, kind string) string {
 	if len(keys) == 1 {
-		id := keys[0].IdString()
+		id := keys[0].IDString()
 		if id == "" {
 			return fmt.Sprintf("%v %v %v %q", verb, "1 item", prop, kind)
 		}
@@ -199,10 +199,10 @@ func (store *Store) logAct(verb string, prop string, keys []*Key, kind string) s
 
 		parent := ""
 		if parentKey := keys[0].Parent(); parentKey != nil {
-			parent = fmt.Sprintf(" (with parent '%v' from %q)", newKey(parentKey).IdString(), parentKey.Kind())
+			parent = fmt.Sprintf(" (with parent '%v' from %q)", newKey(parentKey).IDString(), parentKey.Kind())
 		}
 		return fmt.Sprintf("%v %v %v %q%v", verb, id, prop, kind, parent)
-	} else {
-		return fmt.Sprintf("%v %v items %v %q", verb, len(keys), prop, kind)
 	}
+
+	return fmt.Sprintf("%v %v items %v %q", verb, len(keys), prop, kind)
 }

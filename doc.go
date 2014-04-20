@@ -16,7 +16,7 @@ import (
 // https://code.google.com/p/appengine-go/source/browse/appengine/datastore/prop.go
 type doc struct {
 	// reference to entity.
-	src_val reflect.Value
+	srcVal reflect.Value
 
 	// codec of entity.
 	codec *codec
@@ -37,27 +37,27 @@ type property struct {
 	multi bool
 }
 
-func newDoc(src_val reflect.Value) (*doc, error) {
-	src_type := src_val.Type()
-	src_kind := src_val.Kind()
-	switch src_kind {
+func newDoc(srcVal reflect.Value) (*doc, error) {
+	srcType := srcVal.Type()
+	srcKind := srcVal.Kind()
+	switch srcKind {
 	case reflect.Struct:
 	case reflect.Ptr:
-		src_type = src_val.Elem().Type()
-		src_kind = src_val.Elem().Kind()
-		if src_kind != reflect.Struct {
-			return nil, fmt.Errorf("invalid value kind %q (wanted struct pointer)", src_kind)
+		srcType = srcVal.Elem().Type()
+		srcKind = srcVal.Elem().Kind()
+		if srcKind != reflect.Struct {
+			return nil, fmt.Errorf("invalid value kind %q (wanted struct pointer)", srcKind)
 		}
 	default:
-		return nil, fmt.Errorf("invalid value kind %q (wanted struct or struct pointer)", src_kind)
+		return nil, fmt.Errorf("invalid value kind %q (wanted struct or struct pointer)", srcKind)
 	}
 
-	codec, err := getCodec(src_type)
+	codec, err := getCodec(srcType)
 	if err != nil {
 		return nil, err
 	}
 
-	return &doc{src_val, codec}, nil
+	return &doc{srcVal, codec}, nil
 }
 
 func newDocFromInst(src interface{}) (*doc, error) {
@@ -76,7 +76,7 @@ func (doc *doc) nil() {
 
 // get returns the entity.
 func (doc *doc) get() interface{} {
-	return doc.src_val.Interface()
+	return doc.srcVal.Interface()
 }
 
 // set sets the entity.
@@ -94,9 +94,9 @@ func (doc *doc) setKey(k *Key) {
 }
 
 func (doc *doc) val() reflect.Value {
-	v := doc.src_val
+	v := doc.srcVal
 	if !v.CanSet() {
-		v = doc.src_val.Elem()
+		v = doc.srcVal.Elem()
 	}
 	return v
 }
@@ -104,9 +104,9 @@ func (doc *doc) val() reflect.Value {
 func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
 	var props []*property
 
-	src_val := doc.val()
+	srcVal := doc.val()
 	for i, t := range doc.codec.byIndex {
-		v := src_val.Field(i)
+		v := srcVal.Field(i)
 		if !v.IsValid() || !v.CanSet() {
 			continue
 		}

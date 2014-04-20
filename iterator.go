@@ -4,27 +4,27 @@ import (
 	"appengine/datastore"
 )
 
+// Iterator is the result of running a query.
 type Iterator struct {
 	qry *Query
 	it  *datastore.Iterator
 }
 
-// Cursor returns a cursor for the iterator's current location.
+// Cursor returns a cursor for the Iterator's current location.
 func (it *Iterator) Cursor() (string, error) {
 	if c, err := it.it.Cursor(); err == nil {
 		return c.String(), nil
-	} else {
-		return "", err
 	}
+	return "", nil
 }
 
-// GetOne loads an entity from the iterator into the passed destination.
+// GetOne loads an entity from the Iterator into the passed destination.
 func (it *Iterator) GetOne(dst interface{}) (err error) {
 	_, err = it.get(dst, false)
 	return
 }
 
-// GetAll loads all entities from the iterator into the passed destination.
+// GetAll loads all entities from the Iterator into the passed destination.
 func (it *Iterator) GetAll(dsts interface{}) (keys []*Key, err error) {
 	return it.get(dsts, true)
 }
@@ -69,7 +69,7 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 			return
 		}
 		key := newKey(dsKey)
-		key.source = SOURCE_DATASTORE
+		key.source = sourceDatastore
 		key.opts = it.qry.opts
 		keys = append(keys, key)
 
@@ -80,7 +80,7 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 				fromCache := false
 				if key.opts.readLocalCache {
 					if cached, ok := store.getMemory(key); ok && cached != nil {
-						key.source = SOURCE_MEMORY
+						key.source = sourceMemory
 						fromCache = true
 						doc.set(cached)
 					}

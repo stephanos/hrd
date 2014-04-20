@@ -6,8 +6,8 @@ type operationOpts struct {
 	// completeKeys is whether an entity's key must be set before writing.
 	completeKeys bool
 
-	// tx_cross_group is whether the transaction can cross multiple entity groups.
-	tx_cross_group bool
+	// txCrossGroup is whether the transaction can cross multiple entity groups.
+	txCrossGroup bool
 
 	// readLocalCache is whether the in-memory cache is read from.
 	readLocalCache bool
@@ -23,12 +23,18 @@ type operationOpts struct {
 	writeGlobalCache time.Duration
 }
 
+// Opt is an option to customize the default behaviour of datastore operations.
 type Opt int
 
 const (
-	NO_CACHE Opt = iota
-	NO_LOCAL_CACHE
-	NO_GLOBAL_CACHE
+	// NoCache prevents reading/writing entities from/to the in-memory cache.
+	NoCache Opt = iota
+
+	// NoLocalCache prevents reading/writing entities from/to the in-memory cache.
+	NoLocalCache
+
+	// NoGlobalCache prevents reading/writing entities from/to memcache.
+	NoGlobalCache
 )
 
 func defaultOperationOpts() *operationOpts {
@@ -51,11 +57,11 @@ func (opts *operationOpts) Apply(flags ...Opt) (ret *operationOpts) {
 	ret = opts.clone()
 	for _, f := range flags {
 		switch f {
-		case NO_CACHE:
+		case NoCache:
 			ret = ret.NoCache()
-		case NO_LOCAL_CACHE:
+		case NoLocalCache:
 			ret = ret.NoLocalCache()
-		case NO_GLOBAL_CACHE:
+		case NoGlobalCache:
 			ret = ret.NoGlobalCache()
 		}
 	}
@@ -77,7 +83,7 @@ func (opts *operationOpts) CompleteKeys(complete ...bool) (ret *operationOpts) {
 // XG is whether the transaction can cross multiple entity groups.
 func (opts *operationOpts) XG() (ret *operationOpts) {
 	ret = opts.clone()
-	ret.tx_cross_group = true
+	ret.txCrossGroup = true
 	return ret
 }
 

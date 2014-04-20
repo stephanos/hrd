@@ -91,12 +91,12 @@ func (coll *Collection) NoCache() *Collection {
 	return coll.NoLocalCache().NoGlobalCache()
 }
 
-// NoCache prevents entities of this collection to be cached in-memory.
+// NoLocalCache prevents entities of this collection to be cached in-memory.
 func (coll *Collection) NoLocalCache() *Collection {
 	return coll.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
-// NoCache prevents entities of this collection to be cached in memcache.
+// NoGlobalCache prevents entities of this collection to be cached in memcache.
 func (coll *Collection) NoGlobalCache() *Collection {
 	return coll.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
