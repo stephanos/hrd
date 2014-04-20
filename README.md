@@ -1,4 +1,4 @@
-hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://travis-ci.org/101loops/hrd)
+hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://travis-ci.org/101loops/hrd) [![Coverage Status](https://coveralls.io/repos/101loops/hrd/badge.png?branch=master)](https://coveralls.io/r/101loops/hrd?branch=master)
 ===
 
 This Go package extends the standard package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore) with useful features:
