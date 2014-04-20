@@ -9,7 +9,7 @@ before_script:
   - go get -u github.com/mattn/goveralls
 
 install:
-  - go get
+  - go get -v -t ./...
 
 script:
   - go_appengine/goapp test -v -covermode=count -coverprofile=profile.cov .
