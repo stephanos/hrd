@@ -3,7 +3,7 @@ package hrd
 import (
 	"appengine/datastore"
 	"fmt"
-	"github.com/101loops/reflect2"
+	"github.com/101loops/reflector"
 	"reflect"
 	"strings"
 	"time"
@@ -223,12 +223,12 @@ func itemToProperties(name string, tags []string, multi bool, v reflect.Value) (
 	for _, tag := range tags {
 		tag = strings.ToLower(tag)
 		if tag == "omitempty" {
-			if reflect2.IsDefault(v.Interface()) {
+			if reflector.IsDefault(v.Interface()) {
 				return // ignore complete field if empty
 			}
 		} else if strings.HasPrefix(tag, "index") {
 			indexed = true
-			if strings.HasSuffix(tag, ":omitempty") && reflect2.IsDefault(v.Interface()) {
+			if strings.HasSuffix(tag, ":omitempty") && reflector.IsDefault(v.Interface()) {
 				indexed = false // ignore index if empty
 			}
 		} else if tag != "" {

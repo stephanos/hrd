@@ -11,7 +11,7 @@ before_script:
 install:
   - go get -u github.com/101loops/bdd
   - go get -u github.com/101loops/mcache
-  - go get -u github.com/101loops/reflect2
+  - go get -u github.com/101loops/reflector
 
 script:
   - go_appengine/goapp test -v -covermode=count -coverprofile=profile.cov .

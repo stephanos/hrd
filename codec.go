@@ -2,7 +2,7 @@ package hrd
 
 import (
 	"fmt"
-	"github.com/101loops/reflect2"
+	"github.com/101loops/reflector"
 	"reflect"
 	"strings"
 	"sync"
@@ -51,7 +51,7 @@ func getCodec(obj interface{}) (*codec, error) {
 
 // Note: codecDictMutex must be held when calling this function.
 func getCodecLocked(obj interface{}) (*codec, error) {
-	refl, err := reflect2.NewStructCodec(obj)
+	refl, err := reflector.NewStructCodec(obj)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func getCodecLocked(obj interface{}) (*codec, error) {
 }
 
 // Note: codecDictMutex must be held when calling this function.
-func getCodecStructLocked(refl *reflect2.StructCodec) (*codec, error) {
+func getCodecStructLocked(refl *reflector.StructCodec) (*codec, error) {
 
 	t := refl.Type()
 
