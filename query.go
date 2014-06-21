@@ -122,6 +122,15 @@ func (qry *Query) Project(s ...string) (ret *Query) {
 	return ret
 }
 
+// EventualConsistency returns a derivative query that returns eventually
+// consistent results. It only has an effect on ancestor queries.
+func (qry *Query) EventualConsistency() (ret *Query) {
+	ret = qry.clone()
+	ret.log("EVENTUAL CONSISTENCY")
+	ret.qry = ret.qry.EventualConsistency()
+	return ret
+}
+
 // End returns a derivative Query with the passed end point.
 func (qry *Query) End(c string) (ret *Query) {
 	ret = qry.clone()
