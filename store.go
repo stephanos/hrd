@@ -9,7 +9,7 @@ import (
 )
 
 // Store represents the datastore.
-// There should only be one store for each request.
+// Users should only need to create one store for each request.
 type Store struct {
 	*cache
 	ctx appengine.Context
