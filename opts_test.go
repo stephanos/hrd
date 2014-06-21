@@ -4,13 +4,42 @@ import (
 	. "github.com/101loops/bdd"
 )
 
-var _ = Describe("Action Options", func() {
+var _ = Describe("Operation Options", func() {
 
-	It("configures local cache", func() {
-		opts := defaultOperationOpts()
+	var opts *operationOpts
+
+	BeforeEach(func() {
+		opts = defaultOperationOpts()
+	})
+
+	It("has default options", func() {
 		Check(opts.readLocalCache, IsTrue)
 		Check(opts.writeLocalCache, IsTrue)
 
+		Check(opts.readGlobalCache, IsTrue)
+		Check(opts.writeGlobalCache, EqualsNum, 0)
+
+		Check(opts.txCrossGroup, IsFalse)
+		Check(opts.completeKeys, IsFalse)
+	})
+
+	It("configures cross-group transaction", func() {
+		opts1 := opts.XG()
+		Check(opts1.txCrossGroup, IsTrue)
+	})
+
+	It("configures complete key requirements", func() {
+		opts1 := opts.CompleteKeys()
+		Check(opts1.completeKeys, IsTrue)
+
+		opts2 := opts1.CompleteKeys(false)
+		Check(opts2.completeKeys, IsFalse)
+
+		opts3 := opts2.CompleteKeys(true)
+		Check(opts3.completeKeys, IsTrue)
+	})
+
+	It("configures local cache", func() {
 		opts1 := opts.NoLocalCacheRead()
 		Check(opts1.readLocalCache, IsFalse)
 
@@ -24,13 +53,15 @@ var _ = Describe("Action Options", func() {
 		opts4 := opts.Apply(NoCache)
 		Check(opts4.readLocalCache, IsFalse)
 		Check(opts4.writeLocalCache, IsFalse)
+
+		opts5 := opts.NoCacheRead()
+		Check(opts5.readLocalCache, IsFalse)
+
+		opts6 := opts.NoCacheWrite()
+		Check(opts6.writeLocalCache, IsFalse)
 	})
 
 	It("configures global cache", func() {
-		opts := defaultOperationOpts()
-		Check(opts.readGlobalCache, IsTrue)
-		Check(opts.writeGlobalCache, EqualsNum, 0)
-
 		opts1 := opts.NoGlobalCacheRead()
 		Check(opts1.readGlobalCache, IsFalse)
 
@@ -44,5 +75,12 @@ var _ = Describe("Action Options", func() {
 		opts4 := opts.Apply(NoCache)
 		Check(opts4.readGlobalCache, IsFalse)
 		Check(opts4.writeGlobalCache, EqualsNum, -1)
+
+		opts5 := opts.NoCacheRead()
+		Check(opts5.readGlobalCache, IsFalse)
+
+		opts6 := opts.NoCacheWrite()
+		Check(opts6.writeGlobalCache, EqualsNum, -1)
 	})
+
 })
