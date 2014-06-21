@@ -1,16 +1,21 @@
 hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://travis-ci.org/101loops/hrd) [![Coverage Status](https://coveralls.io/repos/101loops/hrd/badge.png?branch=master)](https://coveralls.io/r/101loops/hrd?branch=master)  [![GoDoc](https://camo.githubusercontent.com/6bae67c5189d085c05271a127da5a4bbb1e8eb2c/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f736d61727479737472656574732f676f636f6e7665793f7374617475732e706e67)](http://godoc.org/github.com/101loops/hrd)
 ===
 
-This Go package extends the standard package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore) with useful features:
-- caching in local memory as well as memcache
-- fluent API for read, write and delete
-- lifecycle hooks (e.g. beforeSave)
-- logging of all datastore actions
+This Go package extends the package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore)
+with very useful additional features.
 
-**This is still alpha quality.**
+### Features
+- **caching:** great performance through in-memory caching and memcache
+- **fluent API:** concise code for read, query, write and delete actions
+- **hybrid query:** queries that have strong consistency and use memcache 
+- **lifecycle hooks:** BeforeLoad/AfterLoad and BeforeSave/AfterSave
+- **logging:** every datastore action is logged for debugging
 
-Pull requests are very welcome :)
+*This is still alpha quality.*
 
+### ToDos
+- add support for maps
+- allow to pass-in logger
 
 ### Installation
 `go get github.com/101loops/hrd`
