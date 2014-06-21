@@ -27,12 +27,12 @@ type Key struct {
 	err *error
 }
 
-// newKey creates a Key from a datastore Key.
+// newKey creates a Key from a datastore.Key.
 func newKey(k *datastore.Key) *Key {
 	return &Key{Key: k}
 }
 
-// newKeys creates a sequence of Key from a sequence of datastore Key.
+// newKeys creates a sequence of Key from a sequence of datastore.Key.
 func newKeys(keys []*datastore.Key) []*Key {
 	ret := make([]*Key, len(keys))
 	for i, k := range keys {
@@ -99,7 +99,7 @@ func toMemKeys(keys []*Key) []string {
 	return ret
 }
 
-// toDSKeys converts a sequence of Key to a sequence of datastore Key.
+// toDSKeys converts a sequence of Key to a sequence of datastore.Key.
 func toDSKeys(keys []*Key) []*datastore.Key {
 	ret := make([]*datastore.Key, len(keys))
 	for i, k := range keys {

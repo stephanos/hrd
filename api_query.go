@@ -203,19 +203,19 @@ func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 // ==== CACHE
 
 // NoCache prevents reading/writing entities from/to
-// the in-memory cache or memcache in this load operation.
+// the in-memory cache or memcache for this query.
 func (qry *Query) NoCache() (ret *Query) {
 	return qry.NoLocalCache().NoGlobalCache()
 }
 
 // NoLocalCache prevents reading/writing entities from/to
-// the in-memory cache in this load operation.
+// the in-memory cache for this query.
 func (qry *Query) NoLocalCache() (ret *Query) {
 	return qry.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
 // NoGlobalCache prevents reading/writing entities from/to
-// memcache in this load operation.
+// memcache for this query.
 func (qry *Query) NoGlobalCache() (ret *Query) {
 	return qry.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
@@ -229,13 +229,13 @@ func (qry *Query) CacheExpire(exp time.Duration) (ret *Query) {
 }
 
 // NoCacheRead prevents reading entities from
-// the in-memory cache or memcache in this load operation.
+// the in-memory cache or memcache for this query.
 func (qry *Query) NoCacheRead() (ret *Query) {
 	return qry.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
 // NoLocalCacheRead prevents reading entities from
-// the in-memory cache in this load operation.
+// the in-memory cache for this query.
 func (qry *Query) NoLocalCacheRead() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoLocalCacheRead()
@@ -243,7 +243,7 @@ func (qry *Query) NoLocalCacheRead() (ret *Query) {
 }
 
 // NoGlobalCacheRead prevents reading entities from
-// memcache in this load operation.
+// memcache for this query.
 func (qry *Query) NoGlobalCacheRead() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoGlobalCacheRead()
@@ -251,13 +251,13 @@ func (qry *Query) NoGlobalCacheRead() (ret *Query) {
 }
 
 // NoCacheWrite prevents writing entities to
-// the in-memory cache or memcache in this load operation.
+// the in-memory cache or memcache for this query.
 func (qry *Query) NoCacheWrite() (ret *Query) {
 	return qry.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
 // NoLocalCacheWrite prevents writing entities to
-// the in-memory cache in this load operation.
+// the in-memory cache for this query.
 func (qry *Query) NoLocalCacheWrite() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoLocalCacheWrite()
@@ -265,7 +265,7 @@ func (qry *Query) NoLocalCacheWrite() (ret *Query) {
 }
 
 // NoGlobalCacheWrite prevents writing entities to
-// memcache in this load operation.
+// memcache for this query.
 func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
 	q := qry.clone()
 	q.opts = q.opts.NoGlobalCacheWrite()

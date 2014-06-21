@@ -72,19 +72,19 @@ func (l *Loader) Opts(opts ...Opt) *Loader {
 // ==== CACHE
 
 // NoCache prevents reading/writing entities from/to
-// the in-memory cache or memcache in this load operation.
+// the in-memory cache or memcache for this load operation.
 func (l *Loader) NoCache() *Loader {
 	return l.NoLocalCache().NoGlobalCache()
 }
 
 // NoLocalCache prevents reading/writing entities from/to
-// the in-memory cache in this load operation.
+// the in-memory cache for this load operation.
 func (l *Loader) NoLocalCache() *Loader {
 	return l.NoLocalCacheWrite().NoLocalCacheRead()
 }
 
 // NoGlobalCache prevents reading/writing entities from/to
-// memcache in this load operation.
+// memcache for this load operation.
 func (l *Loader) NoGlobalCache() *Loader {
 	return l.NoGlobalCacheWrite().NoGlobalCacheRead()
 }
@@ -97,40 +97,40 @@ func (l *Loader) CacheExpire(exp time.Duration) *Loader {
 }
 
 // NoCacheRead prevents reading entities from
-// the in-memory cache or memcache in this load operation.
+// the in-memory cache or memcache for this load operation.
 func (l *Loader) NoCacheRead() *Loader {
 	return l.NoGlobalCacheRead().NoLocalCacheRead()
 }
 
 // NoLocalCacheRead prevents reading entities from
-// the in-memory cache in this load operation.
+// the in-memory cache for this load operation.
 func (l *Loader) NoLocalCacheRead() *Loader {
 	l.opts = l.opts.NoLocalCacheRead()
 	return l
 }
 
 // NoGlobalCacheRead prevents reading entities from
-// memcache in this load operation.
+// memcache for this load operation.
 func (l *Loader) NoGlobalCacheRead() *Loader {
 	l.opts = l.opts.NoGlobalCacheRead()
 	return l
 }
 
 // NoCacheWrite prevents writing entities to
-// the in-memory cache or memcache in this load operation.
+// the in-memory cache or memcache for this load operation.
 func (l *Loader) NoCacheWrite() *Loader {
 	return l.NoGlobalCacheWrite().NoLocalCacheWrite()
 }
 
 // NoLocalCacheWrite prevents writing entities to
-// the in-memory cache in this load operation.
+// the in-memory cache for this load operation.
 func (l *Loader) NoLocalCacheWrite() *Loader {
 	l.opts = l.opts.NoLocalCacheWrite()
 	return l
 }
 
 // NoGlobalCacheWrite prevents writing entities to
-// memcache in this load operation.
+// memcache for this load operation.
 func (l *Loader) NoGlobalCacheWrite() *Loader {
 	l.opts = l.opts.NoGlobalCacheWrite()
 	return l
