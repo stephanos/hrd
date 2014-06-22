@@ -4,7 +4,8 @@ hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://tra
 This Go package extends the package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore)
 with very useful additional features.
 
-### Features
+
+## Features
 - **caching:** great performance through in-memory caching and memcache 
 - **fluent API:** concise code for read, query, write and delete actions
 - **hybrid query:** queries that have strong consistency and use memcache 
@@ -14,17 +15,19 @@ with very useful additional features.
 
 *This is still alpha quality.*
 
-### ToDos
+## ToDos
 - add support for maps
 - allow to pass-in logger
 
-### Installation
-`go get github.com/101loops/hrd`
+## Install
+```bash
+go get github.com/101loops/hrd
+``
 
-### Documentation
+## Documentation
 [godoc.org](http://godoc.org/github.com/101loops/hrd)
 
-### Credit
+## Credit
 - Google: [https://code.google.com/p/appengine-go/]
 - OpenVN: [https://github.com/openvn/datastone]
 - Jeff Huter: [https://bitbucket.org/SlothNinja/gaelic]
@@ -32,8 +35,8 @@ with very useful additional features.
 
 Without those projects this library would not exist. Thanks!
 
-### License
+## License
 Apache License 2.0 (see LICENSE).
 
-### Usage
+## Usage
 I suggest having a look at the E2E tests to see how it is used.
