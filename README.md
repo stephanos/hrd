@@ -22,7 +22,7 @@ with very useful additional features.
 ## Install
 ```bash
 go get github.com/101loops/hrd
-``
+```
 
 ## Documentation
 [godoc.org](http://godoc.org/github.com/101loops/hrd)
