@@ -17,6 +17,7 @@ with very useful additional features.
 
 ## ToDos
 - add support for maps
+- use CAS for memcache updates
 - allow to pass-in logger
 
 ## Install
