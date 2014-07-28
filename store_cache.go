@@ -1,10 +1,12 @@
 package hrd
 
 import (
-	"appengine/memcache"
 	"bytes"
 	"encoding/gob"
+
 	"github.com/101loops/mcache"
+
+	"appengine/memcache"
 )
 
 // cache manages the caching of a Store.

@@ -1,11 +1,12 @@
 package hrd
 
 import (
-	"appengine"
-	"appengine/datastore"
 	"fmt"
 	"reflect"
 	"time"
+
+	"appengine"
+	"appengine/datastore"
 )
 
 // Store represents the datastore.

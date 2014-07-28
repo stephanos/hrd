@@ -1,9 +1,10 @@
 package hrd
 
 import (
-	"appengine/datastore"
 	"fmt"
 	"time"
+
+	"appengine/datastore"
 )
 
 const putMultiLimit = 500

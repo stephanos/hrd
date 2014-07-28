@@ -1,9 +1,10 @@
 package hrd
 
 import (
-	"appengine/datastore"
 	"fmt"
 	"time"
+
+	"appengine/datastore"
 )
 
 // Key represents the datastore key for an entity.

@@ -1,8 +1,9 @@
 package hrd
 
 import (
-	"appengine/datastore"
 	. "github.com/101loops/bdd"
+
+	"appengine/datastore"
 )
 
 var _ = Describe("Key", func() {

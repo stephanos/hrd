@@ -1,10 +1,11 @@
 package hrd
 
 import (
-	"appengine/datastore"
 	"fmt"
 	"strings"
 	"time"
+
+	"appengine/datastore"
 )
 
 // Query represents a datastore query.
