@@ -12,6 +12,7 @@ install:
   - go get -u github.com/101loops/bdd
   - go get -u github.com/101loops/iszero
   - go get -u github.com/101loops/mcache
+  - go get -u github.com/101loops/structor
   - go get -u github.com/101loops/reflector
 
 script:
