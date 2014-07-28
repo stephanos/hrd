@@ -1,12 +1,15 @@
 package hrd
 
 import (
-	"appengine/datastore"
 	"fmt"
-	"github.com/101loops/iszero"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/101loops/iszero"
+	"github.com/101loops/structor"
+
+	"appengine/datastore"
 )
 
 // doc is a reader and writer for a datastore entity.
@@ -15,11 +18,11 @@ import (
 // It is based on:
 // https://code.google.com/p/appengine-go/source/browse/appengine/datastore/prop.go
 type doc struct {
-	// reference to entity.
+	// reference to the entity.
 	srcVal reflect.Value
 
-	// codec of entity.
-	codec *codec
+	// codec of the entity.
+	codec *structor.Codec
 }
 
 // property is a name/value pair plus some metadata.
@@ -105,23 +108,23 @@ func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	var props []*property
 
 	srcVal := doc.val()
-	for i, t := range doc.codec.byIndex {
-		v := srcVal.Field(i)
-		if !v.IsValid() || !v.CanSet() {
+	for _, fCodec := range doc.codec.Fields() {
+		fVal := srcVal.Field(fCodec.Index)
+		if !fVal.IsValid() || !fVal.CanSet() {
 			continue
 		}
 
-		name := t.name
+		name := fCodec.Label
 		if prefix != "" {
 			name = prefix + "." + name
 		}
 
-		aggrTags := append(tags, t.tags...)
+		aggrTags := append(tags, fCodec.Tag.Modifiers...)
 
 		// for slice fields (that aren't []byte), save each element
-		if v.Kind() == reflect.Slice && v.Type() != typeOfByteSlice {
-			for j := 0; j < v.Len(); j++ {
-				props, err = itemToProperties(name, aggrTags, true, v.Index(j))
+		if fVal.Kind() == reflect.Slice && fVal.Type() != typeOfByteSlice {
+			for i := 0; i < fVal.Len(); i++ {
+				props, err = itemToProperties(name, aggrTags, true, fVal.Index(i))
 				if err != nil {
 					return
 				}
@@ -130,8 +133,9 @@ func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 			continue
 		}
 
-		// otherwise, save the field itdoc
-		props, err = itemToProperties(name, aggrTags, multi, v)
+		// TODO: for map fields, save each element
+
+		props, err = itemToProperties(name, aggrTags, multi, fVal)
 		if err != nil {
 			return
 		}

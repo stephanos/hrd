@@ -2,196 +2,177 @@ package hrd
 
 import (
 	"fmt"
-	"github.com/101loops/reflector"
 	"reflect"
 	"strings"
-	"sync"
 	"time"
 	"unicode"
+
+	"github.com/101loops/structor"
 )
-
-// codec describes how to convert a struct to and from a sequence of properties.
-type codec struct {
-	// byIndex gives the tagCodec for the i'th field.
-	byIndex map[int]tagCodec
-	// byName gives the field codec for the tagCodec with the passed name.
-	byName map[string]fieldCodec
-	// hasSlice is whether a struct or any of its nested or embedded structs
-	// has a slice-typed field (other than []byte).
-	hasSlice bool
-	// complete is whether the codec is complete.
-	// An incomplete codec may be encountered when walking a recursive struct.
-	complete bool
-}
-
-type tagCodec struct {
-	name string
-	tags []string
-}
-
-type fieldCodec struct {
-	index    int
-	subcodec *codec
-}
 
 var (
+	codecSet        *structor.Set
 	typeOfByteSlice = reflect.TypeOf([]byte(nil))
 	typeOfTime      = reflect.TypeOf(time.Time{})
-
-	codecDictMutex sync.Mutex
-	codecDict      = make(map[reflect.Type]*codec)
-	codecTags      = []string{"datastore"}
 )
 
-func getCodec(obj interface{}) (*codec, error) {
-	codecDictMutex.Lock()
-	defer codecDictMutex.Unlock()
-	return getCodecLocked(obj)
+// structCodec describes how to convert a struct to and from a sequence of properties.
+//type structCodec struct {
+//	*structor.StructCodec
+//
+//	// byIndex gives the field codec for the i'th field.
+//	//byIndex map[int]*structor.FieldCodec
+//
+//	// byName gives the field codec for a field name.
+//	//byName map[string]*structor.FieldCodec
+//
+//	// hasSlice is whether a struct or any of its nested or embedded structs
+//	// has a slice-typed field (other than []byte).
+//	hasSlice bool
+//
+//	// complete is whether the codec is complete.
+//	// An incomplete codec may be encountered when walking a recursive struct.
+//	complete bool
+//}
+
+func init() {
+	newCodecSet()
 }
 
-// Note: codecDictMutex must be held when calling this function.
-func getCodecLocked(obj interface{}) (*codec, error) {
-	refl, err := reflector.NewStructCodec(obj)
+func newCodecSet() {
+	codecSet = structor.NewSet("datastore")
+	codecSet.SetValidateFunc(validateCodec)
+}
+
+// RegisterEntity prepares the passed-in struct type for the datastore.
+// It returns an error if the type is invalid.
+func RegisterEntity(entity interface{}) error {
+	return codecSet.Add(entity)
+}
+
+// RegisterEntityMust prepares the passed-in struct type for the datastore.
+// It panics if the type is invalid.
+func RegisterEntityMust(entity interface{}) {
+	codecSet.AddMust(entity)
+}
+
+func getCodec(entity interface{}) (*structor.Codec, error) {
+	codec, err := codecSet.Get(entity)
 	if err != nil {
 		return nil, err
 	}
-	return getCodecStructLocked(refl)
+
+	return codec, nil
 }
 
-// Note: codecDictMutex must be held when calling this function.
-func getCodecStructLocked(refl *reflector.StructCodec) (*codec, error) {
+func validateCodec(codec *structor.Codec) error {
+	labels := make(map[string]bool, 0)
 
-	t := refl.Type()
+	for _, field := range codec.Fields() {
+		fType := field.Type
 
-	// lookup and return cached codec, if any
-	ret, ok := codecDict[t]
-	if ok {
-		return ret, nil
-	}
-
-	defer func() {
-		if ret != nil {
-			delete(codecDict, t)
-		}
-	}()
-
-	fields, err := refl.FieldCodecs(codecTags)
-	if err != nil {
-		return nil, err
-	}
-
-	// create new codec
-	ret = &codec{
-		byIndex: make(map[int]tagCodec),
-		byName:  make(map[string]fieldCodec),
-	}
-	// Add c to the codecDict map before we are sure it is good.
-	// If t is a recursive type, it needs to find the incomplete entry for itself in the map.
-	codecDict[t] = ret
-
-	for _, f := range fields {
-
-		if strings.HasPrefix(f.Label, "_") {
-			continue // skip fields starting with '_' (e.g. '_id')
+		// field ignored?
+		if strings.HasPrefix(field.Label, "_") {
+			continue
 		}
 
-		// validate field label
-		nameErrMsg := validatePropertyName(f.Label)
-		if nameErrMsg != "" {
-			return nil, fmt.Errorf("field %q has invalid name (%v)", f.Name, nameErrMsg)
+		// valid field name?
+		if err := validateFieldName(field.Label); err != nil {
+			return fmt.Errorf("field %q has invalid name (%v)", field.Name, err)
 		}
 
-		// validate field type
-		typeErrMsg := validatePropertyType(f.Type)
-		if typeErrMsg != "" {
-			return nil, fmt.Errorf("field %q has invalid type (%v)", f.Name, typeErrMsg)
+		label := strings.ToLower(field.Label)
+		if _, ok := labels[label]; ok {
+			return fmt.Errorf("duplicate field name %q", label)
+		}
+		labels[label] = true
+
+		// valid field type?
+		if err := validateFieldType(field.Type); err != nil {
+			return fmt.Errorf("field %q has invalid type (%v)", field.Name, err)
 		}
 
-		// is field a sub-struct?
-		subType, fIsSlice := reflect.Type(nil), false
-		switch f.Type.Kind() {
-		//case reflect.Ptr:
-		//	subType = f.Type.Elem()
-		case reflect.Struct:
-			subType = f.Type
-		case reflect.Slice:
-			sliceElem := f.Type.Elem()
-			sliceElemKind := sliceElem.Kind()
-			if sliceElemKind == reflect.Ptr {
-				subType = sliceElem.Elem()
-			} else if sliceElemKind == reflect.Struct {
-				subType = sliceElem
+		if field.KeyType != nil {
+			keyType := *field.KeyType
+			if keyType != typeOfStr {
+				return fmt.Errorf("field %q has invalid map key type '%v' - only 'string' is allowed", field.Name, keyType)
 			}
-			fIsSlice = f.Type != typeOfByteSlice
-			ret.hasSlice = ret.hasSlice || fIsSlice
 		}
 
-		if subType != nil && subType != typeOfTime {
+		// valid sub-codec?
+		var innerType *reflect.Type
+		if fType.Kind() == reflect.Struct {
+			if fType != typeOfTime {
+				innerType = &fType
+			}
+		} else if field.ElemType == nil {
+			if fType != typeOfByteSlice {
+				innerType = field.ElemType
+			}
+		}
 
-			// process sub-struct
-			sub, err := getCodecLocked(subType)
+		if innerType != nil {
+			subCodec, err := codecSet.Get(*innerType)
 			if err != nil {
-				return nil, fmt.Errorf("error processing field %q (%v)", f.Name, err)
+				return fmt.Errorf("error processing field %q (%v)", field.Name, err)
 			}
-			if !sub.complete {
-				return nil, fmt.Errorf("recursive struct at field %q", f.Name)
+
+			if !subCodec.Complete() {
+				return fmt.Errorf("recursive struct at field %q", field.Name)
 			}
-			if fIsSlice && sub.hasSlice {
-				return nil, fmt.Errorf("field %q leads to a slice of slices", f.Name)
-			}
-			ret.hasSlice = ret.hasSlice || sub.hasSlice
-			for relName := range sub.byName {
-				absName := f.Label + "." + relName
-				if _, ok := ret.byName[absName]; ok {
-					return nil, fmt.Errorf("duplicate property name %q", absName)
+
+			hasSlice := false
+			for _, subField := range subCodec.Fields() {
+				label := strings.ToLower(label + "." + subField.Label)
+				if _, ok := labels[label]; ok {
+					return fmt.Errorf("duplicate field name %q", label)
 				}
-				ret.byName[absName] = fieldCodec{index: f.Index, subcodec: sub}
-			}
-		} else {
+				labels[label] = true
 
-			// process non-sub-struct
-			if _, ok := ret.byName[f.Label]; ok {
-				return nil, fmt.Errorf("duplicate property name %q", f.Label)
+				if subField.Type.Kind() == reflect.Slice {
+					hasSlice = true
+				}
 			}
-			ret.byName[f.Label] = fieldCodec{index: f.Index}
-		}
 
-		ret.byIndex[f.Index] = tagCodec{
-			name: f.Label,
-			tags: f.Tags,
+			if fType.Kind() == reflect.Slice && hasSlice {
+				return fmt.Errorf("field %q leads to a slice of slices", field.Name)
+			}
 		}
 	}
-	ret.complete = true
 
-	return ret, nil
+	return nil
 }
 
-func validatePropertyType(typ reflect.Type) string {
-	return "" // TODO ?
+func validateFieldType(typ reflect.Type) error {
+	if typ.Kind() == reflect.Ptr {
+		return fmt.Errorf("field is a pointer")
+	}
+
+	return nil
 }
 
-func validatePropertyName(name string) string {
+func validateFieldName(name string) error {
 	if name == "" {
-		return "property name is empty"
+		return fmt.Errorf("field name is empty")
 	}
 
 	if strings.Contains(name, ".") {
-		return "property name contains '.'"
+		return fmt.Errorf("field name contains '.'")
 	}
 
 	first := true
-	for _, c := range name {
+	for _, char := range name {
 		if first {
 			first = false
-			if c != '_' && !unicode.IsLetter(c) {
-				return fmt.Sprintf("property name begins with invalid character %q", c)
+			if char != '_' && !unicode.IsLetter(char) {
+				return fmt.Errorf("field name begins with invalid character %q", char)
 			}
 		} else {
-			if c != '_' && !unicode.IsLetter(c) && !unicode.IsDigit(c) {
-				return fmt.Sprintf("property name contains invalid character %q", c)
+			if char != '_' && !unicode.IsLetter(char) && !unicode.IsDigit(char) {
+				return fmt.Errorf("field name contains invalid character %q", char)
 			}
 		}
 	}
 
-	return ""
+	return nil
 }

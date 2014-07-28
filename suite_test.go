@@ -1,14 +1,14 @@
 package hrd
 
 import (
-	"appengine/aetest"
-	"appengine/memcache"
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
-	. "github.com/101loops/bdd"
 	"testing"
 	"time"
+	. "github.com/101loops/bdd"
+	"appengine/aetest"
+	"appengine/memcache"
 )
 
 var (
@@ -23,6 +23,10 @@ func TestSuite(t *testing.T) {
 	defer ctx.Close()
 
 	store = NewStore(ctx)
+
+	RegisterEntityMust(SimpleModel{})
+	RegisterEntityMust(InvalidModel{})
+	RegisterEntityMust(ComplexModel{})
 
 	RunSpecs(t, "HRD Suite")
 }
@@ -41,15 +45,15 @@ func clearCache() {
 type InvalidModel struct{}
 
 type SimpleModel struct {
-	id        int64     `datastore:"-"`
-	Num       int64     `datastore:"num"`
+	id        int64
 	Ignore    string    `datastore:"-"`
-	Data      []byte    `datastore:"dat,index"`
-	Text      string    `datastore:"html,index,omitempty"`
+	Num       int64     `datastore:"num"`
+	Data      []byte    `datastore:",index"`
+	Text      string    `datastore:"html,index"`
 	Time      time.Time `datastore:"timing,index,omitempty"`
-	lifecycle string    `datastore:"-"`
-	updatedAt time.Time `datastore:"-"`
-	createdAt time.Time `datastore:"-"`
+	lifecycle string
+	updatedAt time.Time
+	createdAt time.Time
 }
 
 func (mdl *SimpleModel) ID() int64 {
@@ -117,6 +121,6 @@ func (mdl *ComplexModel) AfterSave() error {
 }
 
 type Pair struct {
-	Key string `datastore:",index,omitempty"`
+	Key string `datastore:"key,index,omitempty"`
 	Val string
 }
