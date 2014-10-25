@@ -1,6 +1,6 @@
 #!/bin/bash
 
-UPDATE_URL="https://appengine.google.com/api/updatecheck"
+VERSION_URL="https://appengine.google.com/api/updatecheck"
 VERSION=$(echo $(curl ${UPDATE_URL}) | sed -E 's/release: \"(.+)\"(.*)/\1/g')
 
 ARCH="386"
