@@ -51,14 +51,10 @@ func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) 
 
 	// #3 load from datastore
 	docsToCache := make(map[*Key]*doc, 0)
-	for i := 0; i <= len(dsKeys)/getMultiLimit; i++ {
-		lo := i * getMultiLimit
-		hi := (i + 1) * getMultiLimit
-		if hi > len(dsKeys) {
-			hi = len(dsKeys)
-		}
-
-		dsErr := datastore.GetMulti(store.ctx, toDSKeys(dsKeys[lo:hi]), dsDocs[lo:hi])
+	keyBatches := toKeyBatches(dsKeys, getMultiLimit)
+	for _, keyBatch := range keyBatches {
+		docsBatch := docs.list[keyBatch.lo:keyBatch.hi]
+		dsErr := datastore.GetMulti(store.ctx, toDSKeys(keyBatch.keys), docsBatch)
 		var merr appengine.MultiError
 		if dsErr != nil {
 			if multi, ok := dsErr.(appengine.MultiError); ok {
@@ -69,18 +65,21 @@ func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) 
 		}
 
 		now := time.Now()
-		for i, key := range dsKeys[lo:hi] {
+		fmt.Printf("dsKeys: %v:%v (%v)\n", keyBatch.lo, keyBatch.hi, len(dsKeys))
+		for i, key := range keyBatch.keys {
+			keyIndex := keyBatch.lo + i
+
 			if merr == nil || merr[i] == nil {
-				docsToCache[key] = dsDocs[lo+i]
-				dsDocs[lo+i].setKey(key)
+				docsToCache[key] = dsDocs[keyIndex]
+				dsDocs[keyIndex].setKey(key)
 				key.source = sourceDatastore
 				key.synced = now
 				continue
 			}
 
 			if merr[i] == datastore.ErrNoSuchEntity {
-				dsDocs[lo+i].nil() // not found: set to 'nil'
-				merr[i] = nil      // ignore error
+				dsDocs[keyIndex].nil() // not found: set to 'nil'
+				merr[i] = nil          // ignore error
 				continue
 			}
 

@@ -28,6 +28,11 @@ type Key struct {
 	err *error
 }
 
+type keyBatch struct {
+	keys   []*Key
+	lo, hi int
+}
+
 // newKey creates a Key from a datastore.Key.
 func newKey(k *datastore.Key) *Key {
 	return &Key{Key: k}
@@ -107,4 +112,22 @@ func toDSKeys(keys []*Key) []*datastore.Key {
 		ret[i] = k.Key
 	}
 	return ret
+}
+
+func toKeyBatches(keys []*Key, batchSize int) []*keyBatch {
+	batchCount := (len(keys) / batchSize) + 1
+	batches := make([]*keyBatch, batchCount)
+	for i := 0; i < batchCount; i++ {
+		lo := i * putMultiLimit
+		hi := (i + 1) * putMultiLimit
+		if hi > len(keys) {
+			hi = len(keys)
+		}
+		batches[i] = &keyBatch{
+			keys: keys[lo:hi],
+			lo:   lo,
+			hi:   hi,
+		}
+	}
+	return batches
 }

@@ -41,32 +41,29 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 
 	// #3 put into datastore
 	toCache := make(map[*Key]*doc, len(keys))
-	for i := 0; i <= len(keys)/putMultiLimit; i++ {
-		lo := i * putMultiLimit
-		hi := (i + 1) * putMultiLimit
-		if hi > len(keys) {
-			hi = len(keys)
-		}
-
-		dsKeys, err := datastore.PutMulti(store.ctx, toDSKeys(keys[lo:hi]), docs.list[lo:hi])
+	keyBatches := toKeyBatches(keys, putMultiLimit)
+	for _, keyBatch := range keyBatches {
+		docsBatch := docs.list[keyBatch.lo:keyBatch.hi]
+		dsKeys, err := datastore.PutMulti(store.ctx, toDSKeys(keyBatch.keys), docsBatch)
 		// TODO: appengine.MultiError
 		if err != nil {
 			return nil, store.logErr(err)
 		}
 
 		now := time.Now()
-		for i := range keys[lo:hi] {
-			doc := docs.list[lo+i]
+		for i := range keyBatch.keys {
+			keyIdx := keyBatch.lo + i
+			doc := docs.list[keyIdx]
 
-			if keys[i].Incomplete() {
-				keys[i] = newKey(dsKeys[i])
-				doc.setKey(keys[i])
+			if keys[keyIdx].Incomplete() {
+				keys[keyIdx] = newKey(dsKeys[keyIdx])
+				doc.setKey(keys[keyIdx])
 			}
 
-			keys[i].opts = opts
-			keys[i].synced = now
+			keys[keyIdx].opts = opts
+			keys[keyIdx].synced = now
 
-			toCache[keys[i]] = doc
+			toCache[keys[keyIdx]] = doc
 		}
 	}
 
