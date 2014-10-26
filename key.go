@@ -91,7 +91,7 @@ func setKey(src interface{}, key *Key) {
 // toMemKey converts a Key to a string. It includes the entity's version
 // to prevent reading old versions of an entity from memcache.
 func toMemKey(k *Key) string {
-	return fmt.Sprintf("%v-%v", k.Encode(), k.version)
+	return fmt.Sprintf("hrd:%v:%v", k.Encode(), k.version)
 }
 
 // toMemKeys converts a sequence of Key to a sequence of string.
