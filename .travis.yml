@@ -5,15 +5,17 @@ go:
 before_script:
   - chmod +x *.sh
   - ./install-sdk.sh
-  - go get -u code.google.com/p/go.tools/cmd/cover
-  - go get -u github.com/mattn/goveralls
 
 install:
   - go get -u github.com/101loops/bdd
   - go get -u github.com/101loops/iszero
   - go get -u github.com/101loops/mcache
   - go get -u github.com/101loops/structor
+  - go get -u code.google.com/p/go.tools/cmd/cover
 
 script:
   - go_appengine/goapp test -v -covermode=count -coverprofile=profile.cov .
+
+after_success:
+  - go get -u github.com/mattn/goveralls
   - ~/gopath/bin/goveralls -coverprofile=profile.cov -service=travis-ci
