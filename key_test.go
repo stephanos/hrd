@@ -44,9 +44,9 @@ var _ = Describe("Key", func() {
 
 	It("return memcache key", func() {
 		key := newKey(dsTextKey)
-		Check(toMemKey(key), Equals, "agtkZXZ-dGVzdGFwcHIUCxIIY29sbF9rZXkiBm15LWtleQw-0")
+		Check(toMemKey(key), Equals, "hrd:0:agtkZXZ-dGVzdGFwcHIUCxIIY29sbF9rZXkiBm15LWtleQw")
 
 		key.version = 42
-		Check(toMemKey(key), Equals, "agtkZXZ-dGVzdGFwcHIUCxIIY29sbF9rZXkiBm15LWtleQw-42")
+		Check(toMemKey(key), Equals, "hrd:42:agtkZXZ-dGVzdGFwcHIUCxIIY29sbF9rZXkiBm15LWtleQw")
 	})
 })
