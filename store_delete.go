@@ -12,8 +12,6 @@ func (store *Store) deleteMulti(kind string, keys []*Key) (err error) {
 	defer store.cache.delete(keys)
 
 	// #2 delete from datastore
-	toKeyBatches(keys, deleteMultiLimit)
-
 	keyBatches := toKeyBatches(keys, deleteMultiLimit)
 	for _, keyBatch := range keyBatches {
 		err = datastore.DeleteMulti(store.ctx, toDSKeys(keyBatch.keys))

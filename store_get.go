@@ -65,7 +65,6 @@ func (store *Store) getMultiStats(kind string, docs *docs, opts *operationOpts) 
 		}
 
 		now := time.Now()
-		fmt.Printf("dsKeys: %v:%v (%v)\n", keyBatch.lo, keyBatch.hi, len(dsKeys))
 		for i, key := range keyBatch.keys {
 			keyIndex := keyBatch.lo + i
 
