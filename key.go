@@ -118,8 +118,8 @@ func toKeyBatches(keys []*Key, batchSize int) []*keyBatch {
 	batchCount := (len(keys) / batchSize) + 1
 	batches := make([]*keyBatch, batchCount)
 	for i := 0; i < batchCount; i++ {
-		lo := i * putMultiLimit
-		hi := (i + 1) * putMultiLimit
+		lo := i * batchSize
+		hi := (i + 1) * batchSize
 		if hi > len(keys) {
 			hi = len(keys)
 		}
