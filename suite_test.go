@@ -19,7 +19,9 @@ var (
 func TestSuite(t *testing.T) {
 	var err error
 	ctx, err = aetest.NewContext(nil)
-	Check(err, IsNil)
+	if err != nil {
+		panic(err)
+	}
 	defer ctx.Close()
 
 	store = NewStore(ctx)
