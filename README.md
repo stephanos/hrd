@@ -19,6 +19,8 @@ with very useful additional features.
 - add support for maps
 - use CAS for memcache updates
 - allow to pass-in logger
+- replace 'mcache' with 'lrucache'?
+- integrate [nds](https://github.com/qedus/nds)?
 
 ## Install
 ```bash
