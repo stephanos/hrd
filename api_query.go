@@ -3,7 +3,6 @@ package hrd
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"appengine/datastore"
 )
@@ -16,7 +15,7 @@ type Query struct {
 	logs   []string
 	limit  int
 	opts   *operationOpts
-	qry    *datastore.Query
+	dsQry  *datastore.Query
 }
 
 type qryType int
@@ -40,7 +39,7 @@ func newQuery(coll *Collection) (ret *Query) {
 		limit:  -1,
 		typeOf: hybridQry,
 		opts:   defaultOperationOpts(),
-		qry:    datastore.NewQuery(coll.name),
+		dsQry:  datastore.NewQuery(coll.name),
 		logs:   []string{"KIND " + coll.name},
 	}
 }
@@ -93,7 +92,7 @@ func (qry *Query) Limit(limit int) (ret *Query) {
 		limit = -1
 		ret.log("NO LIMIT")
 	}
-	ret.qry = ret.qry.Limit(limit)
+	ret.dsQry = ret.dsQry.Limit(limit)
 	ret.limit = limit
 	return ret
 }
@@ -109,7 +108,7 @@ func (qry *Query) NoLimit() (ret *Query) {
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ANCESTOR '%v'", k.IDString())
-	ret.qry = ret.qry.Ancestor(k.Key)
+	ret.dsQry = ret.dsQry.Ancestor(k.Key)
 	return ret
 }
 
@@ -118,7 +117,7 @@ func (qry *Query) Ancestor(k *Key) (ret *Query) {
 func (qry *Query) Project(s ...string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("PROJECT '%v'", strings.Join(s, "', '"))
-	ret.qry = ret.qry.Project(s...)
+	ret.dsQry = ret.dsQry.Project(s...)
 	ret.typeOf = projectQry
 	return ret
 }
@@ -128,7 +127,7 @@ func (qry *Query) Project(s ...string) (ret *Query) {
 func (qry *Query) EventualConsistency() (ret *Query) {
 	ret = qry.clone()
 	ret.log("EVENTUAL CONSISTENCY")
-	ret.qry = ret.qry.EventualConsistency()
+	ret.dsQry = ret.dsQry.EventualConsistency()
 	return ret
 }
 
@@ -138,7 +137,7 @@ func (qry *Query) End(c string) (ret *Query) {
 	if c != "" {
 		if cursor, err := datastore.DecodeCursor(c); err == nil {
 			ret.log("END CURSOR")
-			ret.qry = ret.qry.End(cursor)
+			ret.dsQry = ret.dsQry.End(cursor)
 		} else {
 			err = fmt.Errorf("invalid end cursor (%v)", err)
 			ret.err = &err
@@ -153,7 +152,7 @@ func (qry *Query) Start(c string) (ret *Query) {
 	if c != "" {
 		if cursor, err := datastore.DecodeCursor(c); err == nil {
 			ret.log("START CURSOR")
-			ret.qry = ret.qry.Start(cursor)
+			ret.dsQry = ret.dsQry.Start(cursor)
 		} else {
 			err = fmt.Errorf("invalid start cursor (%v)", err)
 			ret.err = &err
@@ -167,7 +166,7 @@ func (qry *Query) Start(c string) (ret *Query) {
 func (qry *Query) Offset(off int) (ret *Query) {
 	ret = qry.clone()
 	ret.log("OFFSET %v", off)
-	ret.qry = ret.qry.Offset(off)
+	ret.dsQry = ret.dsQry.Offset(off)
 	return
 }
 
@@ -176,7 +175,7 @@ func (qry *Query) Offset(off int) (ret *Query) {
 func (qry *Query) OrderAsc(s string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ORDER ASC %v", s)
-	ret.qry = ret.qry.Order(s)
+	ret.dsQry = ret.dsQry.Order(s)
 	return ret
 }
 
@@ -185,7 +184,7 @@ func (qry *Query) OrderAsc(s string) (ret *Query) {
 func (qry *Query) OrderDesc(s string) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ORDER DESC %v", s)
-	ret.qry = ret.qry.Order("-" + s)
+	ret.dsQry = ret.dsQry.Order("-" + s)
 	return
 }
 
@@ -197,80 +196,20 @@ func (qry *Query) OrderDesc(s string) (ret *Query) {
 func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 	ret = qry.clone()
 	ret.log("FILTER '%v %v'", q, val)
-	ret.qry = ret.qry.Filter(q, val)
+	ret.dsQry = ret.dsQry.Filter(q, val)
 	return
 }
 
-// ==== CACHE
-
-// NoCache prevents reading/writing entities from/to
-// the in-memory cache or memcache for this query.
-func (qry *Query) NoCache() (ret *Query) {
-	return qry.NoLocalCache().NoGlobalCache()
+// NoGlobalCache prevents reading/writing entities from/to memcache.
+func (qry *Query) NoGlobalCache() *Query {
+	qry.opts = qry.opts.NoGlobalCache()
+	return qry
 }
 
-// NoLocalCache prevents reading/writing entities from/to
-// the in-memory cache for this query.
-func (qry *Query) NoLocalCache() (ret *Query) {
-	return qry.NoLocalCacheWrite().NoLocalCacheRead()
-}
-
-// NoGlobalCache prevents reading/writing entities from/to
-// memcache for this query.
-func (qry *Query) NoGlobalCache() (ret *Query) {
-	return qry.NoGlobalCacheWrite().NoGlobalCacheRead()
-}
-
-// CacheExpire sets the expiration time in memcache for entities
-// that are cached after loading them to the datastore.
-func (qry *Query) CacheExpire(exp time.Duration) (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.CacheExpire(exp)
-	return q
-}
-
-// NoCacheRead prevents reading entities from
-// the in-memory cache or memcache for this query.
-func (qry *Query) NoCacheRead() (ret *Query) {
-	return qry.NoGlobalCacheRead().NoLocalCacheRead()
-}
-
-// NoLocalCacheRead prevents reading entities from
-// the in-memory cache for this query.
-func (qry *Query) NoLocalCacheRead() (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.NoLocalCacheRead()
-	return q
-}
-
-// NoGlobalCacheRead prevents reading entities from
-// memcache for this query.
-func (qry *Query) NoGlobalCacheRead() (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.NoGlobalCacheRead()
-	return q
-}
-
-// NoCacheWrite prevents writing entities to
-// the in-memory cache or memcache for this query.
-func (qry *Query) NoCacheWrite() (ret *Query) {
-	return qry.NoGlobalCacheWrite().NoLocalCacheWrite()
-}
-
-// NoLocalCacheWrite prevents writing entities to
-// the in-memory cache for this query.
-func (qry *Query) NoLocalCacheWrite() (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.NoLocalCacheWrite()
-	return q
-}
-
-// NoGlobalCacheWrite prevents writing entities to
-// memcache for this query.
-func (qry *Query) NoGlobalCacheWrite() (ret *Query) {
-	q := qry.clone()
-	q.opts = q.opts.NoGlobalCacheWrite()
-	return q
+// GlobalCache enables reading/writing entities from/to memcache.
+func (qry *Query) GlobalCache() *Query {
+	qry.opts = qry.opts.GlobalCache()
+	return qry
 }
 
 // ==== EXECUTE
@@ -283,13 +222,13 @@ func (qry *Query) GetCount() (int, error) {
 	if qry.err != nil {
 		return 0, *qry.err
 	}
-	return qry.qry.Count(qry.coll.store.ctx)
+	return qry.dsQry.Count(qry.coll.store.ctx)
 }
 
 // GetKeys executes the query as keys-only: No entities are retrieved, just their keys.
 func (qry *Query) GetKeys() ([]*Key, string, error) {
 	q := qry.clone()
-	q.qry = q.qry.KeysOnly()
+	q.dsQry = q.dsQry.KeysOnly()
 	q.log("KEYS-ONLY")
 
 	it := q.Run()
@@ -297,6 +236,7 @@ func (qry *Query) GetKeys() ([]*Key, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
+
 	cursor, err := it.Cursor()
 	return keys, cursor, err
 }
@@ -313,7 +253,7 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 		return nil, "", *qry.err
 	}
 
-	if qry.limit != 1 && qry.typeOf == hybridQry && qry.opts.readGlobalCache {
+	if qry.limit != 1 && qry.typeOf == hybridQry && qry.opts.useGlobalCache {
 		keys, cursor, err := qry.GetKeys()
 		if err == nil && len(keys) > 0 {
 			keys, err = newLoader(qry.coll).Keys(keys...).GetAll(dsts)
@@ -340,7 +280,7 @@ func (qry *Query) GetFirst(dst interface{}) (err error) {
 // Run executes the query and returns an Iterator.
 func (qry *Query) Run() *Iterator {
 	qry.coll.store.ctx.Infof(qry.getLog())
-	return &Iterator{qry, qry.qry.Run(qry.coll.store.ctx)}
+	return &Iterator{qry, qry.dsQry.Run(qry.coll.store.ctx)}
 }
 
 func (qry *Query) log(s string, values ...interface{}) {

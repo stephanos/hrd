@@ -93,7 +93,7 @@ func (doc *doc) set(src interface{}) {
 }
 
 func (doc *doc) setKey(k *Key) {
-	setKey(doc.get(), k)
+	k.applyTo(doc.get())
 }
 
 func (doc *doc) val() reflect.Value {
@@ -145,7 +145,6 @@ func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	return
 }
 
-//
 // Note: Save should close the channel when done, even if an error occurred.
 func (doc *doc) Save(c chan<- datastore.Property) error {
 	defer close(c)

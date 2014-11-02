@@ -12,7 +12,6 @@ import (
 // Store represents the datastore.
 // Users should only need to create one store for each request.
 type Store struct {
-	*cache
 	ctx appengine.Context
 
 	// opts is a collection of options.
@@ -33,7 +32,6 @@ func NewStore(ctx appengine.Context) *Store {
 		createdAt: time.Now(),
 		opts:      defaultOperationOpts(),
 	}
-	store.cache = newStoreCache(store)
 	return store
 }
 
@@ -50,11 +48,6 @@ func (store *Store) Coll(name string) *Collection {
 // TX creates a Transactor to run a transaction on the store.
 func (store *Store) TX() *Transactor {
 	return newTransactor(store)
-}
-
-// ClearCache clears the store's in-memory cache.
-func (store *Store) ClearCache() {
-	store.localCache.Clear()
 }
 
 // CreatedAt returns the time the store was created.
@@ -103,32 +96,21 @@ func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 }
 
 // runTX runs f in a transaction. It calls f with a transaction context that
-// should be used for all App Engine operations. Neither the local nor the
-// global cache is touched during a transaction - they are updated only after
-// a successful completion.
+// should be used for all App Engine operations.
 //
 // Otherwise similar to appengine/datastore.RunInTransaction:
 // https://developers.google.com/appengine/docs/go/datastore/reference#RunInTransaction
 func (store *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (keys []*Key, err error) {
-
-	// execute TX
-	var txStore *Store
 	err = datastore.RunInTransaction(store.ctx, func(tc appengine.Context) error {
 		var dsErr error
-		txStore = &Store{
+		txStore := &Store{
 			ctx:  tc,
 			tx:   true,
 			opts: opts,
 		}
-		txStore.cache = newStoreCache(txStore)
 		keys, dsErr = f(txStore)
 		return dsErr
 	}, &datastore.TransactionOptions{XG: opts.txCrossGroup})
-
-	if err == nil {
-		// update cache after successful transaction
-		txStore.cache.writeTo(store.cache)
-	}
 
 	return
 }

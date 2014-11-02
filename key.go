@@ -12,17 +12,8 @@ import (
 type Key struct {
 	*datastore.Key
 
-	// source describes where the entity was read from.
-	source string
-
-	// version is the entity's version.
-	version int64
-
 	// synced is the last time the entity was read/written.
 	synced time.Time
-
-	// opts are the options to use for reading/writing the entity.
-	opts *operationOpts
 
 	// err contains an error if the entity could not be loaded/saved.
 	err *error
@@ -47,7 +38,7 @@ func newKeys(keys []*datastore.Key) []*Key {
 	return ret
 }
 
-// Exists is whether the entity with this key exists in the datastore.
+// Exists is whether an entity with this key exists in the datastore.
 func (key *Key) Exists() bool {
 	return !key.synced.IsZero()
 }
@@ -61,7 +52,11 @@ func (key *Key) IDString() (id string) {
 	return
 }
 
-func setKey(src interface{}, key *Key) {
+func (key *Key) String() string {
+	return fmt.Sprintf("Key{'%v', %v}", key.Kind(), key.IDString())
+}
+
+func (key *Key) applyTo(src interface{}) {
 	var parentKey = key.Parent()
 	if parentKey != nil {
 		id := parentKey.IntID()
@@ -82,27 +77,6 @@ func setKey(src interface{}, key *Key) {
 	if ident, ok := src.(textIdentifier); sid != "" && ok {
 		ident.SetID(sid)
 	}
-
-	if v, ok := src.(versioned); ok {
-		key.version = v.Version()
-	}
-}
-
-// toMemKey converts a Key to a string. It includes the entity's version
-// to prevent reading old versions of an entity from memcache.
-func toMemKey(k *Key) string {
-	return fmt.Sprintf("hrd:%v:%v", k.version, k.Encode())
-}
-
-// toMemKeys converts a sequence of Key to a sequence of string.
-func toMemKeys(keys []*Key) []string {
-	ret := make([]string, len(keys))
-	for i, k := range keys {
-		if !k.Incomplete() {
-			ret[i] = toMemKey(k)
-		}
-	}
-	return ret
 }
 
 // toDSKeys converts a sequence of Key to a sequence of datastore.Key.
@@ -112,22 +86,4 @@ func toDSKeys(keys []*Key) []*datastore.Key {
 		ret[i] = k.Key
 	}
 	return ret
-}
-
-func toKeyBatches(keys []*Key, batchSize int) []*keyBatch {
-	batchCount := (len(keys) / batchSize) + 1
-	batches := make([]*keyBatch, batchCount)
-	for i := 0; i < batchCount; i++ {
-		lo := i * batchSize
-		hi := (i + 1) * batchSize
-		if hi > len(keys) {
-			hi = len(keys)
-		}
-		batches[i] = &keyBatch{
-			keys: keys[lo:hi],
-			lo:   lo,
-			hi:   hi,
-		}
-	}
-	return batches
 }

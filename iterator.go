@@ -1,6 +1,8 @@
 package hrd
 
 import (
+	"fmt"
+
 	"appengine/datastore"
 )
 
@@ -34,6 +36,7 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 		return nil, *it.qry.err
 	}
 
+	// in a keys-only query there is no dsts
 	var docs *docs
 	if dsts != nil {
 		docs, err = newWriteableDocs(dsts, nil, multi)
@@ -42,10 +45,8 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 		}
 	}
 
-	qryType := it.qry.typeOf
-	store := it.qry.coll.store
-
-	toCache := make(map[*Key]*doc, 0)
+	var dsDocs []*doc
+	var dsKeys []*datastore.Key
 	for {
 		var doc *doc
 		if docs != nil {
@@ -53,9 +54,9 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 			if err != nil {
 				return
 			}
+			dsDocs = append(dsDocs, doc)
 		}
 
-		// #1 load from iterator
 		var dsKey *datastore.Key
 		dsKey, err = it.it.Next(doc)
 		if err == datastore.Done {
@@ -68,39 +69,21 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 		if err != nil {
 			return
 		}
-		key := newKey(dsKey)
-		key.source = sourceDatastore
-		key.opts = it.qry.opts
-		keys = append(keys, key)
 
-		if docs != nil {
-			if qryType != projectQry && !store.tx {
-
-				// #2 try to read entity from local cache
-				fromCache := false
-				if key.opts.readLocalCache {
-					if cached, ok := store.getMemory(key); ok && cached != nil {
-						key.source = sourceMemory
-						fromCache = true
-						doc.set(cached)
-					}
-				}
-
-				if !fromCache {
-					toCache[key] = doc
-				}
-			}
-
-			docs.add(key, doc)
-		}
+		fmt.Printf("found %v\n", dsKey)
+		fmt.Printf("found %v\n", doc)
+		dsKeys = append(dsKeys, dsKey)
 
 		if !multi {
 			break
 		}
 	}
 
-	// #3 update cache
-	it.qry.coll.store.cache.write(toCache)
-
-	return keys, nil
+	keys, err = postProcess(dsDocs, dsKeys, err)
+	if dsDocs != nil {
+		for i := range keys {
+			docs.add(keys[i], dsDocs[i])
+		}
+	}
+	return keys, err
 }

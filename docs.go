@@ -167,7 +167,7 @@ func (docs *docs) next() (ret *doc, err error) {
 
 func (docs *docs) add(key *Key, d *doc) {
 	docs.list = append(docs.list, d)
-	d.setKey(key)
+	key.applyTo(d)
 
 	if docs.srcKind == reflect.Map {
 		var v reflect.Value

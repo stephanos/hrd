@@ -13,14 +13,10 @@ var _ = Describe("Operation Options", func() {
 	})
 
 	It("has default options", func() {
-		Check(opts.readLocalCache, IsTrue)
-		Check(opts.writeLocalCache, IsTrue)
-
-		Check(opts.readGlobalCache, IsTrue)
-		Check(opts.writeGlobalCache, EqualsNum, 0)
-
 		Check(opts.txCrossGroup, IsFalse)
 		Check(opts.completeKeys, IsFalse)
+		Check(opts.useGlobalCache, IsTrue)
+		//Check(opts.useLocalCache, IsTrue)
 	})
 
 	It("configures cross-group transaction", func() {
@@ -39,48 +35,15 @@ var _ = Describe("Operation Options", func() {
 		Check(opts3.completeKeys, IsTrue)
 	})
 
-	It("configures local cache", func() {
-		opts1 := opts.NoLocalCacheRead()
-		Check(opts1.readLocalCache, IsFalse)
-
-		opts2 := opts.NoLocalCacheWrite()
-		Check(opts2.writeLocalCache, IsFalse)
-
-		opts3 := opts.NoLocalCache()
-		Check(opts3.readLocalCache, IsFalse)
-		Check(opts3.writeLocalCache, IsFalse)
-
-		opts4 := opts.Apply(NoCache)
-		Check(opts4.readLocalCache, IsFalse)
-		Check(opts4.writeLocalCache, IsFalse)
-
-		opts5 := opts.NoCacheRead()
-		Check(opts5.readLocalCache, IsFalse)
-
-		opts6 := opts.NoCacheWrite()
-		Check(opts6.writeLocalCache, IsFalse)
-	})
-
 	It("configures global cache", func() {
-		opts1 := opts.NoGlobalCacheRead()
-		Check(opts1.readGlobalCache, IsFalse)
+		opts1 := opts.NoGlobalCache()
+		Check(opts1.useGlobalCache, IsFalse)
 
-		opts2 := opts.NoGlobalCacheWrite()
-		Check(opts2.writeGlobalCache, EqualsNum, -1)
+		opts2 := opts1.GlobalCache()
+		Check(opts2.useGlobalCache, IsTrue)
 
-		opts3 := opts.NoGlobalCache()
-		Check(opts3.readGlobalCache, IsFalse)
-		Check(opts3.writeGlobalCache, EqualsNum, -1)
-
-		opts4 := opts.Apply(NoCache)
-		Check(opts4.readGlobalCache, IsFalse)
-		Check(opts4.writeGlobalCache, EqualsNum, -1)
-
-		opts5 := opts.NoCacheRead()
-		Check(opts5.readGlobalCache, IsFalse)
-
-		opts6 := opts.NoCacheWrite()
-		Check(opts6.writeGlobalCache, EqualsNum, -1)
+		opts3 := opts.Apply(NoCache)
+		Check(opts3.useGlobalCache, IsFalse)
 	})
 
 })

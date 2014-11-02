@@ -40,7 +40,6 @@ func randomColl() *Collection {
 }
 
 func clearCache() {
-	store.ClearCache()
 	memcache.Flush(ctx)
 }
 
@@ -53,7 +52,7 @@ type SimpleModel struct {
 	Data      []byte    `datastore:",index"`
 	Text      string    `datastore:"html,index"`
 	Time      time.Time `datastore:"timing,index,omitempty"`
-	lifecycle string
+	lifecycle []string
 	updatedAt time.Time
 	createdAt time.Time
 }
@@ -67,22 +66,22 @@ func (mdl *SimpleModel) SetID(id int64) {
 }
 
 func (mdl *SimpleModel) BeforeLoad() error {
-	mdl.lifecycle = "before-load"
+	mdl.lifecycle = append(mdl.lifecycle, "before-load")
 	return nil
 }
 
 func (mdl *SimpleModel) AfterLoad() error {
-	mdl.lifecycle = "after-load"
+	mdl.lifecycle = append(mdl.lifecycle, "after-load")
 	return nil
 }
 
 func (mdl *SimpleModel) BeforeSave() error {
-	mdl.lifecycle = "before-save"
+	mdl.lifecycle = append(mdl.lifecycle, "before-save")
 	return nil
 }
 
 func (mdl *SimpleModel) AfterSave() error {
-	mdl.lifecycle = "after-save"
+	mdl.lifecycle = append(mdl.lifecycle, "after-save")
 	return nil
 }
 

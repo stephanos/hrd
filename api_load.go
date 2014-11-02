@@ -1,7 +1,5 @@
 package hrd
 
-import "time"
-
 // Loader can load entities from a Collection.
 type Loader struct {
 	coll *Collection
@@ -69,70 +67,15 @@ func (l *Loader) Opts(opts ...Opt) *Loader {
 	return l
 }
 
-// ==== CACHE
-
-// NoCache prevents reading/writing entities from/to
-// the in-memory cache or memcache for this load operation.
-func (l *Loader) NoCache() *Loader {
-	return l.NoLocalCache().NoGlobalCache()
-}
-
-// NoLocalCache prevents reading/writing entities from/to
-// the in-memory cache for this load operation.
-func (l *Loader) NoLocalCache() *Loader {
-	return l.NoLocalCacheWrite().NoLocalCacheRead()
-}
-
-// NoGlobalCache prevents reading/writing entities from/to
-// memcache for this load operation.
+// NoGlobalCache prevents reading/writing entities from/to memcache.
 func (l *Loader) NoGlobalCache() *Loader {
-	return l.NoGlobalCacheWrite().NoGlobalCacheRead()
-}
-
-// CacheExpire sets the expiration time in memcache for entities
-// that are cached after loading them from the datastore.
-func (l *Loader) CacheExpire(exp time.Duration) *Loader {
-	l.opts = l.opts.CacheExpire(exp)
+	l.opts = l.opts.NoGlobalCache()
 	return l
 }
 
-// NoCacheRead prevents reading entities from
-// the in-memory cache or memcache for this load operation.
-func (l *Loader) NoCacheRead() *Loader {
-	return l.NoGlobalCacheRead().NoLocalCacheRead()
-}
-
-// NoLocalCacheRead prevents reading entities from
-// the in-memory cache for this load operation.
-func (l *Loader) NoLocalCacheRead() *Loader {
-	l.opts = l.opts.NoLocalCacheRead()
-	return l
-}
-
-// NoGlobalCacheRead prevents reading entities from
-// memcache for this load operation.
-func (l *Loader) NoGlobalCacheRead() *Loader {
-	l.opts = l.opts.NoGlobalCacheRead()
-	return l
-}
-
-// NoCacheWrite prevents writing entities to
-// the in-memory cache or memcache for this load operation.
-func (l *Loader) NoCacheWrite() *Loader {
-	return l.NoGlobalCacheWrite().NoLocalCacheWrite()
-}
-
-// NoLocalCacheWrite prevents writing entities to
-// the in-memory cache for this load operation.
-func (l *Loader) NoLocalCacheWrite() *Loader {
-	l.opts = l.opts.NoLocalCacheWrite()
-	return l
-}
-
-// NoGlobalCacheWrite prevents writing entities to
-// memcache for this load operation.
-func (l *Loader) NoGlobalCacheWrite() *Loader {
-	l.opts = l.opts.NoGlobalCacheWrite()
+// GlobalCache enables reading/writing entities from/to memcache.
+func (l *Loader) GlobalCache() *Loader {
+	l.opts = l.opts.GlobalCache()
 	return l
 }
 
@@ -148,13 +91,15 @@ func (l *MultiLoader) GetAll(dsts interface{}) ([]*Key, error) {
 
 // GetOne loads an entity from the datastore into the passed destination.
 func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
-	var key *Key
 	keys, err := l.loader.get(dst, false)
+
+	var key *Key
 	if len(keys) == 1 {
 		if keys[0].Exists() {
 			key = keys[0]
 		}
 	}
+
 	return key, err
 }
 

@@ -1,7 +1,5 @@
 package hrd
 
-import "time"
-
 // Transactor can run multiple datastore operations inside a transaction.
 type Transactor struct {
 	store *Store
@@ -26,70 +24,15 @@ func (tx *Transactor) XG() *Transactor {
 	return tx
 }
 
-// ==== CACHE
-
-// NoCache prevents reading/writing entities from/to
-// the in-memory cache or memcache in this transaction.
-func (tx *Transactor) NoCache() *Transactor {
-	return tx.NoLocalCache().NoGlobalCache()
-}
-
-// NoLocalCache prevents reading/writing entities from/to
-// the in-memory cache in this transaction.
-func (tx *Transactor) NoLocalCache() *Transactor {
-	return tx.NoLocalCacheWrite().NoLocalCacheRead()
-}
-
-// NoGlobalCache prevents writing entities to
-// memcache in this transaction.
+// NoGlobalCache prevents reading/writing entities from/to memcache.
 func (tx *Transactor) NoGlobalCache() *Transactor {
-	return tx.NoGlobalCacheWrite().NoGlobalCacheRead()
-}
-
-// CacheExpire sets the expiration time in memcache for entities
-// that are cached after the successful transaction.
-func (tx *Transactor) CacheExpire(exp time.Duration) *Transactor {
-	tx.opts = tx.opts.CacheExpire(exp)
+	tx.opts = tx.opts.NoGlobalCache()
 	return tx
 }
 
-// NoCacheRead prevents reading entities from
-// the in-memory cache or memcache in this transaction.
-func (tx *Transactor) NoCacheRead() *Transactor {
-	return tx.NoGlobalCacheRead().NoLocalCacheRead()
-}
-
-// NoLocalCacheRead prevents reading entities from
-// the in-memory cache in this transaction.
-func (tx *Transactor) NoLocalCacheRead() *Transactor {
-	tx.opts = tx.opts.NoLocalCacheRead()
-	return tx
-}
-
-// NoGlobalCacheRead prevents reading entities from
-// memcache in this transaction.
-func (tx *Transactor) NoGlobalCacheRead() *Transactor {
-	tx.opts = tx.opts.NoGlobalCacheRead()
-	return tx
-}
-
-// NoCacheWrite prevents writing entities to
-// the in-memory cache or memcache in this transaction.
-func (tx *Transactor) NoCacheWrite() *Transactor {
-	return tx.NoGlobalCacheWrite().NoLocalCacheWrite()
-}
-
-// NoLocalCacheWrite prevents writing entities to
-// the in-memory cache in this transaction.
-func (tx *Transactor) NoLocalCacheWrite() *Transactor {
-	tx.opts = tx.opts.NoLocalCacheWrite()
-	return tx
-}
-
-// NoGlobalCacheWrite prevents writing entities to
-// memcache in this transaction.
-func (tx *Transactor) NoGlobalCacheWrite() *Transactor {
-	tx.opts = tx.opts.NoGlobalCacheWrite()
+// GlobalCache enables reading/writing entities from/to memcache.
+func (tx *Transactor) GlobalCache() *Transactor {
+	tx.opts = tx.opts.GlobalCache()
 	return tx
 }
 

@@ -1,8 +1,6 @@
 package hrd
 
-import (
-	. "github.com/101loops/bdd"
-)
+import . "github.com/101loops/bdd"
 
 var _ = Describe("HRD Query", func() {
 
@@ -54,7 +52,6 @@ func queryTests(hybrid bool, opts ...Opt) {
 			// step is required because of 'eventual consistency'
 			var entities []*SimpleModel
 			coll.Load().IDs(-1).GetAll(&entities)
-			coll.store.ClearCache()
 		})
 
 		It("counts entities", func() {
@@ -87,8 +84,9 @@ func queryTests(hybrid bool, opts ...Opt) {
 
 			Check(err, IsNil)
 			Check(entity, NotNil)
-			Check(entity.id, EqualsNum, 1)
+			Check(entity.ID(), EqualsNum, 1)
 			Check(entity.Text, Equals, "text1")
+			Check(entity.lifecycle, Equals, []string{"before-load", "after-load"})
 		})
 
 		It("queries an entity projection", func() {
@@ -97,28 +95,34 @@ func queryTests(hybrid bool, opts ...Opt) {
 
 			Check(err, IsNil)
 			Check(entity, NotNil)
-			Check(entity.id, EqualsNum, 1)
+			Check(entity.ID(), EqualsNum, 1)
 			Check(entity.Data, IsEmpty)
 			Check(entity.Text, Equals, "text1")
 		})
 
 		It("queries all entities", func() {
 			var entities []*SimpleModel
-			keys, _, err := query.GetAll(&entities)
+			keys, cursor, err := query.GetAll(&entities)
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
+			Check(cursor, Not(IsEmpty))
+
 			Check(entities, HasLen, 4)
 			Check(entities[0].id, EqualsNum, 1)
-			Check(keys[0].source, Equals, sourceDatastore)
+			Check(entities[1].id, EqualsNum, 2)
+			Check(entities[2].id, EqualsNum, 3)
+			Check(entities[3].id, EqualsNum, 4)
 		})
 
 		It("queries filtered entities", func() {
 			var entities []*SimpleModel
-			keys, _, err := query.Filter("html =", "text1").GetAll(&entities)
+			keys, cursor, err := query.Filter("html =", "text1").GetAll(&entities)
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 1)
+			Check(cursor, Not(IsEmpty))
+
 			Check(entities, HasLen, 1)
 			Check(entities[0].Text, Equals, "text1")
 		})
@@ -126,28 +130,32 @@ func queryTests(hybrid bool, opts ...Opt) {
 		It("queries by ascending order", func() {
 			var entities []*SimpleModel
 			// TODO: var entities map[*Key]*SimpleModel
-			keys, _, err := query.OrderAsc("html").GetAll(&entities)
+			keys, cursor, err := query.OrderAsc("html").GetAll(&entities)
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
+			Check(cursor, Not(IsEmpty))
+
 			Check(entities, HasLen, 4)
-			Check(entities[0].id, EqualsNum, 1)
+			Check(entities[0].ID(), EqualsNum, 1)
 			Check(entities[0].Text, Equals, "text1")
-			Check(entities[3].id, EqualsNum, 4)
+			Check(entities[3].ID(), EqualsNum, 4)
 			Check(entities[3].Text, Equals, "text4")
 		})
 
 		It("queries by descending order", func() {
 			var entities []*SimpleModel
 			// TODO: var entities map[int64]*SimpleModel
-			keys, _, err := query.OrderDesc("html").GetAll(&entities)
+			keys, cursor, err := query.OrderDesc("html").GetAll(&entities)
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 4)
+			Check(cursor, Not(IsEmpty))
+
 			Check(entities, HasLen, 4)
-			Check(entities[0].id, EqualsNum, 4)
+			Check(entities[0].ID(), EqualsNum, 4)
 			Check(entities[0].Text, Equals, "text4")
-			Check(entities[3].id, EqualsNum, 1)
+			Check(entities[3].ID(), EqualsNum, 1)
 			Check(entities[3].Text, Equals, "text1")
 		})
 
@@ -166,23 +174,5 @@ func queryTests(hybrid bool, opts ...Opt) {
 			Check(err, IsNil)
 			Check(keys, HasLen, 2)
 		})
-
-		//		It("deletes entity", func() {
-		//			err := coll.Delete().Entity(simpleMdls[0])
-		//			Check(err, IsNil)
-		//
-		//			var entities []*SimpleModel
-		//			coll.Load().IDs(1, 2, 3, 4).GetAll(&entities)
-		//
-		//			keys, err := query.GetKeys()
-		//			Check(err, IsNil)
-		//			Check(keys, HasLen, 3)
-		//
-		//			//count, err := query.GetCount()
-		//		})
-	})
-
-	With("complex model", func() {
-		// TODO
 	})
 }

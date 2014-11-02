@@ -1,9 +1,5 @@
 package hrd
 
-import (
-	"time"
-)
-
 // Saver can save entities to a Collection.
 type Saver struct {
 	coll *Collection
@@ -26,34 +22,6 @@ func (s *Saver) Opts(opts ...Opt) *Saver {
 // If no parameter is passed, true is assumed.
 func (s *Saver) ReqKey(complete ...bool) *Saver {
 	s.opts = s.opts.CompleteKeys(complete...)
-	return s
-}
-
-// ==== CACHE
-
-// NoCache prevents writing entities to
-// the in-memory cache or memcache in this save operation.
-func (s *Saver) NoCache() *Saver {
-	return s.NoLocalCache().NoGlobalCache()
-}
-
-// NoLocalCache prevents writing entities to
-// the in-memory cache in this save operation.
-func (s *Saver) NoLocalCache() *Saver {
-	s.opts = s.opts.NoLocalCache()
-	return s
-}
-
-// NoGlobalCache prevents writing entities to
-// memcache in this save operation.
-func (s *Saver) NoGlobalCache() *Saver {
-	return s.CacheExpire(-1)
-}
-
-// CacheExpire sets the expiration time in memcache for entities
-// that are cached after saving them to the datastore.
-func (s *Saver) CacheExpire(exp time.Duration) *Saver {
-	s.opts = s.opts.CacheExpire(exp)
 	return s
 }
 

@@ -6,21 +6,21 @@ with very useful additional features.
 
 
 ## Features
-- **caching:** great performance through in-memory caching and memcache 
+- **caching:** great performance through memcache 
 - **fluent API:** concise code for read, query, write and delete actions
 - **hybrid query:** queries that have strong consistency and use memcache 
 - **lifecycle hooks:** BeforeLoad/AfterLoad and BeforeSave/AfterSave
 - **caching control:** turn caching on/off for queries and entities
 - **logging:** every datastore action is logged for debugging
 
+Internally it uses [nds](https://github.com/qedus/nds) and  [structor](https://github.com/101loops/structor).
+
 *This is still alpha quality.*
 
 ## ToDos
+- in-memory cache
 - add support for maps
-- use CAS for memcache updates
 - allow to pass-in logger
-- replace 'mcache' with 'lrucache'?
-- integrate [nds](https://github.com/qedus/nds)?
 
 ## Install
 ```bash
