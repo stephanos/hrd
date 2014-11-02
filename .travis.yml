@@ -8,11 +8,11 @@ before_install:
   - export PATH=$PATH:$HOME/go_appengine
 
 install:
-  - goapp get -u github.com/qedus/nds
-  - goapp get -u github.com/101loops/bdd
-  - goapp get -u github.com/101loops/iszero
-  - goapp get -u github.com/101loops/structor
-  - goapp get -u code.google.com/p/go.tools/cmd/cover
+  - goapp get github.com/qedus/nds
+  - goapp get github.com/101loops/bdd
+  - goapp get github.com/101loops/iszero
+  - goapp get github.com/101loops/structor
+  - goapp get code.google.com/p/go.tools/cmd/cover
 
 script:
   - goapp test -v -covermode=count -coverprofile=profile.cov .
