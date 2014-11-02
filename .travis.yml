@@ -5,6 +5,7 @@ go:
 before_install:
   - chmod +x *.sh
   - ./install-sdk.sh
+  - export PATH=$PATH:$HOME/go_appengine
 
 install:
   - goapp get -u github.com/qedus/nds
