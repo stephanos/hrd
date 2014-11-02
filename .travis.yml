@@ -7,11 +7,11 @@ before_script:
   - ./install-sdk.sh
 
 install:
-  - go get -u github.com/qedus/nds
   - go get -u github.com/101loops/bdd
   - go get -u github.com/101loops/iszero
   - go get -u github.com/101loops/structor
   - go get -u code.google.com/p/go.tools/cmd/cover
+  - go_appengine/goapp get -u github.com/qedus/nds
 
 script:
   - go_appengine/goapp test -v -covermode=count -coverprofile=profile.cov .
