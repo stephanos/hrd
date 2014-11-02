@@ -14,3 +14,4 @@ echo "downloading '$FILE'"
 
 wget https://commondatastorage.googleapis.com/appengine-sdks/featured/$FILE -nv
 unzip -q $FILE -d .
+export PATH=$PATH:./go_appengine

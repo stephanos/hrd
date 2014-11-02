@@ -7,14 +7,14 @@ before_install:
   - ./install-sdk.sh
 
 install:
-  - go get -u github.com/101loops/bdd
-  - go get -u github.com/101loops/iszero
-  - go get -u github.com/101loops/structor
-  - go get -u code.google.com/p/go.tools/cmd/cover
-  - go_appengine/goapp get -u github.com/qedus/nds
+  - goapp get -u github.com/qedus/nds
+  - goapp get -u github.com/101loops/bdd
+  - goapp get -u github.com/101loops/iszero
+  - goapp get -u github.com/101loops/structor
+  - goapp get -u code.google.com/p/go.tools/cmd/cover
 
 script:
-  - go_appengine/goapp test -v -covermode=count -coverprofile=profile.cov .
+  - goapp test -v -covermode=count -coverprofile=profile.cov .
 
 after_success:
   - go get -u github.com/mattn/goveralls
