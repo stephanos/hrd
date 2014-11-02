@@ -13,5 +13,6 @@ FILE=go_appengine_sdk_linux_$ARCH-$VERSION.zip
 echo "downloading '$FILE'"
 
 wget https://commondatastorage.googleapis.com/appengine-sdks/featured/$FILE -nv
-unzip -q $FILE -d .
-export PATH=$PATH:./go_appengine
+unzip -q $FILE -d $HOME
+
+export PATH=$PATH:$HOME/go_appengine
