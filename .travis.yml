@@ -2,7 +2,7 @@ language: go
 go:
   - 1.2
 
-before_script:
+before_install:
   - chmod +x *.sh
   - ./install-sdk.sh
 
