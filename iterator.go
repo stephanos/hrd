@@ -1,23 +1,20 @@
 package hrd
 
-import (
-	"fmt"
-
-	"appengine/datastore"
-)
+import "appengine/datastore"
 
 // Iterator is the result of running a query.
 type Iterator struct {
-	qry *Query
-	it  *datastore.Iterator
+	qry  *Query
+	dsIt *datastore.Iterator
 }
 
 // Cursor returns a cursor for the Iterator's current location.
 func (it *Iterator) Cursor() (string, error) {
-	if c, err := it.it.Cursor(); err == nil {
-		return c.String(), nil
+	c, err := it.dsIt.Cursor()
+	if err != nil {
+		return "", err
 	}
-	return "", nil
+	return c.String(), nil
 }
 
 // GetOne loads an entity from the Iterator into the passed destination.
@@ -58,7 +55,7 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 		}
 
 		var dsKey *datastore.Key
-		dsKey, err = it.it.Next(doc)
+		dsKey, err = it.dsIt.Next(doc)
 		if err == datastore.Done {
 			if !multi {
 				docs.nil(0)
@@ -70,8 +67,6 @@ func (it *Iterator) get(dsts interface{}, multi bool) (keys []*Key, err error) {
 			return
 		}
 
-		fmt.Printf("found %v\n", dsKey)
-		fmt.Printf("found %v\n", doc)
 		dsKeys = append(dsKeys, dsKey)
 
 		if !multi {

@@ -116,10 +116,37 @@ func basicTests(opts ...Opt) {
 		err := coll.Delete().ID(setID)
 		Check(err, IsNil)
 
+		// make sure it was really deleted:
 		var entity *SimpleModel
 		key, err := loader.ID(setID).GetOne(&entity)
 		Check(err, IsNil)
 		Check(key, IsNil)
 		Check(entity, IsNil)
+	})
+
+	It("update entity in transaction", func() {
+		store.TX().Run(func(store *Store) error {
+			coll := store.Coll(coll.Name())
+
+			var entity *SimpleModel
+			key, err := coll.Load().ID(genID).GetOne(&entity)
+			Check(err, IsNil)
+			Check(key, Not(IsNil))
+			Check(entity, Not(IsNil))
+
+			entity.Text = "tx"
+			key, err = coll.Save().Entity(entity)
+			Check(err, IsNil)
+			Check(key, Not(IsNil))
+
+			return nil
+		})
+	})
+
+	It("deletes all entities", func() {
+		keys, err := coll.DESTROY()
+
+		Check(err, IsNil)
+		Check(keys, HasLen, 1)
 	})
 }

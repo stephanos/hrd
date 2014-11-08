@@ -39,6 +39,6 @@ func (tx *Transactor) GlobalCache() *Transactor {
 // ==== EXECUTE
 
 // Run executes a transaction.
-func (tx *Transactor) Run(f func(*Store) ([]*Key, error)) (keys []*Key, err error) {
+func (tx *Transactor) Run(f func(*Store) error) error {
 	return tx.store.runTX(f, tx.opts)
 }

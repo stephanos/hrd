@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 	. "github.com/101loops/bdd"
+
 	"appengine/aetest"
 	"appengine/memcache"
 )
@@ -39,9 +40,7 @@ func randomColl() *Collection {
 	return store.Coll(fmt.Sprintf("coll_%v", n))
 }
 
-func clearCache() {
-	memcache.Flush(ctx)
-}
+// ==== MODELS
 
 type InvalidModel struct{}
 
@@ -124,4 +123,10 @@ func (mdl *ComplexModel) AfterSave() error {
 type Pair struct {
 	Key string `datastore:"key,index,omitempty"`
 	Val string
+}
+
+// ===== UTIL
+
+func clearCache() {
+	memcache.Flush(ctx)
 }

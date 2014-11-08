@@ -7,6 +7,11 @@ type Collection struct {
 	name  string
 }
 
+// Name returns the name of the collection.
+func (coll *Collection) Name() string {
+	return coll.name
+}
+
 // NewNumKey returns a key for the passed numeric ID.
 // It can also receive an optional parent key.
 func (coll *Collection) NewNumKey(id int64, parent ...*Key) *Key {
@@ -55,26 +60,28 @@ func (coll *Collection) Query(opts ...Opt) *Query {
 
 // DESTROY deletes all entities of the collection.
 // Proceed with extreme caution!
-func (coll *Collection) DESTROY() error {
-	i := 0
+func (coll *Collection) DESTROY() ([]*Key, error) {
+	var i int
 	var start string
+	var allKeys []*Key
 	for {
-		keys, cursor, err := coll.Query().Limit(1000).Start(start).GetKeys()
-		if err != nil {
-			return err
+		keys, cursor, dsErr := coll.Query().Limit(1000).Start(start).GetKeys()
+		if dsErr != nil {
+			return allKeys, dsErr
 		}
 		if len(keys) == 0 {
 			coll.store.ctx.Infof("destroyed collection %q (%d items)", coll.name, i)
-			return nil
+			return allKeys, nil
 		}
 
-		err = coll.Delete().Keys(keys)
-		if err != nil {
-			return err
+		dsErr = coll.Delete().Keys(keys)
+		if dsErr != nil {
+			return allKeys, dsErr
 		}
 
 		start = cursor
 		i += len(keys)
+		allKeys = append(allKeys, keys...)
 	}
 }
 

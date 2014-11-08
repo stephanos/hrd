@@ -167,10 +167,13 @@ func queryTests(hybrid bool, opts ...Opt) {
 			Check(err, IsNil)
 			Check(keys, HasLen, 2)
 
-			entities = []*SimpleModel{}
-			cursor, _ := it.Cursor()
-			keys, _, err = query.Start(cursor).GetAll(&entities)
+			var cursor string
+			cursor, err = it.Cursor()
+			Check(err, IsNil)
+			Check(cursor, Not(IsEmpty))
 
+			entities = []*SimpleModel{}
+			keys, _, err = query.Start(cursor).GetAll(&entities)
 			Check(err, IsNil)
 			Check(keys, HasLen, 2)
 		})

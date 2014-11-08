@@ -100,19 +100,17 @@ func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 //
 // Otherwise similar to appengine/datastore.RunInTransaction:
 // https://developers.google.com/appengine/docs/go/datastore/reference#RunInTransaction
-func (store *Store) runTX(f func(*Store) ([]*Key, error), opts *operationOpts) (keys []*Key, err error) {
-	err = datastore.RunInTransaction(store.ctx, func(tc appengine.Context) error {
+func (store *Store) runTX(f func(*Store) error, opts *operationOpts) error {
+	return datastore.RunInTransaction(store.ctx, func(tc appengine.Context) error {
 		var dsErr error
 		txStore := &Store{
 			ctx:  tc,
 			tx:   true,
 			opts: opts,
 		}
-		keys, dsErr = f(txStore)
+		dsErr = f(txStore)
 		return dsErr
 	}, &datastore.TransactionOptions{XG: opts.txCrossGroup})
-
-	return
 }
 
 func (store *Store) getKey(kind string, src interface{}) (*Key, error) {

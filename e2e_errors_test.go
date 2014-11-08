@@ -6,6 +6,10 @@ import (
 
 var _ = Describe("HRD Errors", func() {
 
+	const (
+		setID = 42
+	)
+
 	var (
 		coll *Collection
 	)
@@ -24,7 +28,7 @@ var _ = Describe("HRD Errors", func() {
 		})
 
 		It("does not save non-struct entity", func() {
-			_, err := coll.Save().Entity(42)
+			_, err := coll.Save().Entity(setID)
 
 			Check(err, Contains, "invalid value kind").And(Contains, "int")
 		})
@@ -46,23 +50,31 @@ var _ = Describe("HRD Errors", func() {
 
 	With("load", func() {
 
-		It("does not load entity from struct", func() {
+		It("does not load entity into invalid type", func() {
+			var entity string
+			key, err := coll.Load().ID(setID).GetOne(entity)
+
+			Check(key, IsNil)
+			Check(err, Contains, "invalid value kind").And(Contains, "string")
+		})
+
+		It("does not load entity into non-pointer struct", func() {
 			var entity SimpleModel
-			key, err := coll.Load().ID(42).GetOne(entity)
+			key, err := coll.Load().ID(setID).GetOne(entity)
 
 			Check(key, IsNil)
 			Check(err, Contains, "invalid value kind").And(Contains, "struct")
 		})
 
-		It("does not load entity from non-reference struct", func() {
+		It("does not load entity into non-reference struct", func() {
 			var entity *SimpleModel
-			key, err := coll.Load().ID(42).GetOne(entity)
+			key, err := coll.Load().ID(setID).GetOne(entity)
 
 			Check(key, IsNil)
 			Check(err, Contains, "invalid value kind").And(Contains, "ptr")
 		})
 
-		It("does not load entities from map with invalid key", func() {
+		It("does not load entities into map with invalid key", func() {
 			var entities map[bool]*SimpleModel
 			keys, err := coll.Load().IDs(1, 2, 3).GetAll(&entities)
 
