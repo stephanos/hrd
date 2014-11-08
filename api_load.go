@@ -61,21 +61,18 @@ func (l *Loader) TextIDs(ids ...string) *MultiLoader {
 	return &MultiLoader{l}
 }
 
+// ==== CONFIG
+
 // Opts applies a sequence of Opt the Loader's options.
 func (l *Loader) Opts(opts ...Opt) *Loader {
 	l.opts = l.opts.Apply(opts...)
 	return l
 }
 
-// NoGlobalCache prevents reading/writing entities from/to memcache.
-func (l *Loader) NoGlobalCache() *Loader {
-	l.opts = l.opts.NoGlobalCache()
-	return l
-}
-
-// GlobalCache enables reading/writing entities from/to memcache.
-func (l *Loader) GlobalCache() *Loader {
-	l.opts = l.opts.GlobalCache()
+// GlobalCache defines whether entities are read from memcache.
+// If no parameter is passed, true is assumed.
+func (l *Loader) GlobalCache(enable ...bool) *Loader {
+	l.opts = l.opts.GlobalCache(enable...)
 	return l
 }
 

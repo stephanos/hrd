@@ -36,7 +36,7 @@ var _ = Describe("Operation Options", func() {
 	})
 
 	It("configures global cache", func() {
-		opts1 := opts.NoGlobalCache()
+		opts1 := opts.GlobalCache(false)
 		Check(opts1.useGlobalCache, IsFalse)
 
 		opts2 := opts1.GlobalCache()

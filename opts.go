@@ -56,11 +56,11 @@ func (opts *operationOpts) Apply(flags ...Opt) (ret *operationOpts) {
 		case CompleteKeys:
 			ret = ret.CompleteKeys(true)
 		case NoCache:
-			ret = ret.NoCache()
+			ret = ret.Cache(false)
 		//case NoLocalCache:
 		//	ret = ret.NoLocalCache()
 		case NoGlobalCache:
-			ret = ret.NoGlobalCache()
+			ret = ret.GlobalCache(false)
 		}
 	}
 	return
@@ -70,41 +70,39 @@ func (opts *operationOpts) Apply(flags ...Opt) (ret *operationOpts) {
 // If no parameter is passed, true is assumed.
 func (opts *operationOpts) CompleteKeys(complete ...bool) (ret *operationOpts) {
 	ret = opts.clone()
-	if len(complete) == 1 {
-		ret.completeKeys = complete[0]
-	} else {
-		ret.completeKeys = true
+	ret.completeKeys = allTrueOrEmpty(complete...)
+	return ret
+}
+
+// XG defines whether the transaction can cross multiple entity groups.
+// If no parameter is passed, true is assumed.
+func (opts *operationOpts) XG(enable ...bool) (ret *operationOpts) {
+	ret = opts.clone()
+	ret.txCrossGroup = allTrueOrEmpty(enable...)
+	return ret
+}
+
+// Cache defines whether entities are read/written from/to any cache.
+// If no parameter is passed, true is assumed.
+func (opts *operationOpts) Cache(enable ...bool) (ret *operationOpts) {
+	ret = opts.clone()
+	ret.useGlobalCache = allTrueOrEmpty(enable...)
+	return
+}
+
+// GlobalCache defines whether entities are read/written from/to memcache.
+// If no parameter is passed, true is assumed.
+func (opts *operationOpts) GlobalCache(enable ...bool) (ret *operationOpts) {
+	ret = opts.clone()
+	ret.useGlobalCache = allTrueOrEmpty(enable...)
+	return
+}
+
+func allTrueOrEmpty(bools ...bool) bool {
+	for _, b := range bools {
+		if !b {
+			return false
+		}
 	}
-	return ret
-}
-
-// XG is whether the transaction can cross multiple entity groups.
-func (opts *operationOpts) XG() (ret *operationOpts) {
-	ret = opts.clone()
-	ret.txCrossGroup = true
-	return ret
-}
-
-// NoCache prevents reading/writing entities from/to the in-memory cache.
-func (opts *operationOpts) NoCache() *operationOpts {
-	return opts.NoGlobalCache()
-}
-
-// NoLocalCache prevents reading/writing entities from/to the in-memory cache.
-//func (opts *operationOpts) NoLocalCache() *operationOpts {
-//	return opts.NoLocalCacheWrite().NoLocalCacheRead()
-//}
-
-// NoGlobalCache prevents reading/writing entities from/to memcache.
-func (opts *operationOpts) NoGlobalCache() (ret *operationOpts) {
-	ret = opts.clone()
-	ret.useGlobalCache = false
-	return ret
-}
-
-// GlobalCache enables reading/writing entities from/to memcache.
-func (opts *operationOpts) GlobalCache() (ret *operationOpts) {
-	ret = opts.clone()
-	ret.useGlobalCache = true
-	return ret
+	return true
 }

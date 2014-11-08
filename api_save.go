@@ -12,6 +12,8 @@ func newSaver(coll *Collection) *Saver {
 	return &Saver{coll, coll.opts.clone()}
 }
 
+// ==== CONFIG
+
 // Opts applies the passed sequence of Opt to the Saver's options.
 func (s *Saver) Opts(opts ...Opt) *Saver {
 	s.opts = s.opts.Apply(opts...)

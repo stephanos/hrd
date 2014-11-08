@@ -200,15 +200,10 @@ func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 	return
 }
 
-// NoGlobalCache prevents reading/writing entities from/to memcache.
-func (qry *Query) NoGlobalCache() *Query {
-	qry.opts = qry.opts.NoGlobalCache()
-	return qry
-}
-
-// GlobalCache enables reading/writing entities from/to memcache.
-func (qry *Query) GlobalCache() *Query {
-	qry.opts = qry.opts.GlobalCache()
+// If no parameter is passed, true is assumed.
+// GlobalCache enables reading entities from memcache.
+func (qry *Query) GlobalCache(enable ...bool) *Query {
+	qry.opts = qry.opts.GlobalCache(enable...)
 	return qry
 }
 

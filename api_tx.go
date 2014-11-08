@@ -12,27 +12,25 @@ func newTransactor(store *Store) *Transactor {
 	return &Transactor{store, store.opts.clone()}
 }
 
+// ==== CONFIG
+
 // Opts applies the sequence of Opt to the Transactor's options.
 func (tx *Transactor) Opts(opts ...Opt) *Transactor {
 	tx.opts = tx.opts.Apply(opts...)
 	return tx
 }
 
-// XG allows the transaction to run across multiple entity groups.
-func (tx *Transactor) XG() *Transactor {
-	tx.opts = tx.opts.XG()
+// XG defines whether the transaction can cross multiple entity groups.
+// If no parameter is passed, true is assumed.
+func (tx *Transactor) XG(enable ...bool) *Transactor {
+	tx.opts = tx.opts.XG(enable...)
 	return tx
 }
 
-// NoGlobalCache prevents reading/writing entities from/to memcache.
-func (tx *Transactor) NoGlobalCache() *Transactor {
-	tx.opts = tx.opts.NoGlobalCache()
-	return tx
-}
-
-// GlobalCache enables reading/writing entities from/to memcache.
-func (tx *Transactor) GlobalCache() *Transactor {
-	tx.opts = tx.opts.GlobalCache()
+// GlobalCache defines whether entities are read/written from/to memcache.
+// If no parameter is passed, true is assumed.
+func (tx *Transactor) GlobalCache(enable ...bool) *Transactor {
+	tx.opts = tx.opts.GlobalCache(enable...)
 	return tx
 }
 
