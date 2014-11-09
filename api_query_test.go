@@ -16,10 +16,10 @@ var _ = Describe("HRD Query", func() {
 func queryTests(hybrid bool) {
 
 	var (
-		coll      *Collection
-		childColl *Collection
-		query     *Query
-		childQuery     *Query
+		coll       *Collection
+		childColl  *Collection
+		query      *Query
+		childQuery *Query
 	)
 
 	BeforeEach(func() {
@@ -257,12 +257,20 @@ func queryTests(hybrid bool) {
 	}
 
 	It("does not run query with invalid start cursor", func() {
-		q := coll.Query().Start("nonsense")
+		q := query.Start("nonsense")
 		expectError(q, `invalid start cursor "nonsense"`)
 	})
 
 	It("does not run query with invalid end cursor", func() {
-		q := coll.Query().End("nonsense")
+		q := query.End("nonsense")
 		expectError(q, `invalid end cursor "nonsense"`)
+	})
+
+	It("does not load entity into invalid target", func() {
+		var entities []*SimpleModel
+		key, _, err := query.GetAll(entities)
+
+		Check(key, IsNil)
+		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "slice")
 	})
 }
