@@ -20,13 +20,6 @@ func (s *Saver) Opts(opts ...Opt) *Saver {
 	return s
 }
 
-// ReqKey defines whether an entity requires a complete key.
-// If no parameter is passed, true is assumed.
-func (s *Saver) ReqKey(complete ...bool) *Saver {
-	s.opts = s.opts.CompleteKeys(complete...)
-	return s
-}
-
 // ==== EXECUTE
 
 // Entity saves the passed entity into the datastore.

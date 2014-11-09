@@ -22,17 +22,16 @@ func loadTests(opts ...Opt) {
 		loader *Loader
 	)
 
-	simpleMdls := []*SimpleModel{
-		&SimpleModel{id: 1, Text: "text1"}, &SimpleModel{id: 2, Text: "text2"},
-		&SimpleModel{id: 3, Text: "text3"}, &SimpleModel{id: 4, Text: "text4"},
-	}
-
 	BeforeEach(func() {
 		if coll == nil {
 			coll = randomColl()
 		}
 
-		keys, err := coll.Save().ReqKey().Entities(simpleMdls)
+		entities := []*SimpleModel{
+			&SimpleModel{id: 1, Text: "text1"}, &SimpleModel{id: 2, Text: "text2"},
+			&SimpleModel{id: 3, Text: "text3"}, &SimpleModel{id: 4, Text: "text4"},
+		}
+		keys, err := coll.Save(CompleteKeys).Entities(entities)
 		Check(err, IsNil)
 		Check(keys, HasLen, 4)
 		Check(keys[0].IntID(), EqualsNum, 1)

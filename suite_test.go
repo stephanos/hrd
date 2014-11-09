@@ -28,6 +28,7 @@ func TestSuite(t *testing.T) {
 
 	store = NewStore(ctx)
 
+	RegisterEntityMust(ChildModel{})
 	RegisterEntityMust(SimpleModel{})
 	RegisterEntityMust(InvalidModel{})
 	RegisterEntityMust(ComplexModel{})
@@ -91,6 +92,32 @@ func (mdl *SimpleModel) SetCreatedAt(t time.Time) {
 
 func (mdl *SimpleModel) SetUpdatedAt(t time.Time) {
 	mdl.updatedAt = t
+}
+
+type ChildModel struct {
+	id         string
+	parentID   int64
+	parentKind string
+}
+
+func (mdl *ChildModel) ID() string {
+	return mdl.id
+}
+
+func (mdl *ChildModel) SetID(id string) {
+	mdl.id = id
+}
+
+func (mdl *ChildModel) Parent() int64 {
+	return mdl.parentID
+}
+
+func (mdl *ChildModel) SetParent(parentID int64) {
+	mdl.parentID = parentID
+}
+
+func (mdl *ChildModel) ParentKind() string {
+	return mdl.parentKind
 }
 
 type ComplexModel struct {

@@ -63,6 +63,31 @@ func saveTests(opts ...Opt) {
 		Check(entity.ID(), EqualsNum, setID)
 	})
 
+	It("saves multiple entities with id", func() {
+		entities := []*SimpleModel{
+			&SimpleModel{id: 1}, &SimpleModel{id: 2},
+		}
+		keys, err := coll.Save(CompleteKeys).Entities(entities)
+
+		Check(err, IsNil)
+		Check(keys, HasLen, 2)
+		Check(keys[0].IntID(), EqualsNum, 1)
+		Check(keys[1].IntID(), EqualsNum, 2)
+	})
+
+	It("saves multiple entities with parents", func() {
+		entities := []*ChildModel{
+			&ChildModel{id: "a", parentID: genID, parentKind: coll.name},
+			&ChildModel{id: "b", parentID: setID, parentKind: coll.name},
+		}
+		keys, err := coll.Save(CompleteKeys).Entities(entities)
+
+		Check(err, IsNil)
+		Check(keys, HasLen, 2)
+		Check(keys[0].StringID(), Equals, "a")
+		Check(keys[1].StringID(), Equals, "b")
+	})
+
 	// ==== ERRORS
 
 	It("does not save nil entity", func() {
@@ -86,8 +111,8 @@ func saveTests(opts ...Opt) {
 
 	It("does not save complete entity without Id", func() {
 		entity := &SimpleModel{}
-		_, err := coll.Save().ReqKey().Entity(entity)
+		_, err := coll.Save(CompleteKeys).Entity(entity)
 
-		Check(err, NotNil).And(Contains, "incomplete key")
+		Check(err, NotNil).And(Contains, "is incomplete")
 	})
 }

@@ -19,7 +19,7 @@ func (store *Store) getMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 
 	for i, key := range keys {
 		if key.Incomplete() {
-			return nil, fmt.Errorf("incomplete key '%v' (%dth index)", key, i)
+			return nil, fmt.Errorf("'%v' is incomplete (%dth index)", key, i)
 		}
 	}
 
@@ -47,7 +47,7 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 	if opts.completeKeys {
 		for i, key := range keys {
 			if key.Incomplete() {
-				return nil, fmt.Errorf("incomplete key %v for %q (%dth index)", key, kind, i)
+				return nil, fmt.Errorf("%v is incomplete (%dth index)", key, i)
 			}
 		}
 	}

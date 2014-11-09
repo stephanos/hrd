@@ -14,15 +14,18 @@ var _ = Describe("HRD Delete", func() {
 		coll *Collection
 	)
 
-	simpleMdls := []*SimpleModel{
-		&SimpleModel{id: 1, Text: "text1"}, &SimpleModel{id: 2, Text: "text2"},
-		&SimpleModel{id: 3, Text: "text3"}, &SimpleModel{id: 4, Text: "text4"},
-	}
+	var entities []interface{}
 
 	BeforeEach(func() {
 		coll = randomColl()
 
-		keys, err := coll.Save().ReqKey().Entities(simpleMdls)
+		entities = []interface{}{
+			&SimpleModel{id: 1, Text: "text1"},
+			&SimpleModel{id: 2, Text: "text2"},
+			&ChildModel{id: "a", parentID: 1, parentKind: coll.name},
+			&ChildModel{id: "b", parentID: 2, parentKind: coll.name},
+		}
+		keys, err := coll.Save(CompleteKeys).Entities(entities)
 		Check(err, IsNil)
 		Check(keys, HasLen, 4)
 
@@ -61,12 +64,45 @@ var _ = Describe("HRD Delete", func() {
 		Check(key, Not(ExistsInDatabase))
 	})
 
+	It("deletes an entity by text ID", func() {
+		parentKey := coll.NewNumKey(1)
+		key := coll.NewTextKey("a", parentKey)
+		Check(key, ExistsInDatabase)
+
+		err := coll.Delete().TextID(key.StringID(), parentKey)
+
+		Check(err, IsNil)
+		Check(key, Not(ExistsInDatabase))
+	})
+
 	It("deletes multiple entity by ID", func() {
 		keys := []*Key{coll.NewNumKey(1), coll.NewNumKey(2)}
 		Check(keys[0], ExistsInDatabase)
 		Check(keys[1], ExistsInDatabase)
 
 		err := coll.Delete().IDs(keys[0].IntID(), keys[1].IntID())
+
+		Check(err, IsNil)
+		Check(keys[0], Not(ExistsInDatabase))
+		Check(keys[1], Not(ExistsInDatabase))
+	})
+
+	It("deletes entity", func() {
+		key := coll.NewNumKey(1)
+		Check(key, ExistsInDatabase)
+
+		err := coll.Delete().Entity(entities[0])
+
+		Check(err, IsNil)
+		Check(key, Not(ExistsInDatabase))
+	})
+
+	It("deletes multiple entities", func() {
+		keys := []*Key{coll.NewNumKey(1), coll.NewNumKey(2)}
+		Check(keys[0], ExistsInDatabase)
+		Check(keys[1], ExistsInDatabase)
+
+		err := coll.Delete().Entities(entities[0:2])
 
 		Check(err, IsNil)
 		Check(keys[0], Not(ExistsInDatabase))
