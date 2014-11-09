@@ -115,4 +115,20 @@ var _ = Describe("HRD Delete", func() {
 		Check(err, IsNil)
 		// Check(keys, HasLen, 4) TODO
 	})
+
+	// ==== ERRORS
+
+	It("does not delete invalid entity", func() {
+		var entity string
+		err := coll.Delete().Entity(entity)
+
+		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+	})
+
+	It("does not delete invalid entities", func() {
+		entities := []string{"a", "b", "c"}
+		err := coll.Delete().Entities(entities)
+
+		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+	})
 })
