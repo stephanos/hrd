@@ -8,14 +8,15 @@ import (
 
 var _ = Describe("Codec", func() {
 
-	It("evaluate simple codec", func() {
+	It("return simple codec", func() {
 		type SimpleModel struct {
-			id     int64
-			Ignore string    `datastore:"-"`
-			Num    int64     `datastore:"num"`
-			Data   []byte    `datastore:",index"`
-			Text   string    `datastore:"html,index"`
-			Time   time.Time `datastore:"timing,index,omitempty"`
+			id       int64
+			_Ignored string
+			Ignore   string    `datastore:"-"`
+			Num      int64     `datastore:"num"`
+			Data     []byte    `datastore:",index"`
+			Text     string    `datastore:"html,index"`
+			Time     time.Time `datastore:"timing,index,omitempty"`
 		}
 
 		entity := &SimpleModel{}
@@ -23,21 +24,21 @@ var _ = Describe("Codec", func() {
 		err := CodecSet.Add(entity)
 		Check(err, IsNil)
 
-		var code *structor.Codec
-		code, err = GetCodec(entity)
+		var codec *structor.Codec
+		codec, err = GetCodec(entity)
 		Check(err, IsNil)
-		Check(code, NotNil)
-		Check(code.Complete(), IsTrue)
+		Check(codec, NotNil)
+		Check(codec.Complete(), IsTrue)
 
-		fieldNames := code.FieldNames()
+		fieldNames := codec.FieldNames()
 		Check(fieldNames, HasLen, 4)
 		Check(fieldNames, Equals, []string{"Num", "Data", "Text", "Time"})
 
-		fields := code.Fields()
+		fields := codec.Fields()
 		Check(fields, HasLen, 4)
 	})
 
-	It("evaluate complex codec", func() {
+	It("return complex codec", func() {
 		type Pair struct {
 			Key string `datastore:"key,index,omitempty"`
 			Val string
@@ -55,10 +56,17 @@ var _ = Describe("Codec", func() {
 		err := CodecSet.Add(entity)
 		Check(err, IsNil)
 
-		var code *structor.Codec
-		code, err = GetCodec(entity)
+		var codec *structor.Codec
+		codec, err = GetCodec(entity)
 		Check(err, IsNil)
-		Check(code, NotNil)
+		Check(codec, NotNil)
+	})
+
+	It("return error for invalid codec", func() {
+		codec, err := GetCodec("invalid-type")
+
+		Check(codec, IsNil)
+		Check(err, NotNil).And(Contains, `value is not a struct, struct pointer or reflect.Type - but "string"`)
 	})
 
 	// ==== ERRORS
@@ -102,4 +110,24 @@ var _ = Describe("Codec", func() {
 		Check(err, NotNil).And(Contains, `field "Map" has invalid map key type 'int' - only 'string' is allowed`)
 	})
 
+	//	It("rejects recursive struct", func() {
+	//		type InvalidCodec struct {
+	//			Recursive []InvalidCodec
+	//		}
+	//
+	//		err := CodecSet.Add(InvalidCodec{})
+	//		Check(err, NotNil).And(Contains, `TODO`)
+	//	})
+
+	//	It("rejects slice of slices", func() {
+	//		type InvalidSubCodec struct {
+	//			Slice []string
+	//		}
+	//		type InvalidCodec struct {
+	//			Slice []InvalidSubCodec
+	//		}
+	//
+	//		err := CodecSet.Add(InvalidCodec{})
+	//		Check(err, NotNil).And(Contains, `TODO`)
+	//	})
 })
