@@ -97,12 +97,25 @@ var _ = Describe("HRD Delete", func() {
 		Check(key, Not(ExistsInDatabase))
 	})
 
-	It("deletes multiple entities", func() {
+	It("deletes slice of entities", func() {
 		keys := []*Key{coll.NewNumKey(1), coll.NewNumKey(2)}
 		Check(keys[0], ExistsInDatabase)
 		Check(keys[1], ExistsInDatabase)
 
 		err := coll.Delete().Entities(entities[0:2])
+
+		Check(err, IsNil)
+		Check(keys[0], Not(ExistsInDatabase))
+		Check(keys[1], Not(ExistsInDatabase))
+	})
+
+	It("deletes map of entities", func() {
+		keys := []*Key{coll.NewNumKey(1), coll.NewNumKey(2)}
+		Check(keys[0], ExistsInDatabase)
+		Check(keys[1], ExistsInDatabase)
+
+		entityMap := map[string]interface{}{"a": entities[0], "b": entities[1]}
+		err := coll.Delete().Entities(entityMap)
 
 		Check(err, IsNil)
 		Check(keys[0], Not(ExistsInDatabase))
