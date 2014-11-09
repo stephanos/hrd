@@ -110,7 +110,7 @@ func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
 		collKind := l.coll.name
 		if keyKind != collKind {
 			err := fmt.Errorf("invalid key kind '%v' for collection '%v'", keyKind, collKind)
-			return nil, l.coll.store.logErr(err)
+			return nil, logErr(l.coll.store.ctx, err)
 		}
 	}
 

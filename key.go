@@ -1,8 +1,9 @@
 package hrd
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/101loops/hrd/internal"
 
 	"appengine/datastore"
 )
@@ -43,17 +44,8 @@ func (key *Key) Exists() bool {
 	return !key.synced.IsZero()
 }
 
-// IDString returns the ID of this Key as a string.
-func (key *Key) IDString() (id string) {
-	id = key.StringID()
-	if id == "" && key.IntID() > 0 {
-		id = fmt.Sprintf("%v", key.IntID())
-	}
-	return
-}
-
 func (key *Key) String() string {
-	return fmt.Sprintf("Key{'%v', %v}", key.Kind(), key.IDString())
+	return internal.KeyString(key.Key)
 }
 
 func (key *Key) applyTo(src interface{}) {

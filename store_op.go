@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/101loops/hrd/internal"
 	"github.com/qedus/nds"
 
 	"appengine"
@@ -23,11 +24,11 @@ func getMulti(ctx appengine.Context, kind string, docs *docs, opts *operationOpt
 		}
 	}
 
-	//ctx.Infof(store.logAct("getting", "from", keys, kind))
-
 	var dsErr error
 	dsDocs := docs.list
 	dsKeys := toDSKeys(keys)
+	ctx.Infof(internal.LogDatastoreAction("getting", "from", dsKeys, kind))
+
 	if opts.useGlobalCache {
 		dsErr = nds.GetMulti(ctx, dsKeys, dsDocs)
 	}
@@ -64,11 +65,11 @@ func putMulti(ctx appengine.Context, kind string, docs *docs, opts *operationOpt
 		}
 	}
 
-	//ctx.Infof(store.logAct("putting", "in", keys, kind))
-
 	// put into datastore
 	dsDocs := docs.list
 	dsKeys, dsErr := nds.PutMulti(ctx, toDSKeys(keys), dsDocs)
+	ctx.Infof(internal.LogDatastoreAction("putting", "in", dsKeys, kind))
+
 	if dsErr != nil {
 		return nil, dsErr
 	}

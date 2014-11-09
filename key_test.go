@@ -24,7 +24,7 @@ var _ = Describe("Key", func() {
 
 		Check(key, NotNil)
 		Check(key.Exists(), IsFalse)
-		Check(key.IDString(), Equals, "42")
+		Check(key.String(), Equals, "Key{'coll_key', 42}")
 	})
 
 	It("create textual one", func() {
@@ -32,7 +32,7 @@ var _ = Describe("Key", func() {
 
 		Check(key, NotNil)
 		Check(key.Exists(), IsFalse)
-		Check(key.IDString(), Equals, "my-key")
+		Check(key.String(), Equals, "Key{'coll_key', my-key}")
 	})
 
 	It("create many", func() {

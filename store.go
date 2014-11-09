@@ -178,26 +178,8 @@ func (store *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
 	return keys, nil
 }
 
-func (store *Store) logErr(e interface{}) error {
+func logErr(ctx appengine.Context, e interface{}) error {
 	err := fmt.Errorf("%v", e)
-	store.ctx.Errorf("%v", err)
+	ctx.Errorf("%v", err)
 	return err
-}
-
-func (store *Store) logAct(verb string, prop string, keys []*Key, kind string) string {
-	if len(keys) == 1 {
-		id := keys[0].IDString()
-		if id == "" {
-			return fmt.Sprintf("%v %v %v %q", verb, "1 item", prop, kind)
-		}
-		id = "'" + id + "'"
-
-		parent := ""
-		if parentKey := keys[0].Parent(); parentKey != nil {
-			parent = fmt.Sprintf(" (with parent '%v' from %q)", newKey(parentKey).IDString(), parentKey.Kind())
-		}
-		return fmt.Sprintf("%v %v %v %q%v", verb, id, prop, kind, parent)
-	}
-
-	return fmt.Sprintf("%v %v items %v %q", verb, len(keys), prop, kind)
 }

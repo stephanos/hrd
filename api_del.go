@@ -1,5 +1,9 @@
 package hrd
 
+import (
+	"github.com/101loops/hrd/internal"
+)
+
 // Deleter can delete entities from a Collection.
 type Deleter struct {
 	coll *Collection
@@ -62,5 +66,5 @@ func (d *Deleter) TextIDs(ids ...string) error {
 }
 
 func (d *Deleter) delete(keys []*Key) error {
-	return deleteMulti(d.coll.store.ctx, d.coll.name, keys)
+	return internal.DSDelete(d.coll.store.ctx, d.coll.name, toDSKeys(keys))
 }
