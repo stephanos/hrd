@@ -15,7 +15,7 @@ install:
   - goapp get code.google.com/p/go.tools/cmd/cover
 
 script:
-  - goapp test -v -covermode=count -coverprofile=profile.cov .
+  - goapp test -v -covermode=count -coverprofile=profile.cov ./...
 
 after_success:
   - go get -u github.com/mattn/goveralls
