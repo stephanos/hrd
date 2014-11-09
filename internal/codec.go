@@ -126,24 +126,16 @@ func validateFieldType(typ reflect.Type) error {
 }
 
 func validateFieldName(name string) error {
-	if name == "" {
-		return fmt.Errorf("field name is empty")
-	}
-
-	if strings.Contains(name, ".") {
-		return fmt.Errorf("field name contains '.'")
-	}
-
 	first := true
 	for _, char := range name {
 		if first {
 			first = false
 			if char != '_' && !unicode.IsLetter(char) {
-				return fmt.Errorf("field name begins with invalid character %q", char)
+				return fmt.Errorf("begins with invalid character %q", char)
 			}
 		} else {
 			if char != '_' && !unicode.IsLetter(char) && !unicode.IsDigit(char) {
-				return fmt.Errorf("field name contains invalid character %q", char)
+				return fmt.Errorf("contains invalid character %q", char)
 			}
 		}
 	}
