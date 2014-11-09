@@ -77,11 +77,6 @@ func putMulti(ctx appengine.Context, kind string, docs *docs, opts *operationOpt
 	return postProcess(dsDocs, dsKeys, dsErr)
 }
 
-func deleteMulti(ctx appengine.Context, kind string, keys []*Key) (err error) {
-	//ctx.Infof(store.logAct("deleting", "from", keys, kind))
-	return nds.DeleteMulti(ctx, toDSKeys(keys))
-}
-
 func postProcess(dsDocs []*doc, dsKeys []*datastore.Key, dsErr error) ([]*Key, error) {
 	now := time.Now()
 	keys := make([]*Key, len(dsKeys))
