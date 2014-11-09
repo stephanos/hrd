@@ -6,10 +6,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/101loops/hrd/internal"
 	"github.com/101loops/iszero"
 	"github.com/101loops/structor"
 
 	"appengine/datastore"
+)
+
+var (
+	typeOfByteSlice = reflect.TypeOf([]byte(nil))
 )
 
 // doc is a reader and writer for a datastore entity.
@@ -55,7 +60,7 @@ func newDoc(srcVal reflect.Value) (*doc, error) {
 		return nil, fmt.Errorf("invalid value kind %q (wanted struct or struct pointer)", srcKind)
 	}
 
-	codec, err := getCodec(srcType)
+	codec, err := internal.GetCodec(srcType)
 	if err != nil {
 		return nil, err
 	}

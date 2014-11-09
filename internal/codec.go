@@ -1,4 +1,4 @@
-package hrd
+package internal
 
 import (
 	"fmt"
@@ -11,53 +11,27 @@ import (
 )
 
 var (
-	codecSet        *structor.Set
+	// CodecSet is a set of all registered entity codecs.
+	CodecSet *structor.Set
+
+	typeOfStr       = reflect.TypeOf("")
 	typeOfByteSlice = reflect.TypeOf([]byte(nil))
 	typeOfTime      = reflect.TypeOf(time.Time{})
 )
-
-// structCodec describes how to convert a struct to and from a sequence of properties.
-//type structCodec struct {
-//	*structor.StructCodec
-//
-//	// byIndex gives the field codec for the i'th field.
-//	//byIndex map[int]*structor.FieldCodec
-//
-//	// byName gives the field codec for a field name.
-//	//byName map[string]*structor.FieldCodec
-//
-//	// hasSlice is whether a struct or any of its nested or embedded structs
-//	// has a slice-typed field (other than []byte).
-//	hasSlice bool
-//
-//	// complete is whether the codec is complete.
-//	// An incomplete codec may be encountered when walking a recursive struct.
-//	complete bool
-//}
 
 func init() {
 	newCodecSet()
 }
 
 func newCodecSet() {
-	codecSet = structor.NewSet("datastore")
-	codecSet.SetValidateFunc(validateCodec)
+	CodecSet = structor.NewSet("datastore")
+	CodecSet.SetValidateFunc(validateCodec)
 }
 
-// RegisterEntity prepares the passed-in struct type for the datastore.
-// It returns an error if the type is invalid.
-func RegisterEntity(entity interface{}) error {
-	return codecSet.Add(entity)
-}
-
-// RegisterEntityMust prepares the passed-in struct type for the datastore.
-// It panics if the type is invalid.
-func RegisterEntityMust(entity interface{}) {
-	codecSet.AddMust(entity)
-}
-
-func getCodec(entity interface{}) (*structor.Codec, error) {
-	codec, err := codecSet.Get(entity)
+// GetCodec returns an entity's codec.
+// The entity must be been added to the codec set beforehand.
+func GetCodec(entity interface{}) (*structor.Codec, error) {
+	codec, err := CodecSet.Get(entity)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +39,7 @@ func getCodec(entity interface{}) (*structor.Codec, error) {
 	return codec, nil
 }
 
-func validateCodec(codec *structor.Codec) error {
+func validateCodec(codecSet *structor.Set, codec *structor.Codec) error {
 	labels := make(map[string]bool, 0)
 
 	for _, field := range codec.Fields() {

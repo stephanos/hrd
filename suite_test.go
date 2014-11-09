@@ -27,11 +27,10 @@ func TestSuite(t *testing.T) {
 	defer ctx.Close()
 
 	store = NewStore(ctx)
-
-	RegisterEntityMust(ChildModel{})
-	RegisterEntityMust(SimpleModel{})
-	RegisterEntityMust(InvalidModel{})
-	RegisterEntityMust(ComplexModel{})
+	store.RegisterEntityMust(ChildModel{})
+	store.RegisterEntityMust(SimpleModel{})
+	store.RegisterEntityMust(InvalidModel{})
+	store.RegisterEntityMust(ComplexModel{})
 
 	RunSpecs(t, "HRD Suite")
 }

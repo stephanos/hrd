@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/101loops/hrd/internal"
+
 	"appengine"
 	"appengine/datastore"
 )
@@ -33,6 +35,18 @@ func NewStore(ctx appengine.Context) *Store {
 		opts:      defaultOperationOpts(),
 	}
 	return store
+}
+
+// RegisterEntity prepares the passed-in struct type for the datastore.
+// It returns an error if the type is invalid.
+func (store *Store) RegisterEntity(entity interface{}) error {
+	return internal.CodecSet.Add(entity)
+}
+
+// RegisterEntityMust prepares the passed-in struct type for the datastore.
+// It panics if the type is invalid.
+func (store *Store) RegisterEntityMust(entity interface{}) {
+	internal.CodecSet.AddMust(entity)
 }
 
 // Coll returns a Collection for the passed name ("kind").
