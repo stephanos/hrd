@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 	. "github.com/101loops/bdd"
+	"github.com/onsi/gomega/format"
 
 	"appengine/aetest"
 	"appengine/memcache"
@@ -130,3 +131,25 @@ type Pair struct {
 func clearCache() {
 	memcache.Flush(ctx)
 }
+
+var ExistsInDatabase = NewMatcherBuilder().
+	SetApply(
+	func(actual interface{}, expected []interface{}) Result {
+		key, ok := actual.(*Key)
+		if !ok {
+			err := fmt.Errorf("expected a Key, got: \n %s", format.Object(actual, 1))
+			return Result{Error: err}
+		}
+
+		var entity *SimpleModel
+		key, err := store.Coll(key.Key.Kind()).Load().Key(key).GetOne(&entity)
+
+		var r Result
+		if err == nil && key != nil && entity != nil {
+			r.Success = true
+		} else {
+			r.FailureMessage = format.Message(actual, " not to exist in database")
+			r.NegatedFailureMessage = format.Message(actual, " to exist in database")
+		}
+		return r
+	}).Build()

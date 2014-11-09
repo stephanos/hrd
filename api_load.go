@@ -1,5 +1,9 @@
 package hrd
 
+import (
+	"fmt"
+)
+
 // Loader can load entities from a Collection.
 type Loader struct {
 	coll *Collection
@@ -61,8 +65,6 @@ func (l *Loader) TextIDs(ids ...string) *MultiLoader {
 	return &MultiLoader{l}
 }
 
-// ==== CONFIG
-
 // Opts applies a sequence of Opt the Loader's options.
 func (l *Loader) Opts(opts ...Opt) *Loader {
 	l.opts = l.opts.Apply(opts...)
@@ -101,6 +103,15 @@ func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 }
 
 func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
+	for _, k := range l.keys {
+		keyKind := k.Kind()
+		collKind := l.coll.name
+		if keyKind != collKind {
+			err := fmt.Errorf("invalid key kind '%v' for collection '%v'", keyKind, collKind)
+			return nil, l.coll.store.logErr(err)
+		}
+	}
+
 	docs, err := newWriteableDocs(dst, l.keys, multi)
 	if err != nil {
 		return nil, err

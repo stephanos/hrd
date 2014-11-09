@@ -107,7 +107,7 @@ func (qry *Query) NoLimit() (ret *Query) {
 // The ancestor should not be nil.
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
-	ret.log("ANCESTOR '%v'", k.IDString())
+	ret.log("ANCESTOR '%v'", k.String())
 	ret.dsQry = ret.dsQry.Ancestor(k.Key)
 	return ret
 }
@@ -200,8 +200,8 @@ func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 	return
 }
 
+// GlobalCache defines whether entities are read/written from/to memcache.
 // If no parameter is passed, true is assumed.
-// GlobalCache enables reading entities from memcache.
 func (qry *Query) GlobalCache(enable ...bool) *Query {
 	qry.opts = qry.opts.GlobalCache(enable...)
 	return qry
