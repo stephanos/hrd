@@ -14,7 +14,7 @@ var _ = Describe("Transactor", func() {
 		}
 	})
 
-	It("initializes", func() {
+	It("initializes and is configurable", func() {
 		tx := store.TX()
 		Check(tx, NotNil)
 		Check(tx.opts.completeKeys, IsFalse)

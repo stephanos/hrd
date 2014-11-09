@@ -11,22 +11,21 @@ var _ = Describe("HRD Query", func() {
 	With("w/o hybrid", func() {
 		queryTests(false)
 	})
-
-	With("w/o cache", func() {
-		queryTests(true, NoCache)
-	})
 })
 
-func queryTests(hybrid bool, opts ...Opt) {
+func queryTests(hybrid bool) {
 
 	var (
-		coll  *Collection
-		query *Query
+		coll      *Collection
+		childColl *Collection
+		query     *Query
+		childQuery     *Query
 	)
 
 	BeforeEach(func() {
 		if coll == nil {
 			coll = randomColl()
+			childColl = randomColl()
 		}
 
 		entities := []*SimpleModel{
@@ -41,8 +40,24 @@ func queryTests(hybrid bool, opts ...Opt) {
 		Check(keys[2].IntID(), EqualsNum, 3)
 		Check(keys[3].IntID(), EqualsNum, 4)
 
+		childEntities := []*ChildModel{
+			&ChildModel{id: "a", parentID: 1, parentKind: coll.name},
+			&ChildModel{id: "b", parentID: 2, parentKind: coll.name},
+			&ChildModel{id: "c", parentID: 1, parentKind: coll.name},
+			&ChildModel{id: "d", parentID: 2, parentKind: coll.name},
+		}
+		keys, err = childColl.Save(CompleteKeys).Entities(childEntities)
+		Check(err, IsNil)
+		Check(keys, HasLen, 4)
+		Check(keys[0].StringID(), Equals, "a")
+		Check(keys[1].StringID(), Equals, "b")
+		Check(keys[2].StringID(), Equals, "c")
+		Check(keys[3].StringID(), Equals, "d")
+
 		clearCache()
-		query = coll.Query().Hybrid(hybrid).Opts(opts...)
+
+		query = coll.Query().Hybrid(hybrid)
+		childQuery = childColl.Query().Hybrid(hybrid)
 	})
 
 	It("loads all entities", func() {
@@ -99,17 +114,21 @@ func queryTests(hybrid bool, opts ...Opt) {
 
 	It("queries all entities", func() {
 		var entities []*SimpleModel
-		keys, cursor, err := query.GetAll(&entities)
+		validate := func(keys []*Key, cursor string, err error) {
+			Check(err, IsNil)
+			Check(keys, HasLen, 4)
+			Check(cursor, Not(IsEmpty))
 
-		Check(err, IsNil)
-		Check(keys, HasLen, 4)
-		Check(cursor, Not(IsEmpty))
+			Check(entities, HasLen, 4)
+			Check(entities[0].id, EqualsNum, 1)
+			Check(entities[1].id, EqualsNum, 2)
+			Check(entities[2].id, EqualsNum, 3)
+			Check(entities[3].id, EqualsNum, 4)
+		}
 
-		Check(entities, HasLen, 4)
-		Check(entities[0].id, EqualsNum, 1)
-		Check(entities[1].id, EqualsNum, 2)
-		Check(entities[2].id, EqualsNum, 3)
-		Check(entities[3].id, EqualsNum, 4)
+		validate(query.GetAll(&entities))
+		validate(query.NoLimit().GetAll(&entities))
+		validate(query.Limit(-1).GetAll(&entities))
 	})
 
 	It("queries filtered entities", func() {
@@ -156,6 +175,19 @@ func queryTests(hybrid bool, opts ...Opt) {
 		Check(entities[3].Text, Equals, "text1")
 	})
 
+	It("query with offset", func() {
+		var entities []*SimpleModel
+		keys, cursor, err := query.Offset(2).GetAll(&entities)
+
+		Check(err, IsNil)
+		Check(keys, HasLen, 2)
+		Check(cursor, Not(IsEmpty))
+
+		Check(entities, HasLen, 2)
+		Check(entities[0].ID(), EqualsNum, 3)
+		Check(entities[1].ID(), EqualsNum, 4)
+	})
+
 	It("query with cursor", func() {
 		var entities []*SimpleModel
 		it := query.Limit(2).Run()
@@ -169,30 +201,68 @@ func queryTests(hybrid bool, opts ...Opt) {
 		Check(err, IsNil)
 		Check(cursor, Not(IsEmpty))
 
+		// cursor: start
 		entities = []*SimpleModel{}
 		keys, _, err = query.Start(cursor).GetAll(&entities)
 		Check(err, IsNil)
 		Check(keys, HasLen, 2)
+		Check(keys[0].IntID(), EqualsNum, 3)
+		Check(keys[1].IntID(), EqualsNum, 4)
+
+		// cursor: end
+		entities = []*SimpleModel{}
+		keys, _, err = query.End(cursor).GetAll(&entities)
+		Check(err, IsNil)
+		Check(keys, HasLen, 2)
+		Check(keys[0].IntID(), EqualsNum, 1)
+		Check(keys[1].IntID(), EqualsNum, 2)
+	})
+
+	It("query with eventual consistency", func() {
+		var entities []*SimpleModel
+		keys, _, err := query.EventualConsistency().GetAll(&entities)
+
+		Check(err, IsNil)
+		Check(keys, HasLen, 4)
+	})
+
+	It("query with ancestor", func() {
+		var entities []*ChildModel
+		keys, _, err := childQuery.Ancestor(coll.NewNumKey(1)).GetAll(&entities)
+
+		Check(err, IsNil)
+		Check(keys, HasLen, 2)
+		Check(entities, HasLen, 2)
+		Check(entities[0].ID(), Equals, "a")
+		Check(entities[1].ID(), Equals, "c")
 	})
 
 	// ==== ERRORS
 
-	It("does not run query with invalid cursor", func() {
+	expectError := func(q *Query, errContains string) {
 		var entity *SimpleModel
+		var entities []*SimpleModel
 
-		_, err := coll.Query().End("nonsense").GetCount()
-		Check(err, Contains, "invalid end cursor")
+		_, err := q.GetCount()
+		Check(err, Contains, errContains)
 
-		_, _, err = coll.Query().End("nonsense").GetKeys()
-		Check(err, Contains, "invalid end cursor")
+		_, _, err = q.GetKeys()
+		Check(err, Contains, errContains)
 
-		err = coll.Query().End("nonsense").GetFirst(&entity)
-		Check(err, Contains, "invalid end cursor")
+		err = q.GetFirst(&entity)
+		Check(err, Contains, errContains)
 
-		_, _, err = coll.Query().Start("nonsense").GetAll(&entity)
-		Check(err, Contains, "invalid start cursor")
+		_, _, err = q.GetAll(&entities)
+		Check(err, Contains, errContains)
+	}
 
-		_, _, err = coll.Query().Start("nonsense").NoHybrid().GetAll(&entity)
-		Check(err, Contains, "invalid start cursor")
+	It("does not run query with invalid start cursor", func() {
+		q := coll.Query().Start("nonsense")
+		expectError(q, `invalid start cursor "nonsense"`)
+	})
+
+	It("does not run query with invalid end cursor", func() {
+		q := coll.Query().End("nonsense")
+		expectError(q, `invalid end cursor "nonsense"`)
 	})
 }

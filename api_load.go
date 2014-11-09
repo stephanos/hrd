@@ -65,6 +65,8 @@ func (l *Loader) TextIDs(ids ...string) *MultiLoader {
 	return &MultiLoader{l}
 }
 
+// ==== CONFIG
+
 // Opts applies a sequence of Opt the Loader's options.
 func (l *Loader) Opts(opts ...Opt) *Loader {
 	l.opts = l.opts.Apply(opts...)

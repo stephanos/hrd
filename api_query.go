@@ -61,11 +61,6 @@ func (qry *Query) Opts(opts ...Opt) (ret *Query) {
 	return
 }
 
-// NoHybrid returns a derivative Query that will not run a hybrid query.
-func (qry *Query) NoHybrid() *Query {
-	return qry.Hybrid(false)
-}
-
 // Hybrid returns a derivative Query which will run as a hybrid or non-hybrid
 // query depending on the passed-in argument.
 func (qry *Query) Hybrid(enabled bool) (ret *Query) {
@@ -139,7 +134,7 @@ func (qry *Query) End(c string) (ret *Query) {
 			ret.log("END CURSOR")
 			ret.dsQry = ret.dsQry.End(cursor)
 		} else {
-			err = fmt.Errorf("invalid end cursor (%v)", err)
+			err = fmt.Errorf("invalid end cursor %q: %v", c, err)
 			ret.err = &err
 		}
 	}
@@ -154,7 +149,7 @@ func (qry *Query) Start(c string) (ret *Query) {
 			ret.log("START CURSOR")
 			ret.dsQry = ret.dsQry.Start(cursor)
 		} else {
-			err = fmt.Errorf("invalid start cursor (%v)", err)
+			err = fmt.Errorf("invalid start cursor %q: %v", c, err)
 			ret.err = &err
 		}
 	}
@@ -198,13 +193,6 @@ func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 	ret.log("FILTER '%v %v'", q, val)
 	ret.dsQry = ret.dsQry.Filter(q, val)
 	return
-}
-
-// GlobalCache defines whether entities are read/written from/to memcache.
-// If no parameter is passed, true is assumed.
-func (qry *Query) GlobalCache(enable ...bool) *Query {
-	qry.opts = qry.opts.GlobalCache(enable...)
-	return qry
 }
 
 // ==== EXECUTE

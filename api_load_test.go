@@ -6,6 +6,15 @@ import (
 
 var _ = Describe("HRD Load", func() {
 
+	It("initializes and is configurable", func() {
+		load := store.Coll("loader").Load()
+		Check(load, NotNil)
+		Check(load.opts.useGlobalCache, IsTrue)
+
+		load.GlobalCache(false)
+		Check(load.opts.useGlobalCache, IsFalse)
+	})
+
 	With("default settings", func() {
 		loadTests()
 	})
@@ -38,14 +47,6 @@ func loadTests(opts ...Opt) {
 		Check(keys[1].IntID(), EqualsNum, 2)
 		Check(keys[2].IntID(), EqualsNum, 3)
 		Check(keys[3].IntID(), EqualsNum, 4)
-
-		clearCache()
-	})
-
-	BeforeEach(func() {
-		if coll == nil {
-			coll = randomColl()
-		}
 
 		loader = coll.Load(opts...)
 		clearCache()

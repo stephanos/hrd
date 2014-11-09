@@ -11,6 +11,8 @@ func newDeleter(coll *Collection) *Deleter {
 	return &Deleter{coll: coll}
 }
 
+// ==== EXECUTE
+
 // Key deletes a single entity by key from the datastore.
 func (d *Deleter) Key(key *Key) error {
 	return d.delete([]*Key{key})
