@@ -10,6 +10,14 @@ var _ = Describe("Store", func() {
 		Check(store.CreatedAt(), Not(IsZero))
 	})
 
+	It("create a collection", func() {
+		coll := store.Coll("my-kind")
+
+		Check(coll.opts, NotNil)
+		Check(coll.store, Equals, store)
+		Check(coll.Name(), Equals, "my-kind")
+	})
+
 	It("create numeric key", func() {
 		key := store.NewNumKey("my-kind", 42)
 

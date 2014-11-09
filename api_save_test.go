@@ -91,28 +91,40 @@ func saveTests(opts ...Opt) {
 	// ==== ERRORS
 
 	It("does not save nil entity", func() {
-		_, err := coll.Save().Entity(nil)
+		key, err := coll.Save().Entity(nil)
 
+		Check(key, IsNil)
 		Check(err, NotNil).And(Contains, "must be non-nil")
 	})
 
 	It("does not save non-struct entity", func() {
-		_, err := coll.Save().Entity(setID)
+		key, err := coll.Save().Entity(setID)
 
+		Check(key, IsNil)
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "int")
 	})
 
 	It("does not save entity without ID() and SetID()", func() {
 		invalidMdl := &InvalidModel{}
-		_, err := coll.Save().Entity(invalidMdl)
+		key, err := coll.Save().Entity(invalidMdl)
 
+		Check(key, IsNil)
 		Check(err, NotNil).And(Contains, "does not provide ID")
 	})
 
 	It("does not save complete entity without Id", func() {
 		entity := &SimpleModel{}
-		_, err := coll.Save(CompleteKeys).Entity(entity)
+		key, err := coll.Save(CompleteKeys).Entity(entity)
 
+		Check(key, IsNil)
 		Check(err, NotNil).And(Contains, "is incomplete")
+	})
+
+	It("does not save empty entities", func() {
+		entities := []*SimpleModel{}
+		key, err := coll.Save().Entities(entities)
+
+		Check(key, IsNil)
+		Check(err, NotNil).And(Contains, "no keys provided")
 	})
 }

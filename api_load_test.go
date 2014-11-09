@@ -107,6 +107,15 @@ func loadTests(opts ...Opt) {
 		Check(entities, HasLen, 3)
 	})
 
+	It("ignores non-existing entity", func() {
+		var entity *SimpleModel
+		key, err := coll.Load().ID(666).GetOne(&entity)
+
+		Check(err, IsNil)
+		Check(key, IsNil)
+		Check(entity, IsNil)
+	})
+
 	// ==== ERRORS
 
 	It("does not load entity into invalid type", func() {
@@ -160,12 +169,19 @@ func loadTests(opts ...Opt) {
 		Check(err, NotNil).And(Contains, "invalid key kind 'wrong-kind'")
 	})
 
-	It("does not load non-existing entity", func() {
-		var entity *SimpleModel
-		key, err := coll.Load().ID(666).GetOne(&entity)
+	It("does not load empty keys", func() {
+		var entities []*SimpleModel
+		key, err := coll.Load().IDs().GetAll(&entities)
 
-		Check(err, IsNil)
 		Check(key, IsNil)
-		Check(entity, IsNil)
+		Check(err, NotNil).And(Contains, "no keys provided")
+	})
+
+	It("does not load incomplete key", func() {
+		var entity *SimpleModel
+		key, err := coll.Load().ID(0).GetOne(&entity)
+
+		Check(key, IsNil)
+		Check(err, NotNil).And(Contains, "is incomplete")
 	})
 }
