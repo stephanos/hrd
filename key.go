@@ -62,20 +62,22 @@ func (key *Key) applyTo(src interface{}) {
 		id := parentKey.IntID()
 		if parent, ok := src.(numParent); id != 0 && ok {
 			parent.SetParent(id)
-		}
-		sid := parentKey.StringID()
-		if parent, ok := src.(textParent); sid != "" && ok {
-			parent.SetParent(sid)
+		} else {
+			sid := parentKey.StringID()
+			if parent, ok := src.(textParent); sid != "" && ok {
+				parent.SetParent(sid)
+			}
 		}
 	}
 
 	id := key.IntID()
 	if ident, ok := src.(numIdentifier); id != 0 && ok {
 		ident.SetID(id)
-	}
-	sid := key.StringID()
-	if ident, ok := src.(textIdentifier); sid != "" && ok {
-		ident.SetID(sid)
+	} else {
+		sid := key.StringID()
+		if ident, ok := src.(textIdentifier); sid != "" && ok {
+			ident.SetID(sid)
+		}
 	}
 }
 

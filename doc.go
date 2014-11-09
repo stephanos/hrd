@@ -152,7 +152,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 	src := doc.get()
 
 	// event: before save
-	if hook, ok := src.(beforeSaver); ok {
+	if hook, ok := src.(BeforeSaver); ok {
 		if err := hook.BeforeSave(); err != nil {
 			return err
 		}
@@ -175,7 +175,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 	}
 
 	// event: after save
-	if hook, ok := src.(afterSaver); ok {
+	if hook, ok := src.(AfterSaver); ok {
 		if err := hook.AfterSave(); err != nil {
 			close(c)
 			return err
@@ -191,7 +191,7 @@ func (doc *doc) Load(c <-chan datastore.Property) error {
 	dst := doc.get()
 
 	// event: before load
-	if hook, ok := dst.(beforeLoader); ok {
+	if hook, ok := dst.(BeforeLoader); ok {
 		if err := hook.BeforeLoad(); err != nil {
 			return err
 		}
@@ -202,7 +202,7 @@ func (doc *doc) Load(c <-chan datastore.Property) error {
 	}
 
 	// event: after load
-	if hook, ok := dst.(afterLoader); ok {
+	if hook, ok := dst.(AfterLoader); ok {
 		if err := hook.AfterLoad(); err != nil {
 			return err
 		}

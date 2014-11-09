@@ -48,14 +48,6 @@ type numParent interface {
 	ParentKind() string
 }
 
-// versioned can specify an entity's version.
-// It can be used to ignore old cached versions of an entity.
-type versioned interface {
-
-	// Version returns a numeric version number.
-	Version() int64
-}
-
 // timestampCreator can apply the time of creation to an entity.
 type timestampCreator interface {
 
@@ -70,30 +62,30 @@ type timestampUpdater interface {
 	SetUpdatedAt(time.Time)
 }
 
-// beforeSaver is a lifecycle hook running before saving an entity.
-type beforeSaver interface {
+// BeforeSaver is a lifecycle hook running before saving an entity.
+type BeforeSaver interface {
 
 	// BeforeSave runs before an entity is saved.
 	// If it returns an error, the save is aborted!
 	BeforeSave() error
 }
 
-// afterSaver is a lifecycle hook running after saving an entity.
-type afterSaver interface {
+// AfterSaver is a lifecycle hook running after saving an entity.
+type AfterSaver interface {
 
 	// AfterSave runs after an entity is saved.
 	AfterSave() error
 }
 
-// beforeLoader is a lifecycle hook running before loading an entity.
-type beforeLoader interface {
+// BeforeLoader is a lifecycle hook running before loading an entity.
+type BeforeLoader interface {
 
 	// BeforeLoad runs before an entity is loaded.
 	BeforeLoad() error
 }
 
-// afterLoader is a lifecycle hook running after loading an entity.
-type afterLoader interface {
+// AfterLoader is a lifecycle hook running after loading an entity.
+type AfterLoader interface {
 
 	// AfterLoad runs after an entity is loaded.
 	AfterLoad() error
