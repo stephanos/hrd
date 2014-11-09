@@ -139,18 +139,6 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 	return ret, nil
 }
 
-func (docs *docs) keys() []*Key {
-	return docs.keyList
-}
-
-func (docs *docs) set(idx int, src interface{}) {
-	docs.list[idx].set(src)
-}
-
-func (docs *docs) get(idx int) *doc {
-	return docs.list[idx]
-}
-
 func (docs *docs) nil(idx int) {
 	docs.list[idx].nil()
 }

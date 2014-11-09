@@ -82,16 +82,6 @@ func (doc *doc) get() interface{} {
 	return doc.srcVal.Interface()
 }
 
-// set sets the entity.
-func (doc *doc) set(src interface{}) {
-	dst := doc.val()
-	v := reflect.ValueOf(src)
-	if v.Kind() == reflect.Ptr && dst.Kind() != reflect.Ptr {
-		v = v.Elem()
-	}
-	dst.Set(v)
-}
-
 func (doc *doc) setKey(k *Key) {
 	k.applyTo(doc.get())
 }
