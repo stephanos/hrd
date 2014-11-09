@@ -15,11 +15,9 @@ with very useful additional features.
 
 Internally it uses [nds](https://github.com/qedus/nds) and  [structor](https://github.com/101loops/structor).
 
-*This is still alpha quality.*
-
 ## ToDos
+- validated projection query
 - in-memory cache
-- add support for maps
 - allow to pass-in logger
 
 ## Install
