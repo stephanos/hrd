@@ -15,7 +15,7 @@ install:
   - goapp get code.google.com/p/go.tools/cmd/cover
 
 script:
-  - bin/test.sh
+  - bin/test-coverage.sh
 
 after_success:
   - go get -u github.com/mattn/goveralls
