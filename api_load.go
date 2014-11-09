@@ -118,5 +118,5 @@ func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return l.coll.store.getMulti(l.coll.name, docs, l.opts)
+	return getMulti(l.coll.store.ctx, l.coll.name, docs, l.opts)
 }

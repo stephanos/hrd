@@ -45,5 +45,5 @@ func (s *Saver) put(src interface{}) ([]*Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.coll.store.putMulti(s.coll.name, docs, s.opts)
+	return putMulti(s.coll.store.ctx, s.coll.name, docs, s.opts)
 }

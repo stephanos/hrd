@@ -62,5 +62,5 @@ func (d *Deleter) TextIDs(ids ...string) error {
 }
 
 func (d *Deleter) delete(keys []*Key) error {
-	return d.coll.store.deleteMulti(d.coll.name, keys)
+	return deleteMulti(d.coll.store.ctx, d.coll.name, keys)
 }

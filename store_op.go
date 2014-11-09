@@ -10,7 +10,7 @@ import (
 	"appengine/datastore"
 )
 
-func (store *Store) getMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
+func getMulti(ctx appengine.Context, kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
 
 	keys := docs.keyList
 	if len(keys) == 0 {
@@ -23,20 +23,20 @@ func (store *Store) getMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 		}
 	}
 
-	store.ctx.Infof(store.logAct("getting", "from", keys, kind))
+	//ctx.Infof(store.logAct("getting", "from", keys, kind))
 
 	var dsErr error
 	dsDocs := docs.list
 	dsKeys := toDSKeys(keys)
 	if opts.useGlobalCache {
-		dsErr = nds.GetMulti(store.ctx, dsKeys, dsDocs)
+		dsErr = nds.GetMulti(ctx, dsKeys, dsDocs)
 	}
-	dsErr = datastore.GetMulti(store.ctx, dsKeys, dsDocs)
+	dsErr = datastore.GetMulti(ctx, dsKeys, dsDocs)
 
 	return postProcess(dsDocs, dsKeys, dsErr)
 }
 
-func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
+func putMulti(ctx appengine.Context, kind string, docs *docs, opts *operationOpts) ([]*Key, error) {
 
 	// get document keys
 	keys := docs.keyList
@@ -64,21 +64,21 @@ func (store *Store) putMulti(kind string, docs *docs, opts *operationOpts) ([]*K
 		}
 	}
 
-	store.ctx.Infof(store.logAct("putting", "in", keys, kind))
+	//ctx.Infof(store.logAct("putting", "in", keys, kind))
 
 	// put into datastore
 	dsDocs := docs.list
-	dsKeys, dsErr := nds.PutMulti(store.ctx, toDSKeys(keys), dsDocs)
+	dsKeys, dsErr := nds.PutMulti(ctx, toDSKeys(keys), dsDocs)
 	if dsErr != nil {
-		return nil, store.logErr(dsErr)
+		return nil, dsErr
 	}
 
 	return postProcess(dsDocs, dsKeys, dsErr)
 }
 
-func (store *Store) deleteMulti(kind string, keys []*Key) (err error) {
-	store.ctx.Infof(store.logAct("deleting", "from", keys, kind))
-	return nds.DeleteMulti(store.ctx, toDSKeys(keys))
+func deleteMulti(ctx appengine.Context, kind string, keys []*Key) (err error) {
+	//ctx.Infof(store.logAct("deleting", "from", keys, kind))
+	return nds.DeleteMulti(ctx, toDSKeys(keys))
 }
 
 func postProcess(dsDocs []*doc, dsKeys []*datastore.Key, dsErr error) ([]*Key, error) {
