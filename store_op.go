@@ -24,16 +24,9 @@ func getMulti(ctx appengine.Context, kind string, docs *docs, opts *operationOpt
 		}
 	}
 
-	var dsErr error
 	dsDocs := docs.list
 	dsKeys := toDSKeys(keys)
-	ctx.Infof(internal.LogDatastoreAction("getting", "from", dsKeys, kind))
-
-	if opts.useGlobalCache {
-		dsErr = nds.GetMulti(ctx, dsKeys, dsDocs)
-	}
-	dsErr = datastore.GetMulti(ctx, dsKeys, dsDocs)
-
+	dsErr := internal.DSGet(ctx, kind, dsKeys, dsDocs, opts.useGlobalCache)
 	return postProcess(dsDocs, dsKeys, dsErr)
 }
 
