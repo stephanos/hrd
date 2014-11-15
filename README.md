@@ -4,6 +4,9 @@ hrd [![Build Status](https://secure.travis-ci.org/101loops/hrd.png)](https://tra
 This Go package extends the package [appengine.datastore](http://godoc.org/code.google.com/p/appengine-go/appengine/datastore)
 with very useful additional features.
 
+## Disclaimer
+
+**This package is currently undergoing a massive restructuring. Use at own risk**
 
 ## Features
 - **caching:** great performance through memcache 
