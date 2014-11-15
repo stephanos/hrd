@@ -1,14 +1,21 @@
 package hrd
 
 import (
-	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/101loops/hrd/internal"
 
 	"appengine"
 	"appengine/datastore"
+)
+
+// datastore operations, makes it easy to stub out during testing
+var (
+	dsGet        = internal.DSGet
+	dsPut        = internal.DSPut
+	dsDelete     = internal.DSDelete
+	dsDeleteKeys = internal.DSDeleteKeys
+	dsIterate    = internal.DSIterate
 )
 
 // Store represents the datastore.
@@ -74,9 +81,9 @@ func (store *Store) CreatedAt() time.Time {
 func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
-		parentKey = parent[0].Key
+		parentKey = parent[0].Key.Key
 	}
-	return newKey(datastore.NewKey(store.ctx, kind, "", id, parentKey))
+	return newKey(internal.NewKey(datastore.NewKey(store.ctx, kind, "", id, parentKey)))
 }
 
 // NewNumKeys returns a sequence of key for the passed kind and
@@ -94,9 +101,9 @@ func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
 	var parentKey *datastore.Key
 	if len(parent) > 0 {
-		parentKey = parent[0].Key
+		parentKey = parent[0].Key.Key
 	}
-	return newKey(datastore.NewKey(store.ctx, kind, id, 0, parentKey))
+	return newKey(internal.NewKey(datastore.NewKey(store.ctx, kind, id, 0, parentKey)))
 }
 
 // NewTextKeys returns a sequence of keys for the passed kind and
@@ -125,61 +132,4 @@ func (store *Store) runTX(f func(*Store) error, opts *operationOpts) error {
 		dsErr = f(txStore)
 		return dsErr
 	}, &datastore.TransactionOptions{XG: opts.txCrossGroup})
-}
-
-func (store *Store) getKey(kind string, src interface{}) (*Key, error) {
-	var parentKey *datastore.Key
-	if parented, ok := src.(numParent); ok {
-		parentKey = datastore.NewKey(store.ctx, parented.ParentKind(), "", parented.Parent(), nil)
-	}
-	if parented, ok := src.(textParent); ok {
-		parentKey = datastore.NewKey(store.ctx, parented.ParentKind(), parented.Parent(), 0, nil)
-	}
-
-	if ident, ok := src.(numIdentifier); ok {
-		return newKey(datastore.NewKey(store.ctx, kind, "", ident.ID(), parentKey)), nil
-	}
-	if ident, ok := src.(textIdentifier); ok {
-		return newKey(datastore.NewKey(store.ctx, kind, ident.ID(), 0, parentKey)), nil
-	}
-	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))
-}
-
-func (store *Store) getKeys(kind string, src interface{}) ([]*Key, error) {
-	srcVal := reflect.Indirect(reflect.ValueOf(src))
-	srcKind := srcVal.Kind()
-	if srcKind != reflect.Slice && srcKind != reflect.Map {
-		return nil, fmt.Errorf("value must be a slice or map")
-	}
-
-	collLen := srcVal.Len()
-	keys := make([]*Key, collLen)
-
-	if srcVal.Kind() == reflect.Slice {
-		for i := 0; i < collLen; i++ {
-			v := srcVal.Index(i)
-			key, err := store.getKey(kind, v.Interface())
-			if err != nil {
-				return nil, err
-			}
-			keys[i] = key
-		}
-		return keys, nil
-	}
-
-	for i, key := range srcVal.MapKeys() {
-		v := srcVal.MapIndex(key)
-		key, err := store.getKey(kind, v.Interface())
-		if err != nil {
-			return nil, err
-		}
-		keys[i] = key
-	}
-	return keys, nil
-}
-
-func logErr(ctx appengine.Context, e interface{}) error {
-	err := fmt.Errorf("%v", e)
-	ctx.Errorf("%v", err)
-	return err
 }

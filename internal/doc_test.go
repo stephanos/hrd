@@ -1,4 +1,4 @@
-package hrd
+package internal
 
 import (
 	. "github.com/101loops/bdd"

@@ -1,8 +1,10 @@
-package hrd
+package internal
 
 import (
 	"fmt"
 	"reflect"
+
+	"appengine/datastore"
 )
 
 type docs struct {
@@ -16,12 +18,11 @@ type docs struct {
 }
 
 var (
-	typeOfKey   = reflect.TypeOf(&Key{})
+	typeOfKey   = reflect.TypeOf(&datastore.Key{})
 	typeOfInt64 = reflect.TypeOf(int64(0))
-	typeOfStr   = reflect.TypeOf("")
 )
 
-func newReadableDocs(coll *Collection, src interface{}) (*docs, error) {
+func newReadableDocs(kind Kind, src interface{}) (*docs, error) {
 	srcVal := reflect.ValueOf(src)
 	if src == nil || (srcVal.Kind() == reflect.Ptr && srcVal.IsNil()) {
 		return nil, fmt.Errorf("value must be non-nil")
@@ -36,7 +37,7 @@ func newReadableDocs(coll *Collection, src interface{}) (*docs, error) {
 		srcVal = reflect.ValueOf(src)
 	}
 
-	// read collection
+	// read Kind
 	srcColl := reflect.Indirect(srcVal)
 	srcCollLen := srcColl.Len()
 
@@ -51,7 +52,7 @@ func newReadableDocs(coll *Collection, src interface{}) (*docs, error) {
 			return nil, err
 		}
 
-		key, err := coll.getKey(entity)
+		key, err := getKey(kind, entity)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +78,7 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 	srcType := srcVal.Type()
 
 	if multi {
-		// create and validate collection
+		// create and validate Kind
 		srcKind = srcVal.Kind()
 		switch srcKind {
 		case reflect.Slice:
@@ -98,7 +99,7 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 		}
 		ret.srcKind = srcKind
 
-		// make sure the collection's elements are structs
+		// make sure the Kind's elements are structs
 		ret.elemType = srcType.Elem()
 		collElemKind := ret.elemType.Kind()
 		switch collElemKind {
@@ -155,7 +156,7 @@ func (docs *docs) next() (ret *doc, err error) {
 
 func (docs *docs) add(key *Key, d *doc) {
 	docs.list = append(docs.list, d)
-	key.applyTo(d)
+	applyTo(key, d)
 
 	if docs.srcKind == reflect.Map {
 		var v reflect.Value

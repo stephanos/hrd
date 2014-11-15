@@ -41,9 +41,6 @@ func (s *Saver) Entities(srcs interface{}) ([]*Key, error) {
 }
 
 func (s *Saver) put(src interface{}) ([]*Key, error) {
-	docs, err := newReadableDocs(s.coll, src)
-	if err != nil {
-		return nil, err
-	}
-	return putMulti(s.coll.store.ctx, s.coll.name, docs, s.opts)
+	keys, err := dsPut(s.coll, src, s.opts.completeKeys)
+	return newKeys(keys), err
 }

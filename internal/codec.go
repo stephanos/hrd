@@ -28,9 +28,9 @@ func newCodecSet() {
 	CodecSet.SetValidateFunc(validateCodec)
 }
 
-// GetCodec returns an entity's codec.
+// getCodec returns an entity's codec.
 // The entity must be been added to the codec set beforehand.
-func GetCodec(entity interface{}) (*structor.Codec, error) {
+func getCodec(entity interface{}) (*structor.Codec, error) {
 	codec, err := CodecSet.Get(entity)
 	if err != nil {
 		return nil, err

@@ -27,13 +27,6 @@ func (tx *Transactor) XG(enable ...bool) *Transactor {
 	return tx
 }
 
-// GlobalCache defines whether entities are read/written from/to memcache.
-// If no parameter is passed, true is assumed.
-func (tx *Transactor) GlobalCache(enable ...bool) *Transactor {
-	tx.opts = tx.opts.GlobalCache(enable...)
-	return tx
-}
-
 // ==== EXECUTE
 
 // Run executes a transaction.

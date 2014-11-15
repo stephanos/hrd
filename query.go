@@ -103,7 +103,7 @@ func (qry *Query) NoLimit() (ret *Query) {
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
 	ret.log("ANCESTOR '%v'", k.String())
-	ret.dsQry = ret.dsQry.Ancestor(k.Key)
+	ret.dsQry = ret.dsQry.Ancestor(k.Key.Key)
 	return ret
 }
 
@@ -239,7 +239,7 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	if qry.limit != 1 && qry.typeOf == hybridQry && qry.opts.useGlobalCache {
 		keys, cursor, err := qry.GetKeys()
 		if err == nil && len(keys) > 0 {
-			keys, err = newLoader(qry.coll).Keys(keys...).GetAll(dsts)
+			keys, err = newLoader(qry.coll).Keys(keys).GetAll(dsts)
 		}
 		return keys, cursor, err
 	}

@@ -1,4 +1,4 @@
-package hrd
+package internal
 
 import (
 	"fmt"
@@ -6,15 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/101loops/hrd/internal"
+	"github.com/101loops/hrd/entity"
 	"github.com/101loops/iszero"
 	"github.com/101loops/structor"
 
 	"appengine/datastore"
-)
-
-var (
-	typeOfByteSlice = reflect.TypeOf([]byte(nil))
 )
 
 // doc is a reader and writer for a datastore entity.
@@ -60,7 +56,7 @@ func newDoc(srcVal reflect.Value) (*doc, error) {
 		return nil, fmt.Errorf("invalid value kind %q (wanted struct or struct pointer)", srcKind)
 	}
 
-	codec, err := internal.GetCodec(srcType)
+	codec, err := getCodec(srcType)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +84,32 @@ func (doc *doc) get() interface{} {
 }
 
 func (doc *doc) setKey(k *Key) {
-	k.applyTo(doc.get())
+	applyTo(k, doc.get())
+}
+
+func applyTo(key *Key, src interface{}) {
+	var parentKey = key.Parent()
+	if parentKey != nil {
+		id := parentKey.IntID()
+		if parent, ok := src.(entity.NumParent); id != 0 && ok {
+			parent.SetParent(id)
+		} else {
+			sid := parentKey.StringID()
+			if parent, ok := src.(entity.TextParent); sid != "" && ok {
+				parent.SetParent(sid)
+			}
+		}
+	}
+
+	id := key.IntID()
+	if ident, ok := src.(entity.NumIdentifier); id != 0 && ok {
+		ident.SetID(id)
+	} else {
+		sid := key.StringID()
+		if ident, ok := src.(entity.TextIdentifier); sid != "" && ok {
+			ident.SetID(sid)
+		}
+	}
 }
 
 func (doc *doc) val() reflect.Value {
@@ -147,7 +168,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 	src := doc.get()
 
 	// event: before save
-	if hook, ok := src.(BeforeSaver); ok {
+	if hook, ok := src.(entity.BeforeSaver); ok {
 		if err := hook.BeforeSave(); err != nil {
 			return err
 		}
@@ -170,7 +191,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 	}
 
 	// event: after save
-	if hook, ok := src.(AfterSaver); ok {
+	if hook, ok := src.(entity.AfterSaver); ok {
 		if err := hook.AfterSave(); err != nil {
 			close(c)
 			return err
@@ -186,7 +207,7 @@ func (doc *doc) Load(c <-chan datastore.Property) error {
 	dst := doc.get()
 
 	// event: before load
-	if hook, ok := dst.(BeforeLoader); ok {
+	if hook, ok := dst.(entity.BeforeLoader); ok {
 		if err := hook.BeforeLoad(); err != nil {
 			return err
 		}
@@ -197,7 +218,7 @@ func (doc *doc) Load(c <-chan datastore.Property) error {
 	}
 
 	// event: after load
-	if hook, ok := dst.(AfterLoader); ok {
+	if hook, ok := dst.(entity.AfterLoader); ok {
 		if err := hook.AfterLoad(); err != nil {
 			return err
 		}

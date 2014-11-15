@@ -1,5 +1,7 @@
 package hrd
 
+import "appengine"
+
 // Collection represents a datastore kind.
 type Collection struct {
 	opts  *operationOpts
@@ -10,6 +12,11 @@ type Collection struct {
 // Name returns the name of the collection.
 func (coll *Collection) Name() string {
 	return coll.name
+}
+
+// Context returns the App Engine context
+func (coll *Collection) Context() appengine.Context {
+	return coll.store.ctx
 }
 
 // NewNumKey returns a key for the passed numeric ID.
@@ -65,12 +72,12 @@ func (coll *Collection) DESTROY() ([]*Key, error) {
 	var start string
 	var allKeys []*Key
 	for {
-		keys, cursor, dsErr := coll.Query().Limit(1000).Start(start).GetKeys()
+		keys, cursor, dsErr := coll.Query().Limit(500).Start(start).GetKeys()
 		if dsErr != nil {
 			return allKeys, dsErr
 		}
 		if len(keys) == 0 {
-			coll.store.ctx.Infof("destroyed collection %q (%d items)", coll.name, i)
+			coll.Context().Infof("destroyed collection %q (%d items)", coll.name, i)
 			return allKeys, nil
 		}
 
@@ -83,8 +90,4 @@ func (coll *Collection) DESTROY() ([]*Key, error) {
 		i += len(keys)
 		allKeys = append(allKeys, keys...)
 	}
-}
-
-func (coll *Collection) getKey(src interface{}) (*Key, error) {
-	return coll.store.getKey(coll.name, src)
 }

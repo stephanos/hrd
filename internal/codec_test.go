@@ -25,7 +25,7 @@ var _ = Describe("Codec", func() {
 		Check(err, IsNil)
 
 		var codec *structor.Codec
-		codec, err = GetCodec(entity)
+		codec, err = getCodec(entity)
 		Check(err, IsNil)
 		Check(codec, NotNil)
 		Check(codec.Complete(), IsTrue)
@@ -57,13 +57,13 @@ var _ = Describe("Codec", func() {
 		Check(err, IsNil)
 
 		var codec *structor.Codec
-		codec, err = GetCodec(entity)
+		codec, err = getCodec(entity)
 		Check(err, IsNil)
 		Check(codec, NotNil)
 	})
 
 	It("return error for invalid codec", func() {
-		codec, err := GetCodec("invalid-type")
+		codec, err := getCodec("invalid-type")
 
 		Check(codec, IsNil)
 		Check(err, NotNil).And(Contains, `value is not a struct, struct pointer or reflect.Type - but "string"`)

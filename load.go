@@ -1,9 +1,5 @@
 package hrd
 
-import (
-	"fmt"
-)
-
 // Loader can load entities from a Collection.
 type Loader struct {
 	coll *Collection
@@ -36,7 +32,7 @@ func (l *Loader) Key(key *Key) *SingleLoader {
 }
 
 // Keys load multiple entities by key from the datastore.
-func (l *Loader) Keys(keys ...*Key) *MultiLoader {
+func (l *Loader) Keys(keys []*Key) *MultiLoader {
 	l.keys = keys
 	return &MultiLoader{l}
 }
@@ -73,13 +69,6 @@ func (l *Loader) Opts(opts ...Opt) *Loader {
 	return l
 }
 
-// GlobalCache defines whether entities are read from memcache.
-// If no parameter is passed, true is assumed.
-func (l *Loader) GlobalCache(enable ...bool) *Loader {
-	l.opts = l.opts.GlobalCache(enable...)
-	return l
-}
-
 // ==== EXECUTE
 
 // TODO: func (l *Loader) GetEntity(dst interface{}) ([]*Key, error)
@@ -93,30 +82,13 @@ func (l *MultiLoader) GetAll(dsts interface{}) ([]*Key, error) {
 // GetOne loads an entity from the datastore into the passed destination.
 func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 	keys, err := l.loader.get(dst, false)
-
-	var key *Key
 	if len(keys) == 1 {
-		if keys[0].Exists() {
-			key = keys[0]
-		}
+		return keys[0], err
 	}
-
-	return key, err
+	return nil, err
 }
 
 func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
-	for _, k := range l.keys {
-		keyKind := k.Kind()
-		collKind := l.coll.name
-		if keyKind != collKind {
-			err := fmt.Errorf("invalid key kind '%v' for collection '%v'", keyKind, collKind)
-			return nil, logErr(l.coll.store.ctx, err)
-		}
-	}
-
-	docs, err := newWriteableDocs(dst, l.keys, multi)
-	if err != nil {
-		return nil, err
-	}
-	return getMulti(l.coll.store.ctx, l.coll.name, docs, l.opts)
+	keys, err := dsGet(l.coll, toInternalKeys(l.keys), dst, l.opts.useGlobalCache, multi)
+	return newKeys(keys), err
 }
