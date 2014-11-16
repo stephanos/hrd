@@ -45,7 +45,7 @@ func (k *dsKind) Name() string {
 	return k.name
 }
 
-func (_ *dsKind) Context() ae.Context {
+func (k *dsKind) Context() ae.Context {
 	return ctx
 }
 

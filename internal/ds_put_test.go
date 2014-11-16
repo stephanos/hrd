@@ -20,9 +20,9 @@ var _ = Describe("DSPut", func() {
 		Check(err, IsNil)
 		Check(keys, HasLen, 1)
 
-		genId := keys[0].IntID()
-		Check(genId, IsGreaterThan, 0)
-		Check(entity.ID(), Equals, genId)
+		genID := keys[0].IntID()
+		Check(genID, IsGreaterThan, 0)
+		Check(entity.ID(), Equals, genID)
 		Check(entity.lifecycle, Equals, []string{"before-save", "after-save"})
 	})
 
