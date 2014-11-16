@@ -100,6 +100,7 @@ func getKey(kind Kind, src interface{}) (*Key, error) {
 	if ident, ok := src.(entity.TextIdentifier); ok {
 		return NewKey(ds.NewKey(ctx, kind.Name(), ident.ID(), 0, parentKey)), nil
 	}
+
 	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))
 }
 
@@ -107,7 +108,7 @@ func getKeys(kind Kind, src interface{}) ([]*Key, error) {
 	srcVal := reflect.Indirect(reflect.ValueOf(src))
 	srcKind := srcVal.Kind()
 	if srcKind != reflect.Slice && srcKind != reflect.Map {
-		return nil, fmt.Errorf("value must be a slice or map")
+		return nil, fmt.Errorf("value must be a slice or map, but is %q", srcKind)
 	}
 
 	collLen := srcVal.Len()
