@@ -15,6 +15,7 @@ var _ = Describe("Store", func() {
 
 		Check(coll.opts, NotNil)
 		Check(coll.store, Equals, store)
+		Check(coll.Context(), Equals, ctx)
 		Check(coll.Name(), Equals, "my-kind")
 	})
 
