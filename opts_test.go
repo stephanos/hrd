@@ -34,7 +34,7 @@ var _ = Describe("Operation Options", func() {
 		opts3 := opts2.CompleteKeys(true)
 		Check(opts3.completeKeys, IsTrue)
 
-		opts4 := opts2.Opts(CompleteKeys)
+		opts4 := opts2.Apply(CompleteKeys)
 		Check(opts4.completeKeys, IsTrue)
 	})
 
