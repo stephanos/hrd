@@ -115,21 +115,3 @@ func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 	}
 	return keys
 }
-
-// runTX runs f in a transaction. It calls f with a transaction context that
-// should be used for all App Engine operations.
-//
-// Otherwise similar to appengine/datastore.RunInTransaction:
-// https://developers.google.com/appengine/docs/go/datastore/reference#RunInTransaction
-func (store *Store) runTX(f func(*Store) error, opts *operationOpts) error {
-	return ds.RunInTransaction(store.ctx, func(tc ae.Context) error {
-		var dsErr error
-		txStore := &Store{
-			ctx:  tc,
-			tx:   true,
-			opts: opts,
-		}
-		dsErr = f(txStore)
-		return dsErr
-	}, &ds.TransactionOptions{XG: opts.txCrossGroup})
-}

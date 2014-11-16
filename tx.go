@@ -1,5 +1,10 @@
 package hrd
 
+import (
+	ae "appengine"
+	ds "appengine/datastore"
+)
+
 // Transactor can run multiple datastore operations inside a transaction.
 type Transactor struct {
 	store *Store
@@ -31,5 +36,14 @@ func (tx *Transactor) XG(enable ...bool) *Transactor {
 
 // Run executes a transaction.
 func (tx *Transactor) Run(f func(*Store) error) error {
-	return tx.store.runTX(f, tx.opts)
+	return ds.RunInTransaction(tx.store.ctx, func(tc ae.Context) error {
+		var dsErr error
+		txStore := &Store{
+			ctx:  tc,
+			tx:   true,
+			opts: tx.opts,
+		}
+		dsErr = f(txStore)
+		return dsErr
+	}, &ds.TransactionOptions{XG: tx.opts.txCrossGroup})
 }
