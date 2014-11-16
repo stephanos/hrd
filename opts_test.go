@@ -33,6 +33,9 @@ var _ = Describe("Operation Options", func() {
 
 		opts3 := opts2.CompleteKeys(true)
 		Check(opts3.completeKeys, IsTrue)
+
+		opts4 := opts2.Opts(CompleteKeys)
+		Check(opts4.completeKeys, IsTrue)
 	})
 
 	It("configures global cache", func() {
@@ -42,7 +45,7 @@ var _ = Describe("Operation Options", func() {
 		opts2 := opts1.GlobalCache()
 		Check(opts2.useGlobalCache, IsTrue)
 
-		opts3 := opts.Apply(NoCache)
+		opts3 := opts.Apply(NoGlobalCache)
 		Check(opts3.useGlobalCache, IsFalse)
 	})
 

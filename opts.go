@@ -7,9 +7,6 @@ type operationOpts struct {
 	// txCrossGroup is whether the transaction can cross multiple entity groups.
 	txCrossGroup bool
 
-	// useLocalCache is whether the in-memory cache is used.
-	// useLocalCache bool
-
 	// useGlobalCache is whether memcache is used.
 	useGlobalCache bool
 }
@@ -18,14 +15,8 @@ type operationOpts struct {
 type Opt int
 
 const (
-	// NoCache prevents reading/writing entities from/to the in-memory cache.
-	NoCache Opt = iota
-
 	// CompleteKeys prevents entity's key must be set before writing.
-	CompleteKeys
-
-	// NoLocalCache prevents reading/writing entities from/to the in-memory cache.
-	// NoLocalCache
+	CompleteKeys = iota
 
 	// NoGlobalCache prevents reading/writing entities from/to memcache.
 	NoGlobalCache
@@ -55,10 +46,6 @@ func (opts *operationOpts) Apply(flags ...Opt) (ret *operationOpts) {
 		switch f {
 		case CompleteKeys:
 			ret = ret.CompleteKeys(true)
-		case NoCache:
-			ret = ret.Cache(false)
-		//case NoLocalCache:
-		//	ret = ret.NoLocalCache()
 		case NoGlobalCache:
 			ret = ret.GlobalCache(false)
 		}
@@ -80,14 +67,6 @@ func (opts *operationOpts) XG(enable ...bool) (ret *operationOpts) {
 	ret = opts.clone()
 	ret.txCrossGroup = allTrueOrEmpty(enable...)
 	return ret
-}
-
-// Cache defines whether entities are read/written from/to any cache.
-// If no parameter is passed, true is assumed.
-func (opts *operationOpts) Cache(enable ...bool) (ret *operationOpts) {
-	ret = opts.clone()
-	ret.useGlobalCache = allTrueOrEmpty(enable...)
-	return
 }
 
 // GlobalCache defines whether entities are read/written from/to memcache.
