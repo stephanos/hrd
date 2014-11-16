@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"appengine/datastore"
+	ds "appengine/datastore"
 )
 
 // Query represents a datastore query.
@@ -15,7 +15,7 @@ type Query struct {
 	logs   []string
 	limit  int
 	opts   *operationOpts
-	dsQry  *datastore.Query
+	dsQry  *ds.Query
 }
 
 type qryType int
@@ -39,7 +39,7 @@ func newQuery(coll *Collection) (ret *Query) {
 		limit:  -1,
 		typeOf: hybridQry,
 		opts:   defaultOperationOpts(),
-		dsQry:  datastore.NewQuery(coll.name),
+		dsQry:  ds.NewQuery(coll.name),
 		logs:   []string{"KIND " + coll.name},
 	}
 }
@@ -130,7 +130,7 @@ func (qry *Query) EventualConsistency() (ret *Query) {
 func (qry *Query) End(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
-		if cursor, err := datastore.DecodeCursor(c); err == nil {
+		if cursor, err := ds.DecodeCursor(c); err == nil {
 			ret.log("END CURSOR")
 			ret.dsQry = ret.dsQry.End(cursor)
 		} else {
@@ -145,7 +145,7 @@ func (qry *Query) End(c string) (ret *Query) {
 func (qry *Query) Start(c string) (ret *Query) {
 	ret = qry.clone()
 	if c != "" {
-		if cursor, err := datastore.DecodeCursor(c); err == nil {
+		if cursor, err := ds.DecodeCursor(c); err == nil {
 			ret.log("START CURSOR")
 			ret.dsQry = ret.dsQry.Start(cursor)
 		} else {

@@ -1,9 +1,9 @@
 package internal
 
-import "appengine/datastore"
+import ds "appengine/datastore"
 
 // DSIterate loads entities from an iterator.
-func DSIterate(dsIt *datastore.Iterator, dsts interface{}, multi bool) (keys []*Key, err error) {
+func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*Key, err error) {
 
 	// in a keys-only query there is no dsts
 	var docs *docs
@@ -15,7 +15,7 @@ func DSIterate(dsIt *datastore.Iterator, dsts interface{}, multi bool) (keys []*
 	}
 
 	var dsDocs []*doc
-	var dsKeys []*datastore.Key
+	var dsKeys []*ds.Key
 	for {
 		var doc *doc
 		if docs != nil {
@@ -26,9 +26,9 @@ func DSIterate(dsIt *datastore.Iterator, dsts interface{}, multi bool) (keys []*
 			dsDocs = append(dsDocs, doc)
 		}
 
-		var dsKey *datastore.Key
+		var dsKey *ds.Key
 		dsKey, err = dsIt.Next(doc)
-		if err == datastore.Done {
+		if err == ds.Done {
 			if !multi {
 				docs.nil(0)
 				return nil, nil

@@ -1,11 +1,11 @@
 package hrd
 
-import "appengine/datastore"
+import ds "appengine/datastore"
 
 // Iterator is the result of running a query.
 type Iterator struct {
 	qry  *Query
-	dsIt *datastore.Iterator
+	dsIt *ds.Iterator
 }
 
 // Cursor returns a cursor for the Iterator's current location.

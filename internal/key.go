@@ -7,13 +7,13 @@ import (
 
 	"github.com/101loops/hrd/entity"
 
-	"appengine/datastore"
+	ds "appengine/datastore"
 )
 
 // Key represents the datastore key for an
 // It also contains meta data about said
 type Key struct {
-	*datastore.Key
+	*ds.Key
 
 	// synced is the last time the entity was read/written.
 	synced time.Time
@@ -23,12 +23,12 @@ type Key struct {
 }
 
 // NewKey creates a Key from a datastore.Key.
-func NewKey(k *datastore.Key) *Key {
+func NewKey(k *ds.Key) *Key {
 	return &Key{Key: k}
 }
 
 // newKeys creates a sequence of Key from a sequence of datastore.Key.
-func newKeys(keys []*datastore.Key) []*Key {
+func newKeys(keys ...*ds.Key) []*Key {
 	ret := make([]*Key, len(keys))
 	for i, k := range keys {
 		ret[i] = NewKey(k)
@@ -54,7 +54,7 @@ func (key *Key) String() string {
 }
 
 // keyStringID returns the ID of the passed-in Key as a string.
-func keyStringID(key *datastore.Key) (id string) {
+func keyStringID(key *ds.Key) (id string) {
 	id = key.StringID()
 	if id == "" && key.IntID() > 0 {
 		id = fmt.Sprintf("%v", key.IntID())
@@ -63,7 +63,7 @@ func keyStringID(key *datastore.Key) (id string) {
 }
 
 // keyToString returns a string representation of the passed-in Key.
-func keyToString(key *datastore.Key) string {
+func keyToString(key *ds.Key) string {
 	if key == nil {
 		return ""
 	}
@@ -76,8 +76,8 @@ func keyToString(key *datastore.Key) string {
 }
 
 // toDSKeys converts a sequence of Key to a sequence of datastore.Key.
-func toDSKeys(keys []*Key) []*datastore.Key {
-	ret := make([]*datastore.Key, len(keys))
+func toDSKeys(keys []*Key) []*ds.Key {
+	ret := make([]*ds.Key, len(keys))
 	for i, k := range keys {
 		ret[i] = k.Key
 	}
@@ -87,19 +87,19 @@ func toDSKeys(keys []*Key) []*datastore.Key {
 func getKey(kind Kind, src interface{}) (*Key, error) {
 	ctx := kind.Context()
 
-	var parentKey *datastore.Key
+	var parentKey *ds.Key
 	if parented, ok := src.(entity.NumParent); ok {
-		parentKey = datastore.NewKey(ctx, parented.ParentKind(), "", parented.Parent(), nil)
+		parentKey = ds.NewKey(ctx, parented.ParentKind(), "", parented.Parent(), nil)
 	}
 	if parented, ok := src.(entity.TextParent); ok {
-		parentKey = datastore.NewKey(ctx, parented.ParentKind(), parented.Parent(), 0, nil)
+		parentKey = ds.NewKey(ctx, parented.ParentKind(), parented.Parent(), 0, nil)
 	}
 
 	if ident, ok := src.(entity.NumIdentifier); ok {
-		return NewKey(datastore.NewKey(ctx, kind.Name(), "", ident.ID(), parentKey)), nil
+		return NewKey(ds.NewKey(ctx, kind.Name(), "", ident.ID(), parentKey)), nil
 	}
 	if ident, ok := src.(entity.TextIdentifier); ok {
-		return NewKey(datastore.NewKey(ctx, kind.Name(), ident.ID(), 0, parentKey)), nil
+		return NewKey(ds.NewKey(ctx, kind.Name(), ident.ID(), 0, parentKey)), nil
 	}
 	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))
 }

@@ -1,6 +1,17 @@
 package internal
 
-import "github.com/qedus/nds"
+import (
+	"github.com/qedus/nds"
+
+	ae "appengine"
+	ds "appengine/datastore"
+)
+
+var (
+	dsDel = func(ctx ae.Context, keys []*ds.Key) error {
+		return nds.DeleteMulti(ctx, keys)
+	}
+)
 
 // DSDelete deletes the given entity.
 func DSDelete(kind Kind, src interface{}, multi bool) error {
@@ -26,6 +37,8 @@ func DSDelete(kind Kind, src interface{}, multi bool) error {
 func DSDeleteKeys(kind Kind, keys []*Key) error {
 	ctx := kind.Context()
 	dsKeys := toDSKeys(keys)
+
 	ctx.Infof(LogDatastoreAction("deleting", "from", keys, kind.Name()))
-	return nds.DeleteMulti(ctx, dsKeys)
+
+	return dsDel(ctx, dsKeys)
 }

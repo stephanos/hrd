@@ -10,7 +10,7 @@ import (
 	"github.com/101loops/iszero"
 	"github.com/101loops/structor"
 
-	"appengine/datastore"
+	ds "appengine/datastore"
 )
 
 // doc is a reader and writer for a datastore entity.
@@ -162,7 +162,7 @@ func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 }
 
 // Note: Save should close the channel when done, even if an error occurred.
-func (doc *doc) Save(c chan<- datastore.Property) error {
+func (doc *doc) Save(c chan<- ds.Property) error {
 	defer close(c)
 
 	src := doc.get()
@@ -182,7 +182,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 
 	// fill channel
 	for _, prop := range props {
-		c <- datastore.Property{
+		c <- ds.Property{
 			Name:     prop.name,
 			Value:    prop.value,
 			NoIndex:  !prop.indexed,
@@ -202,7 +202,7 @@ func (doc *doc) Save(c chan<- datastore.Property) error {
 }
 
 // Note: Load should drain the channel until closed, even if an error occurred.
-func (doc *doc) Load(c <-chan datastore.Property) error {
+func (doc *doc) Load(c <-chan ds.Property) error {
 
 	dst := doc.get()
 
@@ -213,7 +213,7 @@ func (doc *doc) Load(c <-chan datastore.Property) error {
 		}
 	}
 
-	if err := datastore.LoadStruct(dst, c); err != nil {
+	if err := ds.LoadStruct(dst, c); err != nil {
 		return err
 	}
 

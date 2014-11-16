@@ -3,8 +3,6 @@ package internal
 import (
 	"fmt"
 	"reflect"
-
-	"appengine/datastore"
 )
 
 type docs struct {
@@ -18,7 +16,7 @@ type docs struct {
 }
 
 var (
-	typeOfKey   = reflect.TypeOf(&datastore.Key{})
+	typeOfKey   = reflect.TypeOf(&Key{})
 	typeOfInt64 = reflect.TypeOf(int64(0))
 )
 

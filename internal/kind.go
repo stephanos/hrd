@@ -1,10 +1,10 @@
 package internal
 
-import "appengine"
+import ae "appengine"
 
 // Kind represents a category for entities.
 type Kind interface {
-	Context() appengine.Context
+	Context() ae.Context
 
 	Name() string
 }

@@ -1,11 +1,18 @@
 package internal
 
 import (
+	"crypto/rand"
+	"encoding/binary"
+	"fmt"
 	"testing"
 	"time"
+
 	. "github.com/101loops/bdd"
 
+	ae "appengine"
 	"appengine/aetest"
+	ds "appengine/datastore"
+	"appengine/memcache"
 )
 
 var (
@@ -28,11 +35,25 @@ func TestSuite(t *testing.T) {
 	RunSpecs(t, "HRD Internal Suite")
 }
 
-//func randomColl() *Kind {
-//	var n int32
-//	binary.Read(rand.Reader, binary.LittleEndian, &n)
-//	return store.Coll(fmt.Sprintf("coll_%v", n))
-//}
+// ==== KIND
+
+type dsKind struct {
+	name string
+}
+
+func (k *dsKind) Name() string {
+	return k.name
+}
+
+func (_ *dsKind) Context() ae.Context {
+	return ctx
+}
+
+func randomKind() Kind {
+	var n int32
+	binary.Read(rand.Reader, binary.LittleEndian, &n)
+	return &dsKind{fmt.Sprintf("coll_%v", n)}
+}
 
 // ==== MODELS
 
@@ -46,8 +67,6 @@ type SimpleModel struct {
 	Text      string    `datastore:"html,index"`
 	Time      time.Time `datastore:"timing,index,omitempty"`
 	lifecycle []string
-	updatedAt time.Time
-	createdAt time.Time
 }
 
 func (mdl *SimpleModel) ID() int64 {
@@ -76,14 +95,6 @@ func (mdl *SimpleModel) BeforeSave() error {
 func (mdl *SimpleModel) AfterSave() error {
 	mdl.lifecycle = append(mdl.lifecycle, "after-save")
 	return nil
-}
-
-func (mdl *SimpleModel) SetCreatedAt(t time.Time) {
-	mdl.createdAt = t
-}
-
-func (mdl *SimpleModel) SetUpdatedAt(t time.Time) {
-	mdl.updatedAt = t
 }
 
 type ChildModel struct {
@@ -147,28 +158,16 @@ type Pair struct {
 
 // ===== UTIL
 
-//func clearCache() {
-//	memcache.Flush(ctx)
-//}
-//
-//var ExistsInDatabase = NewMatcherBuilder().
-//SetApply(
-//func(actual interface{}, expected []interface{}) Result {
-//	key, ok := actual.(*Key)
-//	if !ok {
-//		err := fmt.Errorf("expected a Key, got: \n %s", format.Object(actual, 1))
-//		return Result{Error: err}
-//	}
-//
-//	var entity *SimpleModel
-//	key, err := store.Coll(key.Key.Kind()).Load().Key(key).GetOne(&entity)
-//
-//	var r Result
-//	if err == nil && key != nil && entity != nil {
-//		r.Success = true
-//	} else {
-//		r.FailureMessage = format.Message(actual, " not to exist in database")
-//		r.NegatedFailureMessage = format.Message(actual, " to exist in database")
-//	}
-//	return r
-//}).Build()
+func clearCache() {
+	memcache.Flush(ctx)
+}
+
+func existsInDB(dsKey *ds.Key) bool {
+	var entity *SimpleModel
+	keys, err := DSGet(&dsKind{dsKey.Kind()}, []*Key{NewKey(dsKey)}, &entity, false, false)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%v\n", keys[0].synced)
+	return len(keys) == 1 && keys[0].Exists()
+}

@@ -1,6 +1,6 @@
 package hrd
 
-import "appengine"
+import ae "appengine"
 
 // Collection represents a datastore kind.
 type Collection struct {
@@ -15,7 +15,7 @@ func (coll *Collection) Name() string {
 }
 
 // Context returns the App Engine context
-func (coll *Collection) Context() appengine.Context {
+func (coll *Collection) Context() ae.Context {
 	return coll.store.ctx
 }
 

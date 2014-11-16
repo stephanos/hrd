@@ -5,8 +5,8 @@ import (
 
 	"github.com/101loops/hrd/internal"
 
-	"appengine"
-	"appengine/datastore"
+	ae "appengine"
+	ds "appengine/datastore"
 )
 
 // datastore operations, makes it easy to stub out during testing
@@ -18,10 +18,10 @@ var (
 	dsIterate    = internal.DSIterate
 )
 
-// Store represents the datastore.
+// Store represents the ds.
 // Users should only need to create one store for each request.
 type Store struct {
-	ctx appengine.Context
+	ctx ae.Context
 
 	// opts is a collection of options.
 	// It controls the store's operations.
@@ -35,7 +35,7 @@ type Store struct {
 }
 
 // NewStore creates a new store for the passed App Engine context.
-func NewStore(ctx appengine.Context) *Store {
+func NewStore(ctx ae.Context) *Store {
 	store := &Store{
 		ctx:       ctx,
 		createdAt: time.Now(),
@@ -79,11 +79,11 @@ func (store *Store) CreatedAt() time.Time {
 // NewNumKey returns a key for the passed kind and numeric ID.
 // It can also receive an optional parent key.
 func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
-	var parentKey *datastore.Key
+	var parentKey *ds.Key
 	if len(parent) > 0 {
 		parentKey = parent[0].Key.Key
 	}
-	return newKey(internal.NewKey(datastore.NewKey(store.ctx, kind, "", id, parentKey)))
+	return newKey(internal.NewKey(ds.NewKey(store.ctx, kind, "", id, parentKey)))
 }
 
 // NewNumKeys returns a sequence of key for the passed kind and
@@ -99,11 +99,11 @@ func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
 // NewTextKey returns a key for the passed kind and string ID.
 // It can also receive an optional parent key.
 func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
-	var parentKey *datastore.Key
+	var parentKey *ds.Key
 	if len(parent) > 0 {
 		parentKey = parent[0].Key.Key
 	}
-	return newKey(internal.NewKey(datastore.NewKey(store.ctx, kind, id, 0, parentKey)))
+	return newKey(internal.NewKey(ds.NewKey(store.ctx, kind, id, 0, parentKey)))
 }
 
 // NewTextKeys returns a sequence of keys for the passed kind and
@@ -122,7 +122,7 @@ func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
 // Otherwise similar to appengine/datastore.RunInTransaction:
 // https://developers.google.com/appengine/docs/go/datastore/reference#RunInTransaction
 func (store *Store) runTX(f func(*Store) error, opts *operationOpts) error {
-	return datastore.RunInTransaction(store.ctx, func(tc appengine.Context) error {
+	return ds.RunInTransaction(store.ctx, func(tc ae.Context) error {
 		var dsErr error
 		txStore := &Store{
 			ctx:  tc,
@@ -131,5 +131,5 @@ func (store *Store) runTX(f func(*Store) error, opts *operationOpts) error {
 		}
 		dsErr = f(txStore)
 		return dsErr
-	}, &datastore.TransactionOptions{XG: opts.txCrossGroup})
+	}, &ds.TransactionOptions{XG: opts.txCrossGroup})
 }
