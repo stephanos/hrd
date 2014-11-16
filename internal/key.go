@@ -19,7 +19,7 @@ type Key struct {
 	synced time.Time
 
 	// err contains an error if the entity could not be loaded/saved.
-	err *error
+	err error
 }
 
 // NewKey creates a Key from a datastore.Key.
@@ -43,10 +43,7 @@ func (key *Key) Exists() bool {
 
 // Error returns an error associated with the key.
 func (key *Key) Error() error {
-	if key.err == nil {
-		return nil
-	}
-	return *key.err
+	return key.err
 }
 
 func (key *Key) String() string {
@@ -88,11 +85,13 @@ func getKey(kind Kind, src interface{}) (*Key, error) {
 	ctx := kind.Context()
 
 	var parentKey *ds.Key
-	if parented, ok := src.(entity.NumParent); ok {
-		parentKey = ds.NewKey(ctx, parented.ParentKind(), "", parented.Parent(), nil)
+	if parentIdent, ok := src.(entity.ParentNumIdentifier); ok {
+		kind, id := parentIdent.Parent()
+		parentKey = ds.NewKey(ctx, kind, "", id, nil)
 	}
-	if parented, ok := src.(entity.TextParent); ok {
-		parentKey = ds.NewKey(ctx, parented.ParentKind(), parented.Parent(), 0, nil)
+	if parentIdent, ok := src.(entity.ParentTextIdentifier); ok {
+		kind, id := parentIdent.Parent()
+		parentKey = ds.NewKey(ctx, kind, id, 0, nil)
 	}
 
 	if ident, ok := src.(entity.NumIdentifier); ok {

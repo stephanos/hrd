@@ -91,12 +91,12 @@ func applyTo(key *Key, src interface{}) {
 	var parentKey = key.Parent()
 	if parentKey != nil {
 		id := parentKey.IntID()
-		if parent, ok := src.(entity.NumParent); id != 0 && ok {
-			parent.SetParent(id)
+		if parent, ok := src.(entity.ParentNumIdentifier); id != 0 && ok {
+			parent.SetParent(parentKey.Kind(), id)
 		} else {
 			sid := parentKey.StringID()
-			if parent, ok := src.(entity.TextParent); sid != "" && ok {
-				parent.SetParent(sid)
+			if parent, ok := src.(entity.ParentTextIdentifier); sid != "" && ok {
+				parent.SetParent(parentKey.Kind(), sid)
 			}
 		}
 	}

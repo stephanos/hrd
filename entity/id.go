@@ -1,47 +1,51 @@
 package entity
 
-// TextIdentifier can identify a datastore entity via string ID.
+// TextIdentifier identifies a datastore entity via string ID.
 type TextIdentifier interface {
 
-	// ID returns a string identifier.
+	// ID returns the string identifier.
 	ID() string
 
-	// SetID applies a string identifier.
+	// SetID sets the string identifier.
 	SetID(string)
 }
 
-// NumIdentifier can identify a datastore entity via numeric ID.
+// TextID represents an entity's string identifier.
+type TextID struct {
+	id string
+}
+
+// ID returns the string identifier.
+func (mdl *TextID) ID() string {
+	return mdl.id
+}
+
+// SetID sets the string identifier.
+func (mdl *TextID) SetID(id string) {
+	mdl.id = id
+}
+
+// NumIdentifier identifies a datastore entity via numeric ID.
 type NumIdentifier interface {
 
-	// ID returns a numeric identifier.
+	// ID returns the numeric identifier.
 	ID() int64
 
-	// SetID applies a numeric identifier.
+	// SetID sets the numeric identifier.
 	SetID(int64)
 }
 
-// TextParent can identify a datastore entity's parent via string ID.
-type TextParent interface {
-
-	// Parent returns the parent's string identifier.
-	Parent() string
-
-	// SetParent applies the parent's string identifier.
-	SetParent(string)
-
-	// ParentKind returns the parent's collection type.
-	ParentKind() string
+// NumID represents an entity's numeric identifier.
+type NumID struct {
+	id int64
 }
 
-// NumParent can identify a datastore entity's parent via numeric ID.
-type NumParent interface {
+// ID returns the numeric identifier.
+func (mdl *NumID) ID() int64 {
+	return mdl.id
+}
 
-	// Parent returns the parent's numeric identifier.
-	Parent() int64
-
-	// SetParent applies the parent's numeric identifier.
-	SetParent(int64)
-
-	// ParentKind returns the parent's collection type.
-	ParentKind() string
+// SetID sets the numeric identifier.
+func (mdl *NumID) SetID(id int64) {
+	mdl.id = id
 }

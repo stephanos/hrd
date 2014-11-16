@@ -17,9 +17,11 @@ var _ = Describe("DSDelete", func() {
 	BeforeEach(func() {
 		kind = randomKind()
 
-		entities = []interface{}{
-			&SimpleModel{id: 1}, &SimpleModel{id: 2},
-			&SimpleModel{id: 3}, &SimpleModel{id: 4},
+		entities = make([]interface{}, 4)
+		for i := int64(0); i < 4; i++ {
+			entity := &SimpleModel{}
+			entity.SetID(i + 1)
+			entities[i] = entity
 		}
 		keys, err := DSPut(kind, entities, true)
 		Check(err, IsNil)

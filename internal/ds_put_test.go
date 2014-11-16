@@ -42,7 +42,8 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("saves an entity with id", func() {
-		entity := &SimpleModel{id: 42}
+		entity := &SimpleModel{}
+		entity.SetID(42)
 
 		keys, err := DSPut(kind, entity, true)
 		Check(err, IsNil)
@@ -53,9 +54,9 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("saves multiple entities with id", func() {
-		entities := []*SimpleModel{
-			&SimpleModel{id: 1}, &SimpleModel{id: 2},
-		}
+		entities := []*SimpleModel{&SimpleModel{}, &SimpleModel{}}
+		entities[0].SetID(1)
+		entities[1].SetID(2)
 
 		keys, err := DSPut(kind, entities, true)
 		Check(err, IsNil)
@@ -63,19 +64,6 @@ var _ = Describe("DSPut", func() {
 
 		Check(keys[0].IntID(), EqualsNum, 1)
 		Check(keys[1].IntID(), EqualsNum, 2)
-	})
-
-	It("saves multiple entities with parents", func() {
-		entities := []*ChildModel{
-			&ChildModel{id: "a", parentID: 42, parentKind: kind.Name()},
-			&ChildModel{id: "b", parentID: 42, parentKind: kind.Name()},
-		}
-		keys, err := DSPut(kind, entities, true)
-
-		Check(err, IsNil)
-		Check(keys, HasLen, 2)
-		Check(keys[0].StringID(), Equals, "a")
-		Check(keys[1].StringID(), Equals, "b")
 	})
 
 	// ==== ERRORS

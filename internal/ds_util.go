@@ -45,7 +45,7 @@ func applyResult(dsDocs []*doc, dsKeys []*ds.Key, dsErr error) ([]*Key, error) {
 		}
 
 		hasErr = true
-		keys[i].err = &mErr[i]
+		keys[i].err = mErr[i]
 	}
 
 	if hasErr {

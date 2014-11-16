@@ -8,6 +8,7 @@ import (
 	"time"
 
 	. "github.com/101loops/bdd"
+	"github.com/101loops/hrd/entity"
 
 	ae "appengine"
 	"appengine/aetest"
@@ -27,7 +28,6 @@ func TestSuite(t *testing.T) {
 	}
 	defer ctx.Close()
 
-	CodecSet.AddMust(ChildModel{})
 	CodecSet.AddMust(SimpleModel{})
 	CodecSet.AddMust(InvalidModel{})
 	CodecSet.AddMust(ComplexModel{})
@@ -60,21 +60,14 @@ func randomKind() Kind {
 type InvalidModel struct{}
 
 type SimpleModel struct {
-	id        int64
+	entity.NumID
+
 	Ignore    string    `datastore:"-"`
 	Num       int64     `datastore:"num"`
 	Data      []byte    `datastore:",index"`
 	Text      string    `datastore:"html,index"`
 	Time      time.Time `datastore:"timing,index,omitempty"`
 	lifecycle []string
-}
-
-func (mdl *SimpleModel) ID() int64 {
-	return mdl.id
-}
-
-func (mdl *SimpleModel) SetID(id int64) {
-	mdl.id = id
 }
 
 func (mdl *SimpleModel) BeforeLoad() error {
@@ -95,32 +88,6 @@ func (mdl *SimpleModel) BeforeSave() error {
 func (mdl *SimpleModel) AfterSave() error {
 	mdl.lifecycle = append(mdl.lifecycle, "after-save")
 	return nil
-}
-
-type ChildModel struct {
-	id         string
-	parentID   int64
-	parentKind string
-}
-
-func (mdl *ChildModel) ID() string {
-	return mdl.id
-}
-
-func (mdl *ChildModel) SetID(id string) {
-	mdl.id = id
-}
-
-func (mdl *ChildModel) Parent() int64 {
-	return mdl.parentID
-}
-
-func (mdl *ChildModel) SetParent(parentID int64) {
-	mdl.parentID = parentID
-}
-
-func (mdl *ChildModel) ParentKind() string {
-	return mdl.parentKind
 }
 
 type ComplexModel struct {
