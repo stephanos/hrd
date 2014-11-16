@@ -21,7 +21,7 @@ func (mdl *ParentTextID) Parent() (kind string, id string) {
 	return mdl.parentKind, mdl.parentID
 }
 
-// Parent sets the parent identifier.
+// SetParent sets the parent identifier.
 func (mdl *ParentTextID) SetParent(kind string, id string) {
 	mdl.parentKind = kind
 	mdl.parentID = id
@@ -48,7 +48,7 @@ func (mdl *ParentNumID) Parent() (kind string, id int64) {
 	return mdl.parentKind, mdl.parentID
 }
 
-// Parent sets the parent identifier.
+// SetParent sets the parent identifier.
 func (mdl *ParentNumID) SetParent(kind string, id int64) {
 	mdl.parentKind = kind
 	mdl.parentID = id
