@@ -103,6 +103,23 @@ var _ = Describe("Key", func() {
 				Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0,
 					ds.NewKey(ctx, "my-parent", "xyz", 0, nil))))
 			})
+
+			It("but not an invalid entity", func() {
+				entity := "invalid"
+				key, err := getKey(dsKind, &entity)
+
+				Check(key, IsNil)
+				Check(err, NotNil).And(Contains, `value type "*string" does not provide ID()`)
+			})
+
+			It("but not an invalid entity collection", func() {
+				invalidEntities := "invalid"
+				key, err := getKeys(dsKind, &invalidEntities)
+
+				Check(key, IsNil)
+				Check(err, NotNil).And(Contains, `value must be a slice or map, but is "string"`)
+			})
+
 		})
 
 		Context("mutliple entities", func() {
@@ -136,22 +153,22 @@ var _ = Describe("Key", func() {
 				Check(keys[0], Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)))
 				Check(keys[1], Equals, NewKey(ds.NewKey(ctx, "my-kind", "xyz", 0, nil)))
 			})
-		})
 
-		It("but not an invalid entity", func() {
-			entity := "invalid"
-			key, err := getKey(dsKind, &entity)
+			It("but not a slice of invalid entities", func() {
+				invalidEntities := []string{"invalid"}
+				keys, err := getKeys(dsKind, invalidEntities)
 
-			Check(key, IsNil)
-			Check(err, NotNil).And(Contains, `value type "*string" does not provide ID()`)
-		})
+				Check(keys, IsNil)
+				Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+			})
 
-		It("but not an invalid entity collection", func() {
-			invalidEntities := "invalid"
-			key, err := getKeys(dsKind, &invalidEntities)
+			It("but not a map of invalid entities", func() {
+				invalidEntities := map[int]string{0: "invalid"}
+				keys, err := getKeys(dsKind, invalidEntities)
 
-			Check(key, IsNil)
-			Check(err, NotNil).And(Contains, `value must be a slice or map, but is "string"`)
+				Check(keys, IsNil)
+				Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+			})
 		})
 	})
 })
