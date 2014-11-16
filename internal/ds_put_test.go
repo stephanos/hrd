@@ -82,7 +82,7 @@ var _ = Describe("DSPut", func() {
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "int")
 	})
 
-	It("does not save entity without ID() and 42()", func() {
+	It("does not save entity without ID()", func() {
 		invalidMdl := &InvalidModel{}
 		keys, err := DSPut(kind, invalidMdl, false)
 
