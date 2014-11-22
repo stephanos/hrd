@@ -13,37 +13,41 @@ var _ = Describe("Key", func() {
 		kind *Kind
 	)
 
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		kind = NewKind(ctx, "my-kind")
 	})
 
-	It("returns string representation of Key", func() {
-		key := NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)).String()
-		Check(key, Equals, "Key{'my-kind', abc}")
+	It("creates a new key", func() {
+		key := NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil))
 
-		key = NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil)).String()
-		Check(key, Equals, "Key{'my-kind', 42}")
-
-		key = NewKey(ds.NewKey(ctx, "my-child", "", 42,
-			ds.NewKey(ctx, "my-parent", "parent", 0, nil))).String()
-		Check(key, Equals, "Key{'my-child', 42}[ParentKey{'my-parent', parent}]")
+		Check(key, NotNil)
+		Check(key.IntID(), EqualsNum, 42)
 	})
 
-	//	It("returns if it exists in the database", func() {
-	//		key := NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil))
-	//		Check(key.Exists(), IsFalse)
-	//
-	//		key.synced = time.Now()
-	//		Check(key.Exists(), IsTrue)
-	//	})
+	It("creates multiple new keys", func() {
+		dsKeys := []*ds.Key{
+			ds.NewKey(ctx, kind.Name, "", 1, nil), ds.NewKey(ctx, kind.Name, "", 2, nil),
+		}
+		keys := NewKeys(dsKeys...)
 
-	//	It("returns an inner error", func() {
-	//		key := NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil))
-	//		Check(key.Error(), IsNil)
-	//
-	//		key.err = fmt.Errorf("an error")
-	//		Check(key.Error(), NotNil).And(Equals, key.err)
-	//	})
+		Check(keys, HasLen, 2)
+		Check(keys[0].IntID(), EqualsNum, 1)
+		Check(keys[0].Kind(), Equals, kind.Name)
+		Check(keys[1].IntID(), EqualsNum, 2)
+		Check(keys[1].Kind(), Equals, kind.Name)
+	})
+
+	It("returns string representation of Key", func() {
+		str := NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)).String()
+		Check(str, Equals, "Key{'my-kind', abc}")
+
+		str = NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil)).String()
+		Check(str, Equals, "Key{'my-kind', 42}")
+
+		str = NewKey(ds.NewKey(ctx, "my-child", "", 42,
+			ds.NewKey(ctx, "my-parent", "parent", 0, nil))).String()
+		Check(str, Equals, "Key{'my-child', 42}[ParentKey{'my-parent', parent}]")
+	})
 
 	Context("is created from", func() {
 
