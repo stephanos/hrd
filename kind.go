@@ -6,7 +6,7 @@ import ae "appengine"
 type Kind struct {
 	store *Store
 	name  string
-	opts  *Opts
+	opts  *opts
 }
 
 func newKind(store *Store, name string) *Kind {

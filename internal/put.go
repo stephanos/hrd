@@ -21,7 +21,7 @@ var (
 func DSPut(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
 	ctx := kind.Context
 
-	docs, err := trafo.NewReadableDocs(kind, src)
+	docs, err := trafo.NewReadableDocSet(kind, src)
 	if err != nil {
 		return nil, err
 	}

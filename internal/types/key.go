@@ -16,6 +16,8 @@ type Key struct {
 	*KeyResult
 }
 
+// KeyResult represents meta data of the datastore operation
+// the key originates from, if any.
 type KeyResult struct {
 	// Synced is the last time the entity was read/written.
 	Synced *time.Time
@@ -29,7 +31,7 @@ func NewKey(k *ds.Key) *Key {
 	return &Key{k, &KeyResult{}}
 }
 
-// newKeys creates a sequence of Key from a sequence of datastore.Key.
+// NewKeys creates a sequence of Key from a sequence of datastore.Key.
 func NewKeys(keys ...*ds.Key) []*Key {
 	ret := make([]*Key, len(keys))
 	for i, k := range keys {
@@ -64,6 +66,7 @@ func keyStringID(key *ds.Key) (id string) {
 	return
 }
 
+// GetEntityKey extracts a new Key from the given entity.
 func GetEntityKey(kind *Kind, src interface{}) (*Key, error) {
 	ctx := kind.Context
 
@@ -87,6 +90,7 @@ func GetEntityKey(kind *Kind, src interface{}) (*Key, error) {
 	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))
 }
 
+// GetEntitiesKeys extracts a sequence of Key from the given entities.
 func GetEntitiesKeys(kind *Kind, src interface{}) ([]*Key, error) {
 	srcVal := reflect.Indirect(reflect.ValueOf(src))
 	srcKind := srcVal.Kind()

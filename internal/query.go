@@ -11,9 +11,9 @@ import (
 func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
 
 	// in a keys-only query there is no dsts
-	var docs *trafo.Docs
+	var docSet *trafo.DocSet
 	if dsts != nil {
-		docs, err = trafo.NewWriteableDocs(dsts, nil, multi)
+		docSet, err = trafo.NewWriteableDocSet(dsts, nil, multi)
 		if err != nil {
 			return
 		}
@@ -21,10 +21,12 @@ func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.K
 
 	var dsDocs []*trafo.Doc
 	var dsKeys []*ds.Key
-	for {
+	for i := 0; ; i++ {
+
+		// prepare next doc
 		var doc *trafo.Doc
-		if docs != nil {
-			doc, err = docs.Next()
+		if docSet != nil {
+			doc, err = docSet.Get(i)
 			if err != nil {
 				return
 			}
@@ -35,7 +37,9 @@ func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.K
 		dsKey, err = dsIt.Next(doc)
 		if err == ds.Done {
 			if !multi {
-				docs.Nil(0)
+				if doc != nil {
+					doc.Nil()
+				}
 				return nil, nil
 			}
 			break
@@ -54,7 +58,7 @@ func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.K
 	keys, err = applyResult(dsDocs, dsKeys, err)
 	if dsDocs != nil {
 		for i := range keys {
-			docs.Add(keys[i], dsDocs[i])
+			docSet.Add(keys[i], dsDocs[i])
 		}
 	}
 

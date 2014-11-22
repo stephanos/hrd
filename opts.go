@@ -1,6 +1,7 @@
 package hrd
 
-type Opts struct {
+type opts struct {
+
 	// completeKeys is whether an entity's key must be set before writing.
 	completeKeys bool
 
@@ -19,20 +20,20 @@ const (
 	NoGlobalCache
 )
 
-func defaultOpts() *Opts {
-	return &Opts{
+func defaultOpts() *opts {
+	return &opts{
 		useGlobalCache: true,
 	}
 }
 
 // Clone returns a deep copy.
-func (opts *Opts) clone() *Opts {
+func (opts *opts) clone() *opts {
 	copy := *opts
 	return &copy
 }
 
 // Flags applies a sequence of Flag.
-func (opts *Opts) Apply(flags ...Opt) (ret *Opts) {
+func (opts *opts) Apply(flags ...Opt) (ret *opts) {
 	if len(flags) == 0 {
 		return opts
 	}

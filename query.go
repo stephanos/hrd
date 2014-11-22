@@ -16,7 +16,7 @@ type Query struct {
 	typeOf qryType
 	logs   []string
 	limit  int
-	opts   *Opts
+	opts   *opts
 	dsQry  *ds.Query
 }
 

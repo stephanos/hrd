@@ -6,7 +6,7 @@ import (
 
 var _ = Describe("Operation Options", func() {
 
-	var opts *Opts
+	var opts *opts
 
 	BeforeEach(func() {
 		opts = defaultOpts()

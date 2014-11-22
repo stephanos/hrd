@@ -23,7 +23,7 @@ var (
 // Store represents the App Engine datastore.
 // Usually there should only be one per application.
 type Store struct {
-	opts      *Opts
+	opts      *opts
 	createdAt time.Time
 }
 
@@ -72,7 +72,7 @@ func (s *Store) CreatedAt() time.Time {
 type actionContext struct {
 	ctx  ae.Context
 	kind *Kind
-	opts *Opts
+	opts *opts
 }
 
 func newActionContext(ctx ae.Context, kind *Kind) *actionContext {

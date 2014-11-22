@@ -27,7 +27,7 @@ func DSGet(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache 
 		return nil, err
 	}
 
-	docs, err := trafo.NewWriteableDocs(dst, keys, multi)
+	docs, err := trafo.NewWriteableDocSet(dst, keys, multi)
 	if err != nil {
 		return nil, err
 	}

@@ -14,7 +14,7 @@ import (
 	ds "appengine/datastore"
 )
 
-// doc is a reader and writer for a datastore entity.
+// Doc is a reader and writer for a datastore entity.
 // It implements the datastore's PropertyLoadSaver.
 //
 // It is based on:
@@ -73,7 +73,7 @@ func newDocFromType(typ reflect.Type) (*Doc, error) {
 	return newDoc(reflect.New(typ.Elem()))
 }
 
-// nil sets the value of the entity to nil.
+// Nil sets the value of the entity to nil.
 func (doc *Doc) Nil() {
 	dst := doc.val()
 	dst.Set(reflect.New(dst.Type()).Elem())
@@ -84,11 +84,10 @@ func (doc *Doc) get() interface{} {
 	return doc.srcVal.Interface()
 }
 
-func (doc *Doc) SetKey(k *types.Key) {
-	applyTo(k, doc.get())
-}
+// SetKey assigns a key to the entity.
+func (doc *Doc) SetKey(key *types.Key) {
+	src := doc.get()
 
-func applyTo(key *types.Key, src interface{}) {
 	var parentKey = key.Parent()
 	if parentKey != nil {
 		id := parentKey.IntID()
@@ -162,7 +161,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	return
 }
 
-// Note: Save should close the channel when done, even if an error occurred.
+// Save saves the entity to datastore properties.
 func (doc *Doc) Save(c chan<- ds.Property) error {
 	defer close(c)
 
@@ -202,9 +201,8 @@ func (doc *Doc) Save(c chan<- ds.Property) error {
 	return nil
 }
 
-// Note: Load should drain the channel until closed, even if an error occurred.
+// Load loads the entity from datastore properties.
 func (doc *Doc) Load(c <-chan ds.Property) error {
-
 	dst := doc.get()
 
 	// event: before load

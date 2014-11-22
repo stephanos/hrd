@@ -6,7 +6,7 @@ import ae "appengine"
 // By default it does not handle multiple entity groups.
 type Transactor struct {
 	ctx        ae.Context
-	opts       *Opts
+	opts       *opts
 	crossGroup bool
 }
 
