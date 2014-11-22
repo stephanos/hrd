@@ -84,7 +84,7 @@ func clearCache() {
 
 func existsInDB(dsKey *ds.Key) bool {
 	var entity *MyModel
-	keys, err := DSGet(types.NewKind(ctx, dsKey.Kind()), []*types.Key{types.NewKey(dsKey)}, &entity, false, false)
+	keys, err := Get(types.NewKind(ctx, dsKey.Kind()), []*types.Key{types.NewKey(dsKey)}, &entity, false, false)
 	if err != nil {
 		panic(err)
 	}

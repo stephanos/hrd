@@ -24,8 +24,8 @@ var _ = Describe("Deleter", func() {
 	})
 
 	AfterEach(func() {
-		dsDelete = internal.DSDelete
-		dsDeleteKeys = internal.DSDeleteKeys
+		dsDelete = internal.Delete
+		dsDeleteKeys = internal.DeleteKeys
 	})
 
 	It("deletes an entity by key", func() {

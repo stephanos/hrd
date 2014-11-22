@@ -12,12 +12,12 @@ import (
 
 // datastore operations, makes it easy to stub out during testing
 var (
-	dsGet        = internal.DSGet
-	dsPut        = internal.DSPut
-	dsDelete     = internal.DSDelete
-	dsTransact   = internal.DSTransact
-	dsDeleteKeys = internal.DSDeleteKeys
-	dsIterate    = internal.DSIterate
+	dsGet        = internal.Get
+	dsPut        = internal.Put
+	dsDelete     = internal.Delete
+	dsIterate    = internal.Iterate
+	dsTransact   = internal.Transact
+	dsDeleteKeys = internal.DeleteKeys
 )
 
 // Store represents the App Engine datastore.

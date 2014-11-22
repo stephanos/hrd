@@ -5,7 +5,7 @@ import (
 	"github.com/101loops/hrd/internal/types"
 )
 
-var _ = Describe("DSPut", func() {
+var _ = Describe("Put", func() {
 
 	var (
 		kind *types.Kind
@@ -19,7 +19,7 @@ var _ = Describe("DSPut", func() {
 	It("saves an entity without id", func() {
 		entity := &MyModel{}
 
-		keys, err := DSPut(kind, entity, false)
+		keys, err := Put(kind, entity, false)
 		Check(err, IsNil)
 		Check(keys, HasLen, 1)
 
@@ -34,7 +34,7 @@ var _ = Describe("DSPut", func() {
 			&MyModel{}, &MyModel{},
 		}
 
-		keys, err := DSPut(kind, entities, false)
+		keys, err := Put(kind, entities, false)
 		Check(err, IsNil)
 		Check(keys, HasLen, 2)
 
@@ -48,7 +48,7 @@ var _ = Describe("DSPut", func() {
 		entity := &MyModel{}
 		entity.SetID(42)
 
-		keys, err := DSPut(kind, entity, true)
+		keys, err := Put(kind, entity, true)
 		Check(err, IsNil)
 		Check(keys, HasLen, 1)
 
@@ -61,7 +61,7 @@ var _ = Describe("DSPut", func() {
 		entities[0].SetID(1)
 		entities[1].SetID(2)
 
-		keys, err := DSPut(kind, entities, true)
+		keys, err := Put(kind, entities, true)
 		Check(err, IsNil)
 		Check(keys, HasLen, 2)
 
@@ -72,14 +72,14 @@ var _ = Describe("DSPut", func() {
 	// ==== ERRORS
 
 	It("does not save nil entity", func() {
-		keys, err := DSPut(kind, nil, false)
+		keys, err := Put(kind, nil, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "must be non-nil")
 	})
 
 	It("does not save non-struct entity", func() {
-		keys, err := DSPut(kind, 42, false)
+		keys, err := Put(kind, 42, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "int")
@@ -87,7 +87,7 @@ var _ = Describe("DSPut", func() {
 
 	It("does not save entity without ID()", func() {
 		invalidMdl := &InvalidModel{}
-		keys, err := DSPut(kind, invalidMdl, false)
+		keys, err := Put(kind, invalidMdl, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "does not provide ID")
@@ -95,7 +95,7 @@ var _ = Describe("DSPut", func() {
 
 	It("does not save complete entity without Id", func() {
 		entity := &MyModel{}
-		keys, err := DSPut(kind, entity, true)
+		keys, err := Put(kind, entity, true)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "is incomplete")
@@ -103,7 +103,7 @@ var _ = Describe("DSPut", func() {
 
 	It("does not save empty entities", func() {
 		entities := []*MyModel{}
-		keys, err := DSPut(kind, entities, false)
+		keys, err := Put(kind, entities, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "no keys provided")

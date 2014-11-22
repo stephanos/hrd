@@ -17,7 +17,7 @@ var _ = Describe("Loader", func() {
 	})
 
 	AfterEach(func() {
-		dsGet = internal.DSGet
+		dsGet = internal.Get
 	})
 
 	It("loads an entity", func() {

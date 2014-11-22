@@ -17,8 +17,8 @@ var (
 	}
 )
 
-// DSPut saves the given entities.
-func DSPut(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
+// Put saves the given entities.
+func Put(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
 	ctx := kind.Context
 
 	docs, err := trafo.NewReadableDocSet(kind, src)
@@ -27,7 +27,7 @@ func DSPut(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, 
 	}
 
 	keys := docs.Keys()
-	if err := validateDSPutKeys(kind, keys, completeKeys); err != nil {
+	if err := validatePutKeys(kind, keys, completeKeys); err != nil {
 		return nil, err
 	}
 
@@ -42,7 +42,7 @@ func DSPut(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, 
 	return applyResult(dsDocs, dsKeys, dsErr)
 }
 
-func validateDSPutKeys(kind *types.Kind, keys []*types.Key, completeKeys bool) error {
+func validatePutKeys(kind *types.Kind, keys []*types.Key, completeKeys bool) error {
 	if len(keys) == 0 {
 		return fmt.Errorf("no keys provided for %q", kind.Name)
 	}

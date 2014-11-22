@@ -7,8 +7,8 @@ import (
 	ds "appengine/datastore"
 )
 
-// DSIterate loads entities from an iterator.
-func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
+// Iterate loads entities from an iterator.
+func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
 
 	// in a keys-only query there is no dsts
 	var docSet *trafo.DocSet

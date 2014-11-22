@@ -21,9 +21,9 @@ var (
 	}
 )
 
-// DSGet loads entities for the given keys.
-func DSGet(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
-	if err := validateDSGetKeys(kind, keys); err != nil {
+// Get loads entities for the given keys.
+func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
+	if err := validateGetKeys(kind, keys); err != nil {
 		return nil, err
 	}
 
@@ -46,7 +46,7 @@ func DSGet(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache 
 	return applyResult(dsDocs, dsKeys, dsErr)
 }
 
-func validateDSGetKeys(kind *types.Kind, keys []*types.Key) error {
+func validateGetKeys(kind *types.Kind, keys []*types.Key) error {
 	if keys == nil || len(keys) == 0 {
 		return fmt.Errorf("no keys provided")
 	}

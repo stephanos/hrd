@@ -17,7 +17,7 @@ var _ = Describe("Saver", func() {
 	})
 
 	AfterEach(func() {
-		dsPut = internal.DSPut
+		dsPut = internal.Put
 	})
 
 	It("saves an entity", func() {

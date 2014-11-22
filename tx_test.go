@@ -9,10 +9,10 @@ import (
 var _ = Describe("Transactor", func() {
 
 	AfterEach(func() {
-		dsGet = internal.DSGet
-		dsPut = internal.DSPut
-		dsDelete = internal.DSDelete
-		dsTransact = internal.DSTransact
+		dsGet = internal.Get
+		dsPut = internal.Put
+		dsDelete = internal.Delete
+		dsTransact = internal.Transact
 	})
 
 	It("initializes and is configurable", func() {

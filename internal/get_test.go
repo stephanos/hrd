@@ -7,7 +7,7 @@ import (
 	ds "appengine/datastore"
 )
 
-var _ = Describe("DSGet", func() {
+var _ = Describe("Get", func() {
 
 	With("w/ global cache", func() {
 		dsLoadTests(true)
@@ -33,7 +33,7 @@ func dsLoadTests(useGlobalCache bool) {
 			entity.SetID(i + 1)
 			entities[i] = entity
 		}
-		keys, err := DSPut(kind, entities, true)
+		keys, err := Put(kind, entities, true)
 		Check(err, IsNil)
 		Check(keys, HasLen, 4)
 
@@ -43,7 +43,7 @@ func dsLoadTests(useGlobalCache bool) {
 	It("loads an entity", func() {
 		var entity *MyModel
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := DSGet(kind, types.NewKeys(dsKey), &entity, useGlobalCache, false)
+		keys, err := Get(kind, types.NewKeys(dsKey), &entity, useGlobalCache, false)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 1)
@@ -58,7 +58,7 @@ func dsLoadTests(useGlobalCache bool) {
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
 			ds.NewKey(ctx, kind.Name, "", 666, nil),
 		}
-		keys, err := DSGet(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
+		keys, err := Get(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 3)
@@ -79,7 +79,7 @@ func dsLoadTests(useGlobalCache bool) {
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
 			ds.NewKey(ctx, kind.Name, "", 666, nil),
 		}
-		keys, err := DSGet(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
+		keys, err := Get(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 3)
@@ -93,7 +93,7 @@ func dsLoadTests(useGlobalCache bool) {
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
 			ds.NewKey(ctx, kind.Name, "", 666, nil),
 		}
-		keys, err := DSGet(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
+		keys, err := Get(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 3)
@@ -105,7 +105,7 @@ func dsLoadTests(useGlobalCache bool) {
 	It("does not load entity into invalid type", func() {
 		var entity string
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := DSGet(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
+		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And("invalid value kind").And(Contains, "string")
@@ -114,7 +114,7 @@ func dsLoadTests(useGlobalCache bool) {
 	It("does not load entity into non-pointer struct", func() {
 		var entity MyModel
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := DSGet(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
+		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "struct")
@@ -123,7 +123,7 @@ func dsLoadTests(useGlobalCache bool) {
 	It("does not load entity into non-reference struct", func() {
 		var entity *MyModel
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := DSGet(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
+		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "ptr")
@@ -135,7 +135,7 @@ func dsLoadTests(useGlobalCache bool) {
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
 		}
-		keys, err := DSGet(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
+		keys, err := Get(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "invalid value key")
@@ -144,7 +144,7 @@ func dsLoadTests(useGlobalCache bool) {
 	It("does not accept key for different Kind", func() {
 		var entity *MyModel
 		invalidKey := ds.NewKey(ctx, "wrong-kind", "", 1, nil)
-		keys, err := DSGet(kind, types.NewKeys(invalidKey), &entity, useGlobalCache, false)
+		keys, err := Get(kind, types.NewKeys(invalidKey), &entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
 		Check(entity, IsNil)
@@ -153,7 +153,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	It("does not load empty keys", func() {
 		var entities []*MyModel
-		keys, err := DSGet(kind, nil, &entities, useGlobalCache, false)
+		keys, err := Get(kind, nil, &entities, useGlobalCache, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "no keys provided")
@@ -162,7 +162,7 @@ func dsLoadTests(useGlobalCache bool) {
 	It("does not load incomplete key", func() {
 		var entity *MyModel
 		incompleteKey := ds.NewKey(ctx, kind.Name, "", 0, nil)
-		keys, err := DSGet(kind, types.NewKeys(incompleteKey), &entity, useGlobalCache, false)
+		keys, err := Get(kind, types.NewKeys(incompleteKey), &entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "is incomplete")

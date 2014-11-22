@@ -7,7 +7,7 @@ import (
 	ds "appengine/datastore"
 )
 
-var _ = Describe("DSDelete", func() {
+var _ = Describe("Delete", func() {
 
 	var (
 		kind *types.Kind
@@ -24,7 +24,7 @@ var _ = Describe("DSDelete", func() {
 			entity.SetID(i + 1)
 			entities[i] = entity
 		}
-		keys, err := DSPut(kind, entities, true)
+		keys, err := Put(kind, entities, true)
 		Check(err, IsNil)
 		Check(keys, HasLen, 4)
 
@@ -35,7 +35,7 @@ var _ = Describe("DSDelete", func() {
 		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
-		err := DSDeleteKeys(kind, types.NewKeys(key))
+		err := DeleteKeys(kind, types.NewKeys(key))
 
 		Check(err, IsNil)
 		Check(existsInDB(key), IsFalse)
@@ -49,7 +49,7 @@ var _ = Describe("DSDelete", func() {
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
 
-		err := DSDeleteKeys(kind, types.NewKeys(keys...))
+		err := DeleteKeys(kind, types.NewKeys(keys...))
 
 		Check(err, IsNil)
 		Check(existsInDB(keys[0]), IsFalse)
@@ -60,7 +60,7 @@ var _ = Describe("DSDelete", func() {
 		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
-		err := DSDelete(kind, entities[0], false)
+		err := Delete(kind, entities[0], false)
 
 		Check(err, IsNil)
 		Check(existsInDB(key), IsFalse)
@@ -74,7 +74,7 @@ var _ = Describe("DSDelete", func() {
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
 
-		err := DSDelete(kind, entities[0:2], true)
+		err := Delete(kind, entities[0:2], true)
 
 		Check(err, IsNil)
 		Check(existsInDB(keys[0]), IsFalse)
@@ -90,7 +90,7 @@ var _ = Describe("DSDelete", func() {
 		Check(existsInDB(keys[1]), IsTrue)
 
 		entityMap := map[string]interface{}{"a": entities[0], "b": entities[1]}
-		err := DSDelete(kind, entityMap, true)
+		err := Delete(kind, entityMap, true)
 
 		Check(err, IsNil)
 		Check(existsInDB(keys[0]), IsFalse)
@@ -101,14 +101,14 @@ var _ = Describe("DSDelete", func() {
 
 	It("does not delete invalid entity", func() {
 		var entity string
-		err := DSDelete(kind, entity, false)
+		err := Delete(kind, entity, false)
 
 		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
 	})
 
 	It("does not delete invalid entities", func() {
 		entities := []string{"a", "b", "c"}
-		err := DSDelete(kind, entities, true)
+		err := Delete(kind, entities, true)
 
 		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
 	})

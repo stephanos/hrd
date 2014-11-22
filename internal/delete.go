@@ -14,8 +14,8 @@ var (
 	}
 )
 
-// DSDelete deletes the given entity.
-func DSDelete(kind *types.Kind, src interface{}, multi bool) error {
+// Delete deletes the given entity.
+func Delete(kind *types.Kind, src interface{}, multi bool) error {
 	var err error
 	var keys []*types.Key
 
@@ -31,11 +31,11 @@ func DSDelete(kind *types.Kind, src interface{}, multi bool) error {
 		return err
 	}
 
-	return DSDeleteKeys(kind, keys)
+	return DeleteKeys(kind, keys)
 }
 
-// DSDeleteKeys deletes the entities for the given keys.
-func DSDeleteKeys(kind *types.Kind, keys []*types.Key) error {
+// DeleteKeys deletes the entities for the given keys.
+func DeleteKeys(kind *types.Kind, keys []*types.Key) error {
 	ctx := kind.Context
 	dsKeys := toDSKeys(keys)
 
