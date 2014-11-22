@@ -20,7 +20,7 @@ var _ = Describe("DSDelete", func() {
 
 		entities = make([]interface{}, 4)
 		for i := int64(0); i < 4; i++ {
-			entity := &SimpleModel{}
+			entity := &MyModel{}
 			entity.SetID(i + 1)
 			entities[i] = entity
 		}
@@ -35,7 +35,7 @@ var _ = Describe("DSDelete", func() {
 		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
-		err := DSDeleteKeys(kind, newKeys(key))
+		err := DSDeleteKeys(kind, types.NewKeys(key))
 
 		Check(err, IsNil)
 		Check(existsInDB(key), IsFalse)
@@ -49,7 +49,7 @@ var _ = Describe("DSDelete", func() {
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
 
-		err := DSDeleteKeys(kind, newKeys(keys...))
+		err := DSDeleteKeys(kind, types.NewKeys(keys...))
 
 		Check(err, IsNil)
 		Check(existsInDB(keys[0]), IsFalse)

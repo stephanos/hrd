@@ -18,7 +18,7 @@ type Key struct {
 
 type KeyResult struct {
 	// Synced is the last time the entity was read/written.
-	Synced time.Time
+	Synced *time.Time
 
 	// Error contains an error if the key could not be loaded/saved.
 	Error error
@@ -30,7 +30,7 @@ func NewKey(k *ds.Key) *Key {
 }
 
 // newKeys creates a sequence of Key from a sequence of datastore.Key.
-func newKeys(keys ...*ds.Key) []*Key {
+func NewKeys(keys ...*ds.Key) []*Key {
 	ret := make([]*Key, len(keys))
 	for i, k := range keys {
 		ret[i] = NewKey(k)

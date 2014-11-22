@@ -1,11 +1,14 @@
 package internal
 
-import . "github.com/101loops/bdd"
+import (
+	. "github.com/101loops/bdd"
+	"github.com/101loops/hrd/internal/types"
+)
 
 var _ = Describe("DSPut", func() {
 
 	var (
-		kind *Kind
+		kind *types.Kind
 	)
 
 	BeforeEach(func() {
@@ -14,7 +17,7 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("saves an entity without id", func() {
-		entity := &SimpleModel{}
+		entity := &MyModel{}
 
 		keys, err := DSPut(kind, entity, false)
 		Check(err, IsNil)
@@ -27,8 +30,8 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("saves multiple entities without id", func() {
-		entities := []*SimpleModel{
-			&SimpleModel{}, &SimpleModel{},
+		entities := []*MyModel{
+			&MyModel{}, &MyModel{},
 		}
 
 		keys, err := DSPut(kind, entities, false)
@@ -42,7 +45,7 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("saves an entity with id", func() {
-		entity := &SimpleModel{}
+		entity := &MyModel{}
 		entity.SetID(42)
 
 		keys, err := DSPut(kind, entity, true)
@@ -54,7 +57,7 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("saves multiple entities with id", func() {
-		entities := []*SimpleModel{&SimpleModel{}, &SimpleModel{}}
+		entities := []*MyModel{&MyModel{}, &MyModel{}}
 		entities[0].SetID(1)
 		entities[1].SetID(2)
 
@@ -91,7 +94,7 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("does not save complete entity without Id", func() {
-		entity := &SimpleModel{}
+		entity := &MyModel{}
 		keys, err := DSPut(kind, entity, true)
 
 		Check(keys, IsNil)
@@ -99,7 +102,7 @@ var _ = Describe("DSPut", func() {
 	})
 
 	It("does not save empty entities", func() {
-		entities := []*SimpleModel{}
+		entities := []*MyModel{}
 		keys, err := DSPut(kind, entities, false)
 
 		Check(keys, IsNil)

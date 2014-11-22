@@ -9,8 +9,9 @@ import (
 
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity"
+	"github.com/101loops/hrd/internal/trafo"
+	"github.com/101loops/hrd/internal/types"
 
-	ae "appengine"
 	"appengine/aetest"
 	ds "appengine/datastore"
 	"appengine/memcache"
@@ -28,38 +29,23 @@ func TestSuite(t *testing.T) {
 	}
 	defer ctx.Close()
 
-	CodecSet.AddMust(SimpleModel{})
-	CodecSet.AddMust(InvalidModel{})
-	CodecSet.AddMust(ComplexModel{})
+	trafo.CodecSet.AddMust(MyModel{})
+	trafo.CodecSet.AddMust(InvalidModel{})
 
 	RunSpecs(t, "HRD Internal Suite")
 }
 
-// ==== KIND
-
-type dsKind struct {
-	name string
-}
-
-func (k *dsKind) Name() string {
-	return k.name
-}
-
-func (k *dsKind) Context() ae.Context {
-	return ctx
-}
-
-func randomKind() Kind {
+func randomKind() *types.Kind {
 	var n int32
 	binary.Read(rand.Reader, binary.LittleEndian, &n)
-	return &dsKind{fmt.Sprintf("coll_%v", n)}
+	return types.NewKind(ctx, fmt.Sprintf("coll_%v", n))
 }
 
 // ==== MODELS
 
 type InvalidModel struct{}
 
-type SimpleModel struct {
+type MyModel struct {
 	entity.NumID
 
 	Ignore    string    `datastore:"-"`
@@ -70,57 +56,24 @@ type SimpleModel struct {
 	lifecycle []string
 }
 
-func (mdl *SimpleModel) BeforeLoad() error {
+func (mdl *MyModel) BeforeLoad() error {
 	mdl.lifecycle = append(mdl.lifecycle, "before-load")
 	return nil
 }
 
-func (mdl *SimpleModel) AfterLoad() error {
+func (mdl *MyModel) AfterLoad() error {
 	mdl.lifecycle = append(mdl.lifecycle, "after-load")
 	return nil
 }
 
-func (mdl *SimpleModel) BeforeSave() error {
+func (mdl *MyModel) BeforeSave() error {
 	mdl.lifecycle = append(mdl.lifecycle, "before-save")
 	return nil
 }
 
-func (mdl *SimpleModel) AfterSave() error {
+func (mdl *MyModel) AfterSave() error {
 	mdl.lifecycle = append(mdl.lifecycle, "after-save")
 	return nil
-}
-
-type ComplexModel struct {
-	Pair Pair `datastore:"tag"`
-	//PairPtr  *Pair   `datastore:"pair"`
-	Pairs []Pair `datastore:"tags"`
-	//PairPtrs []*Pair `datastore:"pairs"`
-	lifecycle string `datastore:"-"`
-}
-
-func (mdl *ComplexModel) BeforeLoad() error {
-	mdl.lifecycle = "before-load"
-	return nil
-}
-
-func (mdl *ComplexModel) AfterLoad() error {
-	mdl.lifecycle = "after-load"
-	return nil
-}
-
-func (mdl *ComplexModel) BeforeSave() error {
-	mdl.lifecycle = "before-save"
-	return nil
-}
-
-func (mdl *ComplexModel) AfterSave() error {
-	mdl.lifecycle = "after-save"
-	return nil
-}
-
-type Pair struct {
-	Key string `datastore:"key,index,omitempty"`
-	Val string
 }
 
 // ===== UTIL
@@ -130,11 +83,10 @@ func clearCache() {
 }
 
 func existsInDB(dsKey *ds.Key) bool {
-	var entity *SimpleModel
-	keys, err := DSGet(&dsKind{dsKey.Kind()}, []*Key{NewKey(dsKey)}, &entity, false, false)
+	var entity *MyModel
+	keys, err := DSGet(types.NewKind(ctx, dsKey.Kind()), []*types.Key{types.NewKey(dsKey)}, &entity, false, false)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%v\n", keys[0].synced)
-	return len(keys) == 1 && keys[0].Exists()
+	return len(keys) == 1 && keys[0].Synced != nil
 }

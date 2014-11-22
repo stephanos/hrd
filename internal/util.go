@@ -46,8 +46,7 @@ func applyResult(dsDocs []*trafo.Doc, dsKeys []*ds.Key, dsErr error) ([]*types.K
 			if dsDocs != nil {
 				dsDocs[i].SetKey(keys[i])
 			}
-			keys[i].Synced = now
-			fmt.Printf("key: %v (%v)\n", keys[i], now)
+			keys[i].Synced = &now
 			continue
 		}
 
