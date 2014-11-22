@@ -16,7 +16,7 @@ var _ = Describe("Transactor", func() {
 	})
 
 	It("initializes and is configurable", func() {
-		tx := store.TX(ctx)
+		tx := myStore.TX(ctx)
 		Check(tx, NotNil)
 		Check(tx.crossGroup, IsFalse)
 
@@ -25,7 +25,7 @@ var _ = Describe("Transactor", func() {
 	})
 
 	It("runs a transaction", func() {
-		err := store.TX(ctx).Run(func(tx TX) error {
+		err := myStore.TX(ctx).Run(func(tx TX) error {
 			Check(tx, NotNil)
 			return fmt.Errorf("tx error")
 		})

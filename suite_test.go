@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	ctx   aetest.Context
-	store *Store
+	ctx     aetest.Context
+	myKind  *Kind
+	myStore *Store
 )
 
 func TestSuite(t *testing.T) {
@@ -21,17 +22,18 @@ func TestSuite(t *testing.T) {
 	}
 	defer ctx.Close()
 
-	store = NewStore()
+	myStore = NewStore()
+	myKind = myStore.Kind("my-kind")
 
 	RunSpecs(t, "HRD API Suite")
 }
 
 type MyModel struct{}
 
-func newNumKeys(kind *Kind, ids ...int64) []*types.Key {
-	return toInternalKeys(ctx, kind.name, kind.NewNumKeys(ids...))
+func newNumKeys(ids ...int64) []*types.Key {
+	return toInternalKeys(ctx, myKind.name, myKind.NewNumKeys(ids...))
 }
 
-func newTextKeys(kind *Kind, ids ...string) []*types.Key {
-	return toInternalKeys(ctx, kind.name, kind.NewTextKeys(ids...))
+func newTextKeys(ids ...string) []*types.Key {
+	return toInternalKeys(ctx, myKind.name, myKind.NewTextKeys(ids...))
 }

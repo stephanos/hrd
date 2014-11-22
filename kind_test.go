@@ -5,14 +5,14 @@ import . "github.com/101loops/bdd"
 var _ = Describe("Kind", func() {
 
 	//	It("creates numeric key", func() {
-	//		key := store.NewNumKey("my-kind", 42)
+	//		key := myKind.NewNumKey(42)
 	//
 	//		Check(key.IntID(), EqualsNum, 42)
 	//		Check(key.Parent(), IsNil)
 	//	})
 	//
 	//	It("creates numeric keys", func() {
-	//		keys := store.NewNumKeys("my-kind", 1, 2)
+	//		keys := myKind.NewNumKeys(1, 2)
 	//
 	//		Check(keys, HasLen, 2)
 	//		Check(keys[0].IntID(), EqualsNum, 1)
@@ -20,7 +20,7 @@ var _ = Describe("Kind", func() {
 	//	})
 	//
 	//	It("creates numeric key with parent", func() {
-	//		key := store.NewNumKey("child-kind", 42, store.NewNumKey("parent-kind", 66))
+	//		key := myKind.NewNumKey(42, myKind.NewNumKey(66))
 	//
 	//		Check(key.IntID(), EqualsNum, 42)
 	//		Check(key.Parent(), NotNil)
@@ -28,14 +28,14 @@ var _ = Describe("Kind", func() {
 	//	})
 	//
 	//	It("creates text key", func() {
-	//		key := store.NewTextKey("my-kind", "abc")
+	//		key := myKind.NewTextKey("abc")
 	//
 	//		Check(key.StringID(), Equals, "abc")
 	//		Check(key.Parent(), IsNil)
 	//	})
 	//
 	//	It("creates text keys", func() {
-	//		keys := store.NewTextKeys("my-kind", "abc", "xyz")
+	//		keys := myKind.NewTextKeys("abc", "xyz")
 	//
 	//		Check(keys, HasLen, 2)
 	//		Check(keys[0].StringID(), Equals, "abc")
@@ -43,7 +43,7 @@ var _ = Describe("Kind", func() {
 	//	})
 	//
 	//	It("creates text key with parent", func() {
-	//		key := store.NewTextKey("child-kind", "abc", store.NewTextKey("parent-kind", "xyz"))
+	//		key := myKind.NewTextKey("abc", myKind.NewTextKey("xyz"))
 	//
 	//		Check(key.StringID(), Equals, "abc")
 	//		Check(key.Parent(), NotNil)

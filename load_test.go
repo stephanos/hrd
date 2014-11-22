@@ -8,12 +8,10 @@ import (
 
 var _ = Describe("Loader", func() {
 
-	var (
-		kind *Kind
-	)
-
 	BeforeEach(func() {
-		kind = store.Kind("my-kind")
+		dsGet = func(_ *types.Kind, _ []*types.Key, _ interface{}, _ bool, _ bool) ([]*types.Key, error) {
+			panic("unexpected call")
+		}
 	})
 
 	AfterEach(func() {
@@ -23,33 +21,33 @@ var _ = Describe("Loader", func() {
 	It("loads an entity", func() {
 		entity := &MyModel{}
 
-		dsGet = func(kindt *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
+		dsGet = func(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
 			Check(multi, IsFalse)
 			Check(dst, Equals, entity)
 			Check(useGlobalCache, IsTrue)
-			Check(kindt.Name, Equals, "my-kind")
-			Check(keys, Equals, newNumKeys(kind, 42))
+			Check(kind.Name, Equals, "my-kind")
+			Check(keys, Equals, newNumKeys(42))
 			return keys, nil
 		}
 
-		key := kind.NewNumKey(42)
-		ret, _ := kind.Load(ctx).Key(key).GetOne(entity)
+		key := myKind.NewNumKey(42)
+		ret, _ := myKind.Load(ctx).Key(key).GetOne(entity)
 		Check(ret, Equals, key)
 	})
 
 	It("loads multiple entities", func() {
 		entities := []*MyModel{&MyModel{}, &MyModel{}}
 
-		dsGet = func(kindt *types.Kind, keys []*types.Key, dsts interface{}, _ bool, multi bool) ([]*types.Key, error) {
+		dsGet = func(kind *types.Kind, keys []*types.Key, dsts interface{}, _ bool, multi bool) ([]*types.Key, error) {
 			Check(multi, IsTrue)
 			Check(dsts, Equals, entities)
-			Check(kindt.Name, Equals, "my-kind")
-			Check(keys, Equals, newNumKeys(kind, 1, 2))
+			Check(kind.Name, Equals, "my-kind")
+			Check(keys, Equals, newNumKeys(1, 2))
 			return keys, nil
 		}
 
-		keys := kind.NewNumKeys(1, 2)
-		ret, _ := kind.Load(ctx).Keys(keys).GetAll(entities)
+		keys := myKind.NewNumKeys(1, 2)
+		ret, _ := myKind.Load(ctx).Keys(keys).GetAll(entities)
 		Check(ret, Equals, keys)
 	})
 
@@ -59,40 +57,40 @@ var _ = Describe("Loader", func() {
 			return nil, nil
 		}
 
-		kind.Load(ctx).Opts(NoGlobalCache).ID(42).GetOne(nil)
+		myKind.Load(ctx).Opts(NoGlobalCache).ID(42).GetOne(nil)
 	})
 
 	Context("creates single-entity loader from", func() {
 		It("key", func() {
-			sl := kind.Load(ctx).Key(kind.NewNumKey(42))
-			Check(sl.loader.keys, Equals, kind.NewNumKeys(42))
+			sl := myKind.Load(ctx).Key(myKind.NewNumKey(42))
+			Check(sl.loader.keys, Equals, myKind.NewNumKeys(42))
 		})
 
 		It("numeric id", func() {
-			sl := kind.Load(ctx).ID(42)
-			Check(sl.loader.keys, Equals, kind.NewNumKeys(42))
+			sl := myKind.Load(ctx).ID(42)
+			Check(sl.loader.keys, Equals, myKind.NewNumKeys(42))
 		})
 
 		It("text id", func() {
-			sl := kind.Load(ctx).TextID("a")
-			Check(sl.loader.keys, Equals, kind.NewTextKeys("a"))
+			sl := myKind.Load(ctx).TextID("a")
+			Check(sl.loader.keys, Equals, myKind.NewTextKeys("a"))
 		})
 	})
 
 	Context("creates multi-entity loader from", func() {
 		It("keys", func() {
-			ml := kind.Load(ctx).Keys(kind.NewNumKeys(1, 2))
-			Check(ml.loader.keys, Equals, kind.NewNumKeys(1, 2))
+			ml := myKind.Load(ctx).Keys(myKind.NewNumKeys(1, 2))
+			Check(ml.loader.keys, Equals, myKind.NewNumKeys(1, 2))
 		})
 
 		It("numeric ids", func() {
-			ml := kind.Load(ctx).IDs(1, 2)
-			Check(ml.loader.keys, Equals, kind.NewNumKeys(1, 2))
+			ml := myKind.Load(ctx).IDs(1, 2)
+			Check(ml.loader.keys, Equals, myKind.NewNumKeys(1, 2))
 		})
 
 		It("text ids", func() {
-			ml := kind.Load(ctx).TextIDs("a", "z")
-			Check(ml.loader.keys, Equals, kind.NewTextKeys("a", "z"))
+			ml := myKind.Load(ctx).TextIDs("a", "z")
+			Check(ml.loader.keys, Equals, myKind.NewTextKeys("a", "z"))
 		})
 	})
 })
