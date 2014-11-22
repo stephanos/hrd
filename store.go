@@ -20,19 +20,11 @@ var (
 	dsIterate    = internal.DSIterate
 )
 
-// Store represents the ds.
-// Users should only need to create one store for each request.
+// Store represents the App Engine datastore.
+// Usually there should only be one per application.
 type Store struct {
-
-	// opts is a collection of options.
-	// It controls the store's operations.
-	opts *Opts
-
-	// createdAt is the time of the store's creation
+	opts      *Opts
 	createdAt time.Time
-
-	// tx is whether the store is within a transaction.
-	tx bool
 }
 
 // NewStore creates a new store.

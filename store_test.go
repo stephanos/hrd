@@ -6,7 +6,6 @@ var _ = Describe("Store", func() {
 
 	It("initializes and is configurable", func() {
 		Check(store.opts, NotNil)
-		Check(store.tx, Equals, false)
 		Check(store.CreatedAt(), Not(IsZero))
 	})
 
