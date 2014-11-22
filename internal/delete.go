@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	dsDel = func(ctx ae.Context, keys []*ds.Key) error {
+	ndsDel = func(ctx ae.Context, keys []*ds.Key) error {
 		return nds.DeleteMulti(ctx, keys)
 	}
 )
@@ -41,5 +41,5 @@ func DSDeleteKeys(kind *types.Kind, keys []*types.Key) error {
 
 	ctx.Infof(LogDatastoreAction("deleting", "from", keys, kind.Name))
 
-	return dsDel(ctx, dsKeys)
+	return ndsDel(ctx, dsKeys)
 }

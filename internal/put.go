@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	dsPut = func(ctx ae.Context, keys []*ds.Key, dst interface{}) ([]*ds.Key, error) {
+	ndsPut = func(ctx ae.Context, keys []*ds.Key, dst interface{}) ([]*ds.Key, error) {
 		return nds.PutMulti(ctx, keys, dst)
 	}
 )
@@ -34,7 +34,7 @@ func DSPut(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, 
 	ctx.Infof(LogDatastoreAction("putting", "in", keys, kind.Name))
 
 	dsDocs := docs.List()
-	dsKeys, dsErr := dsPut(ctx, toDSKeys(keys), dsDocs)
+	dsKeys, dsErr := ndsPut(ctx, toDSKeys(keys), dsDocs)
 	if dsErr != nil {
 		return nil, dsErr
 	}
