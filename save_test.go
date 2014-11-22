@@ -50,7 +50,7 @@ var _ = Describe("Saver", func() {
 		Check(keys, Equals, kind.NewNumKeys(1, 2))
 	})
 
-	It("requires complete keys", func() {
+	It("can require complete keys", func() {
 		dsPut = func(_ *types.Kind, _ interface{}, completeKeys bool) ([]*types.Key, error) {
 			Check(completeKeys, IsTrue)
 			return nil, nil

@@ -23,9 +23,10 @@ var _ = Describe("Loader", func() {
 	It("loads an entity", func() {
 		entity := &MyModel{}
 
-		dsGet = func(kindt *types.Kind, keys []*types.Key, dst interface{}, _ bool, multi bool) ([]*types.Key, error) {
+		dsGet = func(kindt *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
 			Check(multi, IsFalse)
 			Check(dst, Equals, entity)
+			Check(useGlobalCache, IsTrue)
 			Check(kindt.Name, Equals, "my-kind")
 			Check(keys, Equals, newNumKeys(kind, 42))
 			return keys, nil
@@ -50,6 +51,15 @@ var _ = Describe("Loader", func() {
 		keys := kind.NewNumKeys(1, 2)
 		ret, _ := kind.Load(ctx).Keys(keys).GetAll(entities)
 		Check(ret, Equals, keys)
+	})
+
+	It("can skip the global cache", func() {
+		dsGet = func(_ *types.Kind, _ []*types.Key, _ interface{}, useGlobalCache bool, _ bool) ([]*types.Key, error) {
+			Check(useGlobalCache, IsFalse)
+			return nil, nil
+		}
+
+		kind.Load(ctx).Opts(NoGlobalCache).ID(42).GetOne(nil)
 	})
 
 	Context("creates single-entity loader from", func() {
