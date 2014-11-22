@@ -2,6 +2,7 @@ package internal
 
 import (
 	. "github.com/101loops/bdd"
+	"github.com/101loops/hrd/internal/types"
 
 	ds "appengine/datastore"
 )
@@ -9,7 +10,7 @@ import (
 var _ = Describe("DSDelete", func() {
 
 	var (
-		kind Kind
+		kind *types.Kind
 	)
 
 	var entities []interface{}
@@ -31,7 +32,7 @@ var _ = Describe("DSDelete", func() {
 	})
 
 	It("delete entities by key", func() {
-		key := ds.NewKey(ctx, kind.Name(), "", 1, nil)
+		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
 		err := DSDeleteKeys(kind, newKeys(key))
@@ -42,8 +43,8 @@ var _ = Describe("DSDelete", func() {
 
 	It("deletes multiple entities by key", func() {
 		keys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
 		}
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
@@ -56,7 +57,7 @@ var _ = Describe("DSDelete", func() {
 	})
 
 	It("deletes entity", func() {
-		key := ds.NewKey(ctx, kind.Name(), "", 1, nil)
+		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
 		err := DSDelete(kind, entities[0], false)
@@ -67,8 +68,8 @@ var _ = Describe("DSDelete", func() {
 
 	It("deletes slice of entities", func() {
 		keys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
 		}
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
@@ -82,8 +83,8 @@ var _ = Describe("DSDelete", func() {
 
 	It("deletes map of entities", func() {
 		keys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
 		}
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)

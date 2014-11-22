@@ -1,4 +1,4 @@
-package internal
+package types
 
 import (
 	"fmt"
@@ -10,21 +10,23 @@ import (
 	ds "appengine/datastore"
 )
 
-// Key represents the datastore key for an
-// It also contains meta data about said
+// Key represents the identifier for an entity.
 type Key struct {
 	*ds.Key
+	*KeyResult
+}
 
-	// synced is the last time the entity was read/written.
-	synced time.Time
+type KeyResult struct {
+	// Synced is the last time the entity was read/written.
+	Synced time.Time
 
-	// err contains an error if the entity could not be loaded/saved.
-	err error
+	// Error contains an error if the key could not be loaded/saved.
+	Error error
 }
 
 // NewKey creates a Key from a datastore.Key.
 func NewKey(k *ds.Key) *Key {
-	return &Key{Key: k}
+	return &Key{k, &KeyResult{}}
 }
 
 // newKeys creates a sequence of Key from a sequence of datastore.Key.
@@ -36,30 +38,11 @@ func newKeys(keys ...*ds.Key) []*Key {
 	return ret
 }
 
-// Exists is whether an entity with this key exists in the datastore.
-func (key *Key) Exists() bool {
-	return !key.synced.IsZero()
-}
-
-// Error returns an error associated with the key.
-func (key *Key) Error() error {
-	return key.err
-}
-
 func (key *Key) String() string {
 	return keyToString(key.Key)
 }
 
-// keyStringID returns the ID of the passed-in Key as a string.
-func keyStringID(key *ds.Key) (id string) {
-	id = key.StringID()
-	if id == "" && key.IntID() > 0 {
-		id = fmt.Sprintf("%v", key.IntID())
-	}
-	return
-}
-
-// keyToString returns a string representation of the passed-in Key.
+// keyToString returns a string representation of the passed-in datastore.Key.
 func keyToString(key *ds.Key) string {
 	if key == nil {
 		return ""
@@ -72,17 +55,17 @@ func keyToString(key *ds.Key) string {
 	return ret
 }
 
-// toDSKeys converts a sequence of Key to a sequence of datastore.Key.
-func toDSKeys(keys []*Key) []*ds.Key {
-	ret := make([]*ds.Key, len(keys))
-	for i, k := range keys {
-		ret[i] = k.Key
+// keyStringID returns the ID of the passed-in datastore.Key as a string.
+func keyStringID(key *ds.Key) (id string) {
+	id = key.StringID()
+	if id == "" && key.IntID() > 0 {
+		id = fmt.Sprintf("%v", key.IntID())
 	}
-	return ret
+	return
 }
 
-func getKey(kind Kind, src interface{}) (*Key, error) {
-	ctx := kind.Context()
+func GetEntityKey(kind *Kind, src interface{}) (*Key, error) {
+	ctx := kind.Context
 
 	var parentKey *ds.Key
 	if parentIdent, ok := src.(entity.ParentNumIdentifier); ok {
@@ -95,16 +78,16 @@ func getKey(kind Kind, src interface{}) (*Key, error) {
 	}
 
 	if ident, ok := src.(entity.NumIdentifier); ok {
-		return NewKey(ds.NewKey(ctx, kind.Name(), "", ident.ID(), parentKey)), nil
+		return NewKey(ds.NewKey(ctx, kind.Name, "", ident.ID(), parentKey)), nil
 	}
 	if ident, ok := src.(entity.TextIdentifier); ok {
-		return NewKey(ds.NewKey(ctx, kind.Name(), ident.ID(), 0, parentKey)), nil
+		return NewKey(ds.NewKey(ctx, kind.Name, ident.ID(), 0, parentKey)), nil
 	}
 
 	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))
 }
 
-func getKeys(kind Kind, src interface{}) ([]*Key, error) {
+func GetEntitiesKeys(kind *Kind, src interface{}) ([]*Key, error) {
 	srcVal := reflect.Indirect(reflect.ValueOf(src))
 	srcKind := srcVal.Kind()
 	if srcKind != reflect.Slice && srcKind != reflect.Map {
@@ -117,7 +100,7 @@ func getKeys(kind Kind, src interface{}) ([]*Key, error) {
 	if srcVal.Kind() == reflect.Slice {
 		for i := 0; i < collLen; i++ {
 			v := srcVal.Index(i)
-			key, err := getKey(kind, v.Interface())
+			key, err := GetEntityKey(kind, v.Interface())
 			if err != nil {
 				return nil, err
 			}
@@ -128,7 +111,7 @@ func getKeys(kind Kind, src interface{}) ([]*Key, error) {
 
 	for i, key := range srcVal.MapKeys() {
 		v := srcVal.MapIndex(key)
-		key, err := getKey(kind, v.Interface())
+		key, err := GetEntityKey(kind, v.Interface())
 		if err != nil {
 			return nil, err
 		}

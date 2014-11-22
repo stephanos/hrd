@@ -1,26 +1,23 @@
 package hrd
 
-// Saver can save entities to a Collection.
+import ae "appengine"
+
+// Saver can save entities to the datastore.
 type Saver struct {
-	coll *Collection
-	opts *operationOpts
+	*actionContext
 }
 
-// newSaver creates a new Saver for the passed store.
-// The collection's options are used as default options.
-func newSaver(coll *Collection) *Saver {
-	return &Saver{coll, coll.opts.clone()}
+// newSaver creates a new Saver for the passed-in kind.
+// The kind's options are used as default options.
+func newSaver(ctx ae.Context, kind *Kind) *Saver {
+	return &Saver{newActionContext(ctx, kind)}
 }
-
-// ==== CONFIG
 
 // Opts applies the passed sequence of Opt to the Saver's options.
 func (s *Saver) Opts(opts ...Opt) *Saver {
 	s.opts = s.opts.Apply(opts...)
 	return s
 }
-
-// ==== EXECUTE
 
 // Entity saves the passed entity into the datastore.
 // If its key is incomplete, the returned key will
@@ -41,6 +38,6 @@ func (s *Saver) Entities(srcs interface{}) ([]*Key, error) {
 }
 
 func (s *Saver) put(src interface{}) ([]*Key, error) {
-	keys, err := dsPut(s.coll, src, s.opts.completeKeys)
+	keys, err := dsPut(s.Kind(), src, s.opts.completeKeys)
 	return newKeys(keys), err
 }

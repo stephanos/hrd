@@ -24,6 +24,7 @@ Internally it uses [nds](https://github.com/qedus/nds) and  [structor](https://g
 - allow to pass-in logger
 - RPC listener
 - delete from query
+- namespace support
 
 ## Install
 ```bash

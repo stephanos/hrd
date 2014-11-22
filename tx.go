@@ -1,49 +1,39 @@
 package hrd
 
-import (
-	ae "appengine"
-	ds "appengine/datastore"
-)
+import ae "appengine"
 
 // Transactor can run multiple datastore operations inside a transaction.
+// By default it does not handle multiple entity groups.
 type Transactor struct {
-	store *Store
-	opts  *operationOpts
+	ctx        ae.Context
+	opts       *Opts
+	crossGroup bool
 }
 
-// newTransactor creates a new Transactor for the passed store.
-// The store's options are used as default options.
-func newTransactor(store *Store) *Transactor {
-	return &Transactor{store, store.opts.clone()}
+// TX represents an App Engine Context inside a transaction.
+// It should only be used inside a transaction.
+type TX interface {
+	ae.Context
 }
 
-// ==== CONFIG
-
-// Opts applies the sequence of Opt to the Transactor's options.
-func (tx *Transactor) Opts(opts ...Opt) *Transactor {
-	tx.opts = tx.opts.Apply(opts...)
-	return tx
+func newTransactor(s *Store, ctx ae.Context) *Transactor {
+	return &Transactor{ctx: ctx, opts: s.opts.clone()}
 }
 
 // XG defines whether the transaction can cross multiple entity groups.
 // If no parameter is passed, true is assumed.
 func (tx *Transactor) XG(enable ...bool) *Transactor {
-	tx.opts = tx.opts.XG(enable...)
+	crossGroup := true
+	if len(enable) > 0 {
+		crossGroup = enable[0]
+	}
+	tx.crossGroup = crossGroup
 	return tx
 }
 
-// ==== EXECUTE
-
-// Run executes a transaction.
-func (tx *Transactor) Run(f func(*Store) error) error {
-	return ds.RunInTransaction(tx.store.ctx, func(tc ae.Context) error {
-		var dsErr error
-		txStore := &Store{
-			ctx:  tc,
-			tx:   true,
-			opts: tx.opts,
-		}
-		dsErr = f(txStore)
-		return dsErr
-	}, &ds.TransactionOptions{XG: tx.opts.txCrossGroup})
+// Run executes a function in a transaction.
+func (tx *Transactor) Run(f func(_ TX) error) error {
+	return dsTransact(tx.ctx, func(ctx ae.Context) error {
+		return f(ctx)
+	}, tx.crossGroup)
 }

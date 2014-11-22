@@ -1,8 +1,6 @@
-package internal
+package types
 
 import (
-	"fmt"
-	"time"
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity"
 
@@ -10,6 +8,14 @@ import (
 )
 
 var _ = Describe("Key", func() {
+
+	var (
+		kind *Kind
+	)
+
+	BeforeSuite(func() {
+		kind = NewKind(ctx, "my-kind")
+	})
 
 	It("returns string representation of Key", func() {
 		key := NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)).String()
@@ -23,27 +29,23 @@ var _ = Describe("Key", func() {
 		Check(key, Equals, "Key{'my-child', 42}[ParentKey{'my-parent', parent}]")
 	})
 
-	It("returns if it exists in the database", func() {
-		key := NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil))
-		Check(key.Exists(), IsFalse)
+	//	It("returns if it exists in the database", func() {
+	//		key := NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil))
+	//		Check(key.Exists(), IsFalse)
+	//
+	//		key.synced = time.Now()
+	//		Check(key.Exists(), IsTrue)
+	//	})
 
-		key.synced = time.Now()
-		Check(key.Exists(), IsTrue)
-	})
-
-	It("returns an inner error", func() {
-		key := NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil))
-		Check(key.Error(), IsNil)
-
-		key.err = fmt.Errorf("an error")
-		Check(key.Error(), NotNil).And(Equals, key.err)
-	})
+	//	It("returns an inner error", func() {
+	//		key := NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil))
+	//		Check(key.Error(), IsNil)
+	//
+	//		key.err = fmt.Errorf("an error")
+	//		Check(key.Error(), NotNil).And(Equals, key.err)
+	//	})
 
 	Context("is created from", func() {
-
-		var (
-			dsKind = &dsKind{"my-kind"}
-		)
 
 		type entityWithNumID struct {
 			entity.NumID
@@ -68,7 +70,7 @@ var _ = Describe("Key", func() {
 				entity := entityWithNumID{}
 				entity.SetID(42)
 
-				key, err := getKey(dsKind, &entity)
+				key, err := GetEntityKey(kind, &entity)
 				Check(err, IsNil)
 				Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil)))
 			})
@@ -77,7 +79,7 @@ var _ = Describe("Key", func() {
 				entity := entityWithTextID{}
 				entity.SetID("abc")
 
-				key, err := getKey(dsKind, &entity)
+				key, err := GetEntityKey(kind, &entity)
 				Check(err, IsNil)
 				Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)))
 			})
@@ -87,7 +89,7 @@ var _ = Describe("Key", func() {
 				entity.SetID(42)
 				entity.SetParent("my-parent", 66)
 
-				key, err := getKey(dsKind, &entity)
+				key, err := GetEntityKey(kind, &entity)
 				Check(err, IsNil)
 				Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "", 42,
 					ds.NewKey(ctx, "my-parent", "", 66, nil))))
@@ -98,7 +100,7 @@ var _ = Describe("Key", func() {
 				entity.SetID("abc")
 				entity.SetParent("my-parent", "xyz")
 
-				key, err := getKey(dsKind, &entity)
+				key, err := GetEntityKey(kind, &entity)
 				Check(err, IsNil)
 				Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0,
 					ds.NewKey(ctx, "my-parent", "xyz", 0, nil))))
@@ -106,7 +108,7 @@ var _ = Describe("Key", func() {
 
 			It("but not an invalid entity", func() {
 				entity := "invalid"
-				key, err := getKey(dsKind, &entity)
+				key, err := GetEntityKey(kind, &entity)
 
 				Check(key, IsNil)
 				Check(err, NotNil).And(Contains, `value type "*string" does not provide ID()`)
@@ -114,7 +116,7 @@ var _ = Describe("Key", func() {
 
 			It("but not an invalid entity collection", func() {
 				invalidEntities := "invalid"
-				key, err := getKeys(dsKind, &invalidEntities)
+				key, err := GetEntitiesKeys(kind, &invalidEntities)
 
 				Check(key, IsNil)
 				Check(err, NotNil).And(Contains, `value must be a slice or map, but is "string"`)
@@ -131,7 +133,7 @@ var _ = Describe("Key", func() {
 				entities[0].SetID(1)
 				entities[1].SetID(2)
 
-				keys, err := getKeys(dsKind, entities)
+				keys, err := GetEntitiesKeys(kind, entities)
 
 				Check(err, IsNil)
 				Check(keys, HasLen, 2)
@@ -146,7 +148,7 @@ var _ = Describe("Key", func() {
 				entities[0].SetID("abc")
 				entities[1].SetID("xyz")
 
-				keys, err := getKeys(dsKind, entities)
+				keys, err := GetEntitiesKeys(kind, entities)
 
 				Check(err, IsNil)
 				Check(keys, HasLen, 2)
@@ -156,7 +158,7 @@ var _ = Describe("Key", func() {
 
 			It("but not a slice of invalid entities", func() {
 				invalidEntities := []string{"invalid"}
-				keys, err := getKeys(dsKind, invalidEntities)
+				keys, err := GetEntitiesKeys(kind, invalidEntities)
 
 				Check(keys, IsNil)
 				Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
@@ -164,7 +166,7 @@ var _ = Describe("Key", func() {
 
 			It("but not a map of invalid entities", func() {
 				invalidEntities := map[int]string{0: "invalid"}
-				keys, err := getKeys(dsKind, invalidEntities)
+				keys, err := GetEntitiesKeys(kind, invalidEntities)
 
 				Check(keys, IsNil)
 				Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)

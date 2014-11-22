@@ -1,4 +1,4 @@
-package internal
+package trafo
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/101loops/hrd/entity"
+	"github.com/101loops/hrd/internal/types"
 	"github.com/101loops/iszero"
 	"github.com/101loops/structor"
 
@@ -18,7 +19,7 @@ import (
 //
 // It is based on:
 // https://code.google.com/p/appengine-go/source/browse/appengine/datastore/prop.go
-type doc struct {
+type Doc struct {
 	// reference to the entity.
 	srcVal reflect.Value
 
@@ -41,7 +42,7 @@ type property struct {
 	multi bool
 }
 
-func newDoc(srcVal reflect.Value) (*doc, error) {
+func newDoc(srcVal reflect.Value) (*Doc, error) {
 	srcType := srcVal.Type()
 	srcKind := srcVal.Kind()
 	switch srcKind {
@@ -61,33 +62,33 @@ func newDoc(srcVal reflect.Value) (*doc, error) {
 		return nil, err
 	}
 
-	return &doc{srcVal, codec}, nil
+	return &Doc{srcVal, codec}, nil
 }
 
-func newDocFromInst(src interface{}) (*doc, error) {
+func newDocFromInst(src interface{}) (*Doc, error) {
 	return newDoc(reflect.ValueOf(src))
 }
 
-func newDocFromType(typ reflect.Type) (*doc, error) {
+func newDocFromType(typ reflect.Type) (*Doc, error) {
 	return newDoc(reflect.New(typ.Elem()))
 }
 
 // nil sets the value of the entity to nil.
-func (doc *doc) nil() {
+func (doc *Doc) Nil() {
 	dst := doc.val()
 	dst.Set(reflect.New(dst.Type()).Elem())
 }
 
 // get returns the entity.
-func (doc *doc) get() interface{} {
+func (doc *Doc) get() interface{} {
 	return doc.srcVal.Interface()
 }
 
-func (doc *doc) setKey(k *Key) {
+func (doc *Doc) SetKey(k *types.Key) {
 	applyTo(k, doc.get())
 }
 
-func applyTo(key *Key, src interface{}) {
+func applyTo(key *types.Key, src interface{}) {
 	var parentKey = key.Parent()
 	if parentKey != nil {
 		id := parentKey.IntID()
@@ -112,7 +113,7 @@ func applyTo(key *Key, src interface{}) {
 	}
 }
 
-func (doc *doc) val() reflect.Value {
+func (doc *Doc) val() reflect.Value {
 	v := doc.srcVal
 	if !v.CanSet() {
 		v = doc.srcVal.Elem()
@@ -120,7 +121,7 @@ func (doc *doc) val() reflect.Value {
 	return v
 }
 
-func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
+func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
 	var props []*property
 
 	srcVal := doc.val()
@@ -162,7 +163,7 @@ func (doc *doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 }
 
 // Note: Save should close the channel when done, even if an error occurred.
-func (doc *doc) Save(c chan<- ds.Property) error {
+func (doc *Doc) Save(c chan<- ds.Property) error {
 	defer close(c)
 
 	src := doc.get()
@@ -202,7 +203,7 @@ func (doc *doc) Save(c chan<- ds.Property) error {
 }
 
 // Note: Load should drain the channel until closed, even if an error occurred.
-func (doc *doc) Load(c <-chan ds.Property) error {
+func (doc *Doc) Load(c <-chan ds.Property) error {
 
 	dst := doc.get()
 

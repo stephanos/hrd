@@ -1,14 +1,16 @@
-package internal
+package trafo
 
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/101loops/hrd/internal/types"
 )
 
-type docs struct {
+type Docs struct {
 	i        int
-	list     []*doc
-	keyList  []*Key
+	list     []*Doc
+	keyList  []*types.Key
 	srcVal   reflect.Value
 	srcKind  reflect.Kind
 	keyType  reflect.Type
@@ -16,11 +18,11 @@ type docs struct {
 }
 
 var (
-	typeOfKey   = reflect.TypeOf(&Key{})
+	typeOfKey   = reflect.TypeOf(&types.Key{})
 	typeOfInt64 = reflect.TypeOf(int64(0))
 )
 
-func newReadableDocs(kind Kind, src interface{}) (*docs, error) {
+func NewReadableDocs(kind *types.Kind, src interface{}) (*Docs, error) {
 	srcVal := reflect.ValueOf(src)
 	if src == nil || (srcVal.Kind() == reflect.Ptr && srcVal.IsNil()) {
 		return nil, fmt.Errorf("value must be non-nil")
@@ -40,8 +42,8 @@ func newReadableDocs(kind Kind, src interface{}) (*docs, error) {
 	srcCollLen := srcColl.Len()
 
 	// generate list of doc
-	keys := make([]*Key, srcCollLen)
-	list := make([]*doc, srcCollLen)
+	keys := make([]*types.Key, srcCollLen)
+	list := make([]*Doc, srcCollLen)
 	for i := 0; i < srcCollLen; i++ {
 		entity := srcColl.Index(i).Interface()
 
@@ -50,7 +52,7 @@ func newReadableDocs(kind Kind, src interface{}) (*docs, error) {
 			return nil, err
 		}
 
-		key, err := getKey(kind, entity)
+		key, err := types.GetEntityKey(kind, entity)
 		if err != nil {
 			return nil, err
 		}
@@ -59,11 +61,11 @@ func newReadableDocs(kind Kind, src interface{}) (*docs, error) {
 		list[i] = d
 	}
 
-	return &docs{list: list, keyList: keys}, nil
+	return &Docs{list: list, keyList: keys}, nil
 }
 
-func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
-	ret := &docs{keyList: keys}
+func NewWriteableDocs(src interface{}, keys []*types.Key, multi bool) (*Docs, error) {
+	ret := &Docs{keyList: keys}
 	keysLen := len(keys)
 
 	// resolve pointer
@@ -118,7 +120,7 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 			if err != nil {
 				return nil, err
 			}
-			ret.add(key, d)
+			ret.Add(key, d)
 		}
 	} else {
 		if keysLen > 1 {
@@ -131,18 +133,26 @@ func newWriteableDocs(src interface{}, keys []*Key, multi bool) (*docs, error) {
 			return nil, err
 		}
 
-		ret.list = []*doc{d}
+		ret.list = []*Doc{d}
 		ret.elemType = srcType
 	}
 
 	return ret, nil
 }
 
-func (docs *docs) nil(idx int) {
-	docs.list[idx].nil()
+func (docs *Docs) List() []*Doc {
+	return docs.list
 }
 
-func (docs *docs) next() (ret *doc, err error) {
+func (docs *Docs) Keys() []*types.Key {
+	return docs.keyList
+}
+
+func (docs *Docs) Nil(idx int) {
+	docs.list[idx].Nil()
+}
+
+func (docs *Docs) Next() (ret *Doc, err error) {
 	if docs.i < len(docs.list) {
 		ret = docs.list[docs.i]
 	} else {
@@ -152,7 +162,7 @@ func (docs *docs) next() (ret *doc, err error) {
 	return
 }
 
-func (docs *docs) add(key *Key, d *doc) {
+func (docs *Docs) Add(key *types.Key, d *Doc) {
 	docs.list = append(docs.list, d)
 	applyTo(key, d)
 

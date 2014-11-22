@@ -3,54 +3,59 @@ package hrd
 import (
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/internal"
+	"github.com/101loops/hrd/internal/types"
 )
 
 var _ = Describe("Saver", func() {
 
 	var (
-		coll *Collection
+		kind *Kind
 	)
 
 	BeforeEach(func() {
-		coll = store.Coll("my-kind")
+		kind = store.Kind("my-kind")
+	})
+
+	AfterEach(func() {
+		dsPut = internal.DSPut
 	})
 
 	It("saves an entity", func() {
 		entity := &MyModel{}
 
-		dsPut = func(kind internal.Kind, src interface{}, completeKeys bool) ([]*internal.Key, error) {
+		dsPut = func(kindt *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
 			// TODO
 			Check(completeKeys, IsFalse)
-			Check(kind.Name(), Equals, "my-kind")
-			return toInternalKeys(coll.NewNumKeys(42)), nil
+			Check(kindt.Name, Equals, "my-kind")
+			return newNumKeys(kind, 42), nil
 		}
 
-		key, err := coll.Save().Entity(entity)
+		key, err := kind.Save(ctx).Entity(entity)
 		Check(err, IsNil)
-		Check(key, Equals, coll.NewNumKey(42))
+		Check(key, Equals, kind.NewNumKey(42))
 	})
 
 	It("saves multiple entities", func() {
 		entities := []*MyModel{&MyModel{}, &MyModel{}}
 
-		dsPut = func(kind internal.Kind, src interface{}, completeKeys bool) ([]*internal.Key, error) {
+		dsPut = func(kindt *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
 			// TODO
 			Check(completeKeys, IsFalse)
-			Check(kind.Name(), Equals, "my-kind")
-			return toInternalKeys(coll.NewNumKeys(1, 2)), nil
+			Check(kindt.Name, Equals, "my-kind")
+			return newNumKeys(kind, 1, 2), nil
 		}
 
-		keys, err := coll.Save().Entities(entities)
+		keys, err := kind.Save(ctx).Entities(entities)
 		Check(err, IsNil)
-		Check(keys, Equals, coll.NewNumKeys(1, 2))
+		Check(keys, Equals, kind.NewNumKeys(1, 2))
 	})
 
 	It("requires complete keys", func() {
-		dsPut = func(_ internal.Kind, _ interface{}, completeKeys bool) ([]*internal.Key, error) {
+		dsPut = func(_ *types.Kind, _ interface{}, completeKeys bool) ([]*types.Key, error) {
 			Check(completeKeys, IsTrue)
 			return nil, nil
 		}
 
-		coll.Save(CompleteKeys).Entity(&MyModel{})
+		kind.Save(ctx).Opts(CompleteKeys).Entity(&MyModel{})
 	})
 })

@@ -4,9 +4,10 @@ import (
 	"time"
 
 	"github.com/101loops/hrd/internal"
+	"github.com/101loops/hrd/internal/trafo"
+	"github.com/101loops/hrd/internal/types"
 
 	ae "appengine"
-	ds "appengine/datastore"
 )
 
 // datastore operations, makes it easy to stub out during testing
@@ -14,6 +15,7 @@ var (
 	dsGet        = internal.DSGet
 	dsPut        = internal.DSPut
 	dsDelete     = internal.DSDelete
+	dsTransact   = internal.DSTransact
 	dsDeleteKeys = internal.DSDeleteKeys
 	dsIterate    = internal.DSIterate
 )
@@ -21,11 +23,10 @@ var (
 // Store represents the ds.
 // Users should only need to create one store for each request.
 type Store struct {
-	ctx ae.Context
 
 	// opts is a collection of options.
 	// It controls the store's operations.
-	opts *operationOpts
+	opts *Opts
 
 	// createdAt is the time of the store's creation
 	createdAt time.Time
@@ -34,84 +35,58 @@ type Store struct {
 	tx bool
 }
 
-// NewStore creates a new store for the passed App Engine context.
-func NewStore(ctx ae.Context) *Store {
+// NewStore creates a new store.
+func NewStore() *Store {
 	store := &Store{
-		ctx:       ctx,
 		createdAt: time.Now(),
-		opts:      defaultOperationOpts(),
+		opts:      defaultOpts(),
 	}
 	return store
 }
 
+// Opts applies a sequence of Opt the Store's options.
+func (s *Store) Opts(opts ...Opt) *Store {
+	s.opts = s.opts.Apply(opts...)
+	return s
+}
+
 // RegisterEntity prepares the passed-in struct type for the datastore.
 // It returns an error if the type is invalid.
-func (store *Store) RegisterEntity(entity interface{}) error {
-	return internal.CodecSet.Add(entity)
+func (s *Store) RegisterEntity(entity interface{}) error {
+	return trafo.CodecSet.Add(entity)
 }
 
 // RegisterEntityMust prepares the passed-in struct type for the datastore.
 // It panics if the type is invalid.
-func (store *Store) RegisterEntityMust(entity interface{}) {
-	internal.CodecSet.AddMust(entity)
+func (s *Store) RegisterEntityMust(entity interface{}) {
+	trafo.CodecSet.AddMust(entity)
 }
 
-// Coll returns a Collection for the passed name ("kind").
-// The store's options are used as default options.
-func (store *Store) Coll(name string) *Collection {
-	return &Collection{
-		store: store,
-		name:  name,
-		opts:  store.opts.clone(),
-	}
+// Kind returns a kind for the passed name.
+func (s *Store) Kind(name string) *Kind {
+	return newKind(s, name)
 }
 
 // TX creates a Transactor to run a transaction on the store.
-func (store *Store) TX() *Transactor {
-	return newTransactor(store)
+func (s *Store) TX(ctx ae.Context) *Transactor {
+	return newTransactor(s, ctx)
 }
 
 // CreatedAt returns the time the store was created.
-func (store *Store) CreatedAt() time.Time {
-	return store.createdAt
+func (s *Store) CreatedAt() time.Time {
+	return s.createdAt
 }
 
-// NewNumKey returns a key for the passed kind and numeric ID.
-// It can also receive an optional parent key.
-func (store *Store) NewNumKey(kind string, id int64, parent ...*Key) *Key {
-	var parentKey *ds.Key
-	if len(parent) > 0 {
-		parentKey = parent[0].Key.Key
-	}
-	return newKey(internal.NewKey(ds.NewKey(store.ctx, kind, "", id, parentKey)))
+type actionContext struct {
+	ctx  ae.Context
+	kind *Kind
+	opts *Opts
 }
 
-// NewNumKeys returns a sequence of key for the passed kind and
-// sequence of numeric ID.
-func (store *Store) NewNumKeys(kind string, ids ...int64) []*Key {
-	keys := make([]*Key, len(ids))
-	for i, id := range ids {
-		keys[i] = store.NewNumKey(kind, id)
-	}
-	return keys
+func newActionContext(ctx ae.Context, kind *Kind) *actionContext {
+	return &actionContext{ctx, kind, kind.opts.clone()}
 }
 
-// NewTextKey returns a key for the passed kind and string ID.
-// It can also receive an optional parent key.
-func (store *Store) NewTextKey(kind string, id string, parent ...*Key) *Key {
-	var parentKey *ds.Key
-	if len(parent) > 0 {
-		parentKey = parent[0].Key.Key
-	}
-	return newKey(internal.NewKey(ds.NewKey(store.ctx, kind, id, 0, parentKey)))
-}
-
-// NewTextKeys returns a sequence of keys for the passed kind and
-// sequence of string ID.
-func (store *Store) NewTextKeys(kind string, ids ...string) []*Key {
-	keys := make([]*Key, len(ids))
-	for i, id := range ids {
-		keys[i] = store.NewTextKey(kind, id)
-	}
-	return keys
+func (sa *actionContext) Kind() *types.Kind {
+	return types.NewKind(sa.ctx, sa.kind.name)
 }

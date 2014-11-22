@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"strings"
 
+	ae "appengine"
 	ds "appengine/datastore"
 )
 
 // Query represents a datastore query.
 type Query struct {
+	kind   *Kind
+	ctx    ae.Context
 	err    *error
-	coll   *Collection
 	typeOf qryType
 	logs   []string
 	limit  int
-	opts   *operationOpts
+	opts   *Opts
 	dsQry  *ds.Query
 }
 
@@ -31,16 +33,17 @@ const (
 	hybridQry
 )
 
-// newQuery creates a new Query for the passed collection.
-// The collection's options are used as default options.
-func newQuery(coll *Collection) (ret *Query) {
+// newQuery creates a new Query for the passed kind.
+// The kind's options are used as default options.
+func newQuery(ctx ae.Context, kind *Kind) (ret *Query) {
 	return &Query{
-		coll:   coll,
+		ctx:    ctx,
+		kind:   kind,
 		limit:  -1,
 		typeOf: hybridQry,
-		opts:   defaultOperationOpts(),
-		dsQry:  ds.NewQuery(coll.name),
-		logs:   []string{"KIND " + coll.name},
+		opts:   defaultOpts(),
+		dsQry:  ds.NewQuery(kind.name),
+		logs:   []string{"KIND " + kind.name},
 	}
 }
 
@@ -102,8 +105,8 @@ func (qry *Query) NoLimit() (ret *Query) {
 // The ancestor should not be nil.
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
-	ret.log("ANCESTOR '%v'", k.String())
-	ret.dsQry = ret.dsQry.Ancestor(k.Key.Key)
+	//ret.log("ANCESTOR '%v'", k.String())
+	ret.dsQry = ret.dsQry.Ancestor(k.toDSKey(qry.ctx, qry.kind.name))
 	return ret
 }
 
@@ -200,12 +203,12 @@ func (qry *Query) Filter(q string, val interface{}) (ret *Query) {
 // GetCount returns the number of results for the query.
 func (qry *Query) GetCount() (int, error) {
 	qry.log("COUNT")
-	qry.coll.store.ctx.Infof(qry.getLog())
+	qry.ctx.Infof(qry.getLog())
 
 	if qry.err != nil {
 		return 0, *qry.err
 	}
-	return qry.dsQry.Count(qry.coll.store.ctx)
+	return qry.dsQry.Count(qry.ctx)
 }
 
 // GetKeys executes the query as keys-only: No entities are retrieved, just their keys.
@@ -239,7 +242,7 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	if qry.limit != 1 && qry.typeOf == hybridQry && qry.opts.useGlobalCache {
 		keys, cursor, err := qry.GetKeys()
 		if err == nil && len(keys) > 0 {
-			keys, err = newLoader(qry.coll).Keys(keys).GetAll(dsts)
+			keys, err = newLoader(qry.ctx, qry.kind).Keys(keys).GetAll(dsts)
 		}
 		return keys, cursor, err
 	}
@@ -262,8 +265,8 @@ func (qry *Query) GetFirst(dst interface{}) (err error) {
 
 // Run executes the query and returns an Iterator.
 func (qry *Query) Run() *Iterator {
-	qry.coll.store.ctx.Infof(qry.getLog())
-	return &Iterator{qry, qry.dsQry.Run(qry.coll.store.ctx)}
+	qry.ctx.Infof(qry.getLog())
+	return &Iterator{qry, qry.dsQry.Run(qry.ctx)}
 }
 
 func (qry *Query) log(s string, values ...interface{}) {

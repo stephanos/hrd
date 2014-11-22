@@ -1,4 +1,4 @@
-package internal
+package trafo
 
 import (
 	. "github.com/101loops/bdd"

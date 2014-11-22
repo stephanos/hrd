@@ -20,7 +20,7 @@ var _ = Describe("DSGet", func() {
 func dsLoadTests(useGlobalCache bool) {
 
 	var (
-		kind Kind
+		kind *Kind
 	)
 
 	BeforeEach(func() {
@@ -41,7 +41,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	It("loads an entity", func() {
 		var entity *SimpleModel
-		dsKey := ds.NewKey(ctx, kind.Name(), "", 1, nil)
+		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := DSGet(kind, newKeys(dsKey), &entity, useGlobalCache, false)
 
 		Check(err, IsNil)
@@ -52,9 +52,9 @@ func dsLoadTests(useGlobalCache bool) {
 	It("loads multiple entities into slice of struct pointers", func() {
 		var entities []*SimpleModel
 		dsKeys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
-			ds.NewKey(ctx, kind.Name(), "", 666, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 666, nil),
 		}
 		keys, err := DSGet(kind, newKeys(dsKeys...), &entities, useGlobalCache, true)
 
@@ -73,9 +73,9 @@ func dsLoadTests(useGlobalCache bool) {
 	It("loads multiple entities into map of struct pointers by Key", func() {
 		var entities map[*Key]*SimpleModel
 		dsKeys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
-			ds.NewKey(ctx, kind.Name(), "", 666, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 666, nil),
 		}
 		keys, err := DSGet(kind, newKeys(dsKeys...), &entities, useGlobalCache, true)
 
@@ -87,9 +87,9 @@ func dsLoadTests(useGlobalCache bool) {
 	It("loads multiple entities into map of struct pointers by int64", func() {
 		var entities map[int64]*SimpleModel
 		dsKeys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
-			ds.NewKey(ctx, kind.Name(), "", 666, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 666, nil),
 		}
 		keys, err := DSGet(kind, newKeys(dsKeys...), &entities, useGlobalCache, true)
 
@@ -102,7 +102,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	It("does not load entity into invalid type", func() {
 		var entity string
-		dsKey := ds.NewKey(ctx, kind.Name(), "", 1, nil)
+		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := DSGet(kind, newKeys(dsKey), entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
@@ -111,7 +111,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	It("does not load entity into non-pointer struct", func() {
 		var entity SimpleModel
-		dsKey := ds.NewKey(ctx, kind.Name(), "", 1, nil)
+		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := DSGet(kind, newKeys(dsKey), entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
@@ -120,7 +120,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	It("does not load entity into non-reference struct", func() {
 		var entity *SimpleModel
-		dsKey := ds.NewKey(ctx, kind.Name(), "", 1, nil)
+		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := DSGet(kind, newKeys(dsKey), entity, useGlobalCache, false)
 
 		Check(keys, IsNil)
@@ -130,8 +130,8 @@ func dsLoadTests(useGlobalCache bool) {
 	It("does not load entities into map with invalid key", func() {
 		var entities map[bool]*SimpleModel
 		dsKeys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name(), "", 1, nil),
-			ds.NewKey(ctx, kind.Name(), "", 2, nil),
+			ds.NewKey(ctx, kind.Name, "", 1, nil),
+			ds.NewKey(ctx, kind.Name, "", 2, nil),
 		}
 		keys, err := DSGet(kind, newKeys(dsKeys...), &entities, useGlobalCache, true)
 
@@ -159,7 +159,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	It("does not load incomplete key", func() {
 		var entity *SimpleModel
-		incompleteKey := ds.NewKey(ctx, kind.Name(), "", 0, nil)
+		incompleteKey := ds.NewKey(ctx, kind.Name, "", 0, nil)
 		keys, err := DSGet(kind, newKeys(incompleteKey), &entity, useGlobalCache, false)
 
 		Check(keys, IsNil)

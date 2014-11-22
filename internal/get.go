@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 
+	"github.com/101loops/hrd/internal/trafo"
+	"github.com/101loops/hrd/internal/types"
 	"github.com/qedus/nds"
 
 	ae "appengine"
@@ -20,19 +22,19 @@ var (
 )
 
 // DSGet loads entities for the given keys.
-func DSGet(kind Kind, keys []*Key, dst interface{}, useGlobalCache bool, multi bool) ([]*Key, error) {
+func DSGet(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
 	if err := validateDSGetKeys(kind, keys); err != nil {
 		return nil, err
 	}
 
-	docs, err := newWriteableDocs(dst, keys, multi)
+	docs, err := trafo.NewWriteableDocs(dst, keys, multi)
 	if err != nil {
 		return nil, err
 	}
-	dsDocs := docs.list
+	dsDocs := docs.List()
 
-	ctx := kind.Context()
-	ctx.Infof(LogDatastoreAction("getting", "from", keys, kind.Name()))
+	ctx := kind.Context
+	ctx.Infof(LogDatastoreAction("getting", "from", keys, kind.Name))
 
 	var dsErr error
 	dsKeys := toDSKeys(keys)
@@ -44,7 +46,7 @@ func DSGet(kind Kind, keys []*Key, dst interface{}, useGlobalCache bool, multi b
 	return applyResult(dsDocs, dsKeys, dsErr)
 }
 
-func validateDSGetKeys(kind Kind, keys []*Key) error {
+func validateDSGetKeys(kind *types.Kind, keys []*types.Key) error {
 	if keys == nil || len(keys) == 0 {
 		return fmt.Errorf("no keys provided")
 	}
@@ -57,9 +59,9 @@ func validateDSGetKeys(kind Kind, keys []*Key) error {
 
 	for _, k := range keys {
 		keyKind := k.Kind()
-		if keyKind != kind.Name() {
-			err := fmt.Errorf("invalid key kind '%v' for Kind '%v'", keyKind, kind.Name())
-			return logErr(kind.Context(), err)
+		if keyKind != kind.Name {
+			err := fmt.Errorf("invalid key kind '%v' for Kind '%v'", keyKind, kind.Name)
+			return logErr(kind.Context, err)
 		}
 	}
 

@@ -1,25 +1,30 @@
 package internal
 
-import ds "appengine/datastore"
+import (
+	"github.com/101loops/hrd/internal/trafo"
+	"github.com/101loops/hrd/internal/types"
+
+	ds "appengine/datastore"
+)
 
 // DSIterate loads entities from an iterator.
-func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*Key, err error) {
+func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
 
 	// in a keys-only query there is no dsts
-	var docs *docs
+	var docs *trafo.Docs
 	if dsts != nil {
-		docs, err = newWriteableDocs(dsts, nil, multi)
+		docs, err = trafo.NewWriteableDocs(dsts, nil, multi)
 		if err != nil {
 			return
 		}
 	}
 
-	var dsDocs []*doc
+	var dsDocs []*trafo.Doc
 	var dsKeys []*ds.Key
 	for {
-		var doc *doc
+		var doc *trafo.Doc
 		if docs != nil {
-			doc, err = docs.next()
+			doc, err = docs.Next()
 			if err != nil {
 				return
 			}
@@ -30,7 +35,7 @@ func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*Key, er
 		dsKey, err = dsIt.Next(doc)
 		if err == ds.Done {
 			if !multi {
-				docs.nil(0)
+				docs.Nil(0)
 				return nil, nil
 			}
 			break
@@ -49,7 +54,7 @@ func DSIterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*Key, er
 	keys, err = applyResult(dsDocs, dsKeys, err)
 	if dsDocs != nil {
 		for i := range keys {
-			docs.add(keys[i], dsDocs[i])
+			docs.Add(keys[i], dsDocs[i])
 		}
 	}
 

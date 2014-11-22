@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 
+	"github.com/101loops/hrd/internal/trafo"
+	"github.com/101loops/hrd/internal/types"
 	"github.com/qedus/nds"
 
 	ae "appengine"
@@ -16,22 +18,22 @@ var (
 )
 
 // DSPut saves the given entities.
-func DSPut(kind Kind, src interface{}, completeKeys bool) ([]*Key, error) {
-	ctx := kind.Context()
+func DSPut(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
+	ctx := kind.Context
 
-	docs, err := newReadableDocs(kind, src)
+	docs, err := trafo.NewReadableDocs(kind, src)
 	if err != nil {
 		return nil, err
 	}
 
-	keys := docs.keyList
+	keys := docs.Keys()
 	if err := validateDSPutKeys(kind, keys, completeKeys); err != nil {
 		return nil, err
 	}
 
-	ctx.Infof(LogDatastoreAction("putting", "in", keys, kind.Name()))
+	ctx.Infof(LogDatastoreAction("putting", "in", keys, kind.Name))
 
-	dsDocs := docs.list
+	dsDocs := docs.List()
 	dsKeys, dsErr := dsPut(ctx, toDSKeys(keys), dsDocs)
 	if dsErr != nil {
 		return nil, dsErr
@@ -40,9 +42,9 @@ func DSPut(kind Kind, src interface{}, completeKeys bool) ([]*Key, error) {
 	return applyResult(dsDocs, dsKeys, dsErr)
 }
 
-func validateDSPutKeys(kind Kind, keys []*Key, completeKeys bool) error {
+func validateDSPutKeys(kind *types.Kind, keys []*types.Key, completeKeys bool) error {
 	if len(keys) == 0 {
-		return fmt.Errorf("no keys provided for %q", kind.Name())
+		return fmt.Errorf("no keys provided for %q", kind.Name)
 	}
 
 	if completeKeys {

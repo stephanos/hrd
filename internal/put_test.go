@@ -5,7 +5,7 @@ import . "github.com/101loops/bdd"
 var _ = Describe("DSPut", func() {
 
 	var (
-		kind Kind
+		kind *Kind
 	)
 
 	BeforeEach(func() {
