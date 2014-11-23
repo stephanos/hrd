@@ -10,6 +10,10 @@ import (
 	"github.com/101loops/structor"
 )
 
+const (
+	propertySeparator = "."
+)
+
 var (
 	// CodecSet is a set of all registered entity codecs.
 	CodecSet *structor.Set
@@ -44,11 +48,6 @@ func validateCodec(codecSet *structor.Set, codec *structor.Codec) error {
 
 	for _, field := range codec.Fields() {
 		fType := field.Type
-
-		// field ignored?
-		if strings.HasPrefix(field.Label, "_") {
-			continue
-		}
 
 		// valid field name?
 		if err := validateFieldName(field.Label); err != nil {
@@ -97,11 +96,14 @@ func validateCodec(codecSet *structor.Set, codec *structor.Codec) error {
 
 			hasSlice := false
 			for _, subField := range subCodec.Fields() {
-				label := strings.ToLower(label + "." + subField.Label)
-				if _, ok := labels[label]; ok {
-					return fmt.Errorf("duplicate field name %q", label)
+				subLabel := strings.ToLower(subField.Label)
+				if !subField.Tag.HasModifier("inline") {
+					subLabel = label + propertySeparator + subLabel
 				}
-				labels[label] = true
+				if _, ok := labels[subLabel]; ok {
+					return fmt.Errorf("duplicate field name %q", subLabel)
+				}
+				labels[subLabel] = true
 
 				if subField.Type.Kind() == reflect.Slice {
 					hasSlice = true

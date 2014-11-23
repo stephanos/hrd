@@ -21,11 +21,12 @@ var _ = Describe("Doc", func() {
 
 			Check(err, IsNil)
 			Check(props, NotNil)
-			Check(props, HasLen, 3)
+			Check(props, HasLen, 4)
 
-			Check(*props[0], Equals, property{"num", int64(42), false, false})
-			Check(*props[1], Equals, property{"Data", []byte("byte"), false, false})
-			Check(*props[2], Equals, property{"html", "html", true, false})
+			Check(*props[0], Equals, property{"id", int64(0), false, false})
+			Check(*props[1], Equals, property{"num", int64(42), false, false})
+			Check(*props[2], Equals, property{"Data", []byte("byte"), false, false})
+			Check(*props[3], Equals, property{"html", "html", true, false})
 		})
 
 		It("complex model", func() {

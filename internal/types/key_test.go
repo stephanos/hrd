@@ -2,7 +2,6 @@ package types
 
 import (
 	. "github.com/101loops/bdd"
-	"github.com/101loops/hrd/entity"
 
 	ds "appengine/datastore"
 )
@@ -51,25 +50,8 @@ var _ = Describe("Key", func() {
 
 	Context("is created from", func() {
 
-		type entityWithNumID struct {
-			entity.NumID
-		}
-
-		type entityWithTextID struct {
-			entity.TextID
-		}
-
-		type entityWithParentNumID struct {
-			entity.NumID
-			entity.ParentNumID
-		}
-
-		type entityWithParentTextID struct {
-			entity.TextID
-			entity.ParentTextID
-		}
-
 		Context("a single entity", func() {
+
 			It("with numeric id", func() {
 				entity := entityWithNumID{}
 				entity.SetID(42)

@@ -36,11 +36,12 @@ type InvalidModel struct{}
 type SimpleModel struct {
 	entity.NumID
 
-	Ignore    string    `datastore:"-"`
-	Num       int64     `datastore:"num"`
-	Data      []byte    `datastore:",index"`
-	Text      string    `datastore:"html,index"`
-	Time      time.Time `datastore:"timing,index,omitempty"`
+	Ignore string    `datastore:"-"`
+	Num    int64     `datastore:"num"`
+	Data   []byte    `datastore:",index"`
+	Text   string    `datastore:"html,index"`
+	Time   time.Time `datastore:"timing,index,omitempty"`
+
 	lifecycle []string
 }
 

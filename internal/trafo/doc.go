@@ -131,16 +131,12 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 		}
 
 		name := fCodec.Label
-		if prefix != "" {
-			name = prefix + "." + name
-		}
-
 		aggrTags := append(tags, fCodec.Tag.Modifiers...)
 
 		// for slice fields (that aren't []byte), save each element
 		if fVal.Kind() == reflect.Slice && fVal.Type() != typeOfByteSlice {
 			for i := 0; i < fVal.Len(); i++ {
-				props, err = itemToProperties(name, aggrTags, true, fVal.Index(i))
+				props, err = itemToProperties(prefix, name, aggrTags, true, fVal.Index(i))
 				if err != nil {
 					return
 				}
@@ -151,7 +147,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 
 		// TODO: for map fields, save each element
 
-		props, err = itemToProperties(name, aggrTags, multi, fVal)
+		props, err = itemToProperties(prefix, name, aggrTags, multi, fVal)
 		if err != nil {
 			return
 		}
@@ -226,7 +222,7 @@ func (doc *Doc) Load(c <-chan ds.Property) error {
 	return nil
 }
 
-func itemToProperties(name string, tags []string, multi bool, v reflect.Value) (props []*property, err error) {
+func itemToProperties(prefix, name string, tags []string, multi bool, v reflect.Value) (props []*property, err error) {
 
 	// dereference pointers, ignore nil
 	if v.Kind() == reflect.Ptr {
@@ -238,6 +234,7 @@ func itemToProperties(name string, tags []string, multi bool, v reflect.Value) (
 
 	// process tags
 	indexed := false
+	inlined := false
 	for _, tag := range tags {
 		tag = strings.ToLower(tag)
 		if tag == "omitempty" {
@@ -249,18 +246,20 @@ func itemToProperties(name string, tags []string, multi bool, v reflect.Value) (
 			if strings.HasSuffix(tag, ":omitempty") && iszero.Value(v) {
 				indexed = false // ignore index if empty
 			}
+		} else if tag == "inline" {
+			inlined = true
 		} else if tag != "" {
 			err = fmt.Errorf("unknown tag %q", tag)
 			return
 		}
 	}
 
-	p := &property{
-		name:  name,
-		multi: multi,
+	p := &property{name: name, multi: multi}
+	p.indexed = indexed
+	if prefix != "" && !inlined {
+		p.name = prefix + propertySeparator + p.name
 	}
 	props = []*property{p}
-	p.indexed = indexed
 
 	// serialize
 	switch x := v.Interface().(type) {

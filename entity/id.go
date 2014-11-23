@@ -12,17 +12,17 @@ type TextIdentifier interface {
 
 // TextID represents an entity's string identifier.
 type TextID struct {
-	id string
+	Identity string `datastore:"id,inline"`
 }
 
 // ID returns the string identifier.
 func (mdl *TextID) ID() string {
-	return mdl.id
+	return mdl.Identity
 }
 
 // SetID sets the string identifier.
 func (mdl *TextID) SetID(id string) {
-	mdl.id = id
+	mdl.Identity = id
 }
 
 // NumIdentifier identifies a datastore entity via numeric ID.
@@ -37,15 +37,15 @@ type NumIdentifier interface {
 
 // NumID represents an entity's numeric identifier.
 type NumID struct {
-	id int64
+	Identity int64 `datastore:"id,inline"`
 }
 
 // ID returns the numeric identifier.
 func (mdl *NumID) ID() int64 {
-	return mdl.id
+	return mdl.Identity
 }
 
 // SetID sets the numeric identifier.
 func (mdl *NumID) SetID(id int64) {
-	mdl.id = id
+	mdl.Identity = id
 }

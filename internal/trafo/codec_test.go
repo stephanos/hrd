@@ -1,7 +1,6 @@
 package trafo
 
 import (
-	"time"
 	. "github.com/101loops/bdd"
 	"github.com/101loops/structor"
 )
@@ -9,18 +8,7 @@ import (
 var _ = Describe("Codec", func() {
 
 	It("return simple codec", func() {
-		type SimpleModel struct {
-			id       int64
-			_Ignored string
-			Ignore   string    `datastore:"-"`
-			Num      int64     `datastore:"num"`
-			Data     []byte    `datastore:",index"`
-			Text     string    `datastore:"html,index"`
-			Time     time.Time `datastore:"timing,index,omitempty"`
-		}
-
 		entity := &SimpleModel{}
-
 		err := CodecSet.Add(entity)
 		Check(err, IsNil)
 
@@ -31,26 +19,14 @@ var _ = Describe("Codec", func() {
 		Check(codec.Complete(), IsTrue)
 
 		fieldNames := codec.FieldNames()
-		Check(fieldNames, HasLen, 4)
-		Check(fieldNames, Equals, []string{"Num", "Data", "Text", "Time"})
+		Check(fieldNames, HasLen, 5)
+		Check(fieldNames, Equals, []string{"NumID", "Num", "Data", "Text", "Time"})
 
 		fields := codec.Fields()
-		Check(fields, HasLen, 4)
+		Check(fields, HasLen, 5)
 	})
 
 	It("return complex codec", func() {
-		type Pair struct {
-			Key string `datastore:"key,index,omitempty"`
-			Val string
-		}
-
-		type ComplexModel struct {
-			Pair Pair `datastore:"tag"`
-			//PairPtr  *Pair   `datastore:"pair"`
-			Pairs []Pair `datastore:"tags"`
-			//PairPtrs []*Pair `datastore:"pairs"`
-		}
-
 		entity := &ComplexModel{}
 
 		err := CodecSet.Add(entity)
