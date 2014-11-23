@@ -7,8 +7,14 @@ import (
 
 	"github.com/101loops/hrd/entity"
 
+	ae "appengine"
 	ds "appengine/datastore"
 )
+
+// DSKeyConverter can return a datastore.Key.
+type DSKeyConverter interface {
+	ToDSKey(ctx ae.Context) *ds.Key
+}
 
 // Key represents the identifier for an entity.
 type Key struct {

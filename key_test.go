@@ -74,7 +74,7 @@ var _ = Describe("Key", func() {
 	It("converts to datastore.Key", func() {
 		k1 := newNumKey(myKind, 42, nil)
 		k2 := newTextKey(myKind, "abc", k1)
-		dsKey := k2.toDSKey(ctx)
+		dsKey := k2.ToDSKey(ctx)
 
 		Check(dsKey, Equals,
 			ds.NewKey(ctx, "my-kind", "abc", 0, ds.NewKey(ctx, "my-kind", "", 42, nil)))

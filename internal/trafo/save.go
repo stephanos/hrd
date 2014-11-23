@@ -7,21 +7,21 @@ import (
 	"time"
 
 	"github.com/101loops/hrd/entity"
+	"github.com/101loops/hrd/internal/types"
 	"github.com/101loops/iszero"
 
+	ae "appengine"
 	ds "appengine/datastore"
 )
 
 // Save saves the entity to datastore properties.
-func (d *Doc) Save(c chan<- ds.Property) error {
-	defer close(c)
-
-	src := d.get()
+func (doc *Doc) Save(ctx ae.Context) (props []*ds.Property, err error) {
+	src := doc.get()
 
 	// event hook: before save
 	if hook, ok := src.(entity.BeforeSaver); ok {
-		if err := hook.BeforeSave(); err != nil {
-			return err
+		if err = hook.BeforeSave(); err != nil {
+			return
 		}
 	}
 
@@ -35,33 +35,23 @@ func (d *Doc) Save(c chan<- ds.Property) error {
 	}
 
 	// export properties
-	props, err := d.toProperties("", []string{""}, false)
+	props, err = doc.toProperties(ctx, "", []string{""}, false)
 	if err != nil {
-		return err
-	}
-
-	// fill channel
-	for _, prop := range props {
-		c <- ds.Property{
-			Name:     prop.name,
-			Value:    prop.value,
-			NoIndex:  !prop.indexed,
-			Multiple: prop.multi,
-		}
+		return
 	}
 
 	// event hook: after save
 	if hook, ok := src.(entity.AfterSaver); ok {
-		if err := hook.AfterSave(); err != nil {
-			return err
+		if err = hook.AfterSave(); err != nil {
+			return
 		}
 	}
 
-	return nil
+	return
 }
 
-func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
-	var props []*property
+func (doc *Doc) toProperties(ctx ae.Context, prefix string, tags []string, multi bool) (res []*ds.Property, err error) {
+	var props []*ds.Property
 
 	srcVal := doc.val()
 	for _, fCodec := range doc.codec.Fields() {
@@ -76,7 +66,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 		// for slice fields (that aren't []byte), save each element
 		if fVal.Kind() == reflect.Slice && fVal.Type() != typeOfByteSlice {
 			for i := 0; i < fVal.Len(); i++ {
-				props, err = fieldToProps(prefix, name, aggrTags, true, fVal.Index(i))
+				props, err = fieldToProps(ctx, prefix, name, aggrTags, true, fVal.Index(i))
 				if err != nil {
 					return
 				}
@@ -87,7 +77,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 
 		// TODO: for map fields, save each element
 
-		props, err = fieldToProps(prefix, name, aggrTags, multi, fVal)
+		props, err = fieldToProps(ctx, prefix, name, aggrTags, multi, fVal)
 		if err != nil {
 			return
 		}
@@ -97,7 +87,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	return
 }
 
-func fieldToProps(prefix, name string, tags []string, multi bool, v reflect.Value) (props []*property, err error) {
+func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool, v reflect.Value) (props []*ds.Property, err error) {
 
 	// dereference pointers, ignore nil
 	if v.Kind() == reflect.Ptr {
@@ -129,32 +119,33 @@ func fieldToProps(prefix, name string, tags []string, multi bool, v reflect.Valu
 		}
 	}
 
-	p := &property{name: name, multi: multi}
-	p.indexed = indexed
+	p := &ds.Property{Name: name, NoIndex: !indexed, Multiple: multi}
 	if prefix != "" && !inlined {
-		p.name = prefix + propertySeparator + p.name
+		p.Name = prefix + propertySeparator + p.Name
 	}
-	props = []*property{p}
+	props = []*ds.Property{p}
 
 	// serialize
 	switch x := v.Interface().(type) {
-	//case *Key:
-	//	p.value = x
+	case *ds.Key:
+		p.Value = x
+	case types.DSKeyConverter:
+		p.Value = x.ToDSKey(ctx)
 	case time.Time:
-		p.value = x
+		p.Value = x
 	case []byte:
-		p.indexed = false
-		p.value = x
+		p.Value = x
+		p.NoIndex = true
 	default:
 		switch v.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			p.value = v.Int()
+			p.Value = v.Int()
 		case reflect.Bool:
-			p.value = v.Bool()
+			p.Value = v.Bool()
 		case reflect.String:
-			p.value = v.String()
+			p.Value = v.String()
 		case reflect.Float32, reflect.Float64:
-			p.value = v.Float()
+			p.Value = v.Float()
 		case reflect.Struct:
 			if !v.CanAddr() {
 				return nil, fmt.Errorf("unsupported property %q (unaddressable)", name)
@@ -163,11 +154,11 @@ func fieldToProps(prefix, name string, tags []string, multi bool, v reflect.Valu
 			if err != nil {
 				return nil, fmt.Errorf("unsupported property %q (%v)", name, err)
 			}
-			return sub.toProperties(name, tags, multi)
+			return sub.toProperties(ctx, name, tags, multi)
 		}
 	}
 
-	if p.value == nil {
+	if p.Value == nil {
 		err = fmt.Errorf("unsupported struct field type %q (unidentifiable)", v.Type())
 	}
 

@@ -31,7 +31,7 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 	if err != nil {
 		return nil, err
 	}
-	dsDocs := docs.List()
+	docsPipe := docs.Pipe(kind.Context)
 
 	ctx := kind.Context
 	ctx.Infof(LogDatastoreAction("getting", "from", keys, kind.Name))
@@ -39,11 +39,11 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 	var dsErr error
 	dsKeys := toDSKeys(keys)
 	if useGlobalCache {
-		dsErr = ndsGet(ctx, dsKeys, dsDocs)
+		dsErr = ndsGet(ctx, dsKeys, docsPipe.Properties())
 	}
-	dsErr = dsGet(ctx, dsKeys, dsDocs)
+	dsErr = dsGet(ctx, dsKeys, docsPipe.Properties())
 
-	return applyResult(dsDocs, dsKeys, dsErr)
+	return applyResult(docsPipe.Docs, dsKeys, dsErr)
 }
 
 func validateGetKeys(kind *types.Kind, keys []*types.Key) error {

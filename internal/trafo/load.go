@@ -22,6 +22,7 @@ func (d *Doc) Load(c <-chan ds.Property) error {
 		return err
 	}
 
+	// TODO: write custom loader
 	if err = ds.LoadStruct(dst, c); err != nil {
 		return err
 	}

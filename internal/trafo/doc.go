@@ -22,21 +22,6 @@ type Doc struct {
 	codec *structor.Codec
 }
 
-// property is a name/value pair plus some metadata.
-type property struct {
-	// name is the property name.
-	name string
-
-	// value is the property value.
-	value interface{}
-
-	// indexed is whether the datastore indexes this property.
-	indexed bool
-
-	// multi is whether the entity can have multiple properties with the same name.
-	multi bool
-}
-
 func newDoc(srcVal reflect.Value) (*Doc, error) {
 	srcType := srcVal.Type()
 	srcKind := srcVal.Kind()

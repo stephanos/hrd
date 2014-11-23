@@ -33,13 +33,13 @@ func Put(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, er
 
 	ctx.Infof(LogDatastoreAction("putting", "in", keys, kind.Name))
 
-	dsDocs := docs.List()
-	dsKeys, dsErr := ndsPut(ctx, toDSKeys(keys), dsDocs)
+	docsPipe := docs.Pipe(kind.Context)
+	dsKeys, dsErr := ndsPut(ctx, toDSKeys(keys), docsPipe.Properties())
 	if dsErr != nil {
 		return nil, dsErr
 	}
 
-	return applyResult(dsDocs, dsKeys, dsErr)
+	return applyResult(docsPipe.Docs, dsKeys, dsErr)
 }
 
 func validatePutKeys(kind *types.Kind, keys []*types.Key, completeKeys bool) error {

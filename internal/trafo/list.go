@@ -5,6 +5,8 @@ import (
 	"reflect"
 
 	"github.com/101loops/hrd/internal/types"
+
+	ae "appengine"
 )
 
 // DocList represents a collection of Doc.
@@ -141,9 +143,9 @@ func NewWriteableDocList(src interface{}, keys []*types.Key, multi bool) (*DocLi
 	return ret, nil
 }
 
-// List returns the set's sequence of Doc.
-func (l *DocList) List() []*Doc {
-	return l.list
+// Pipe returns the a DocsPipe to load/save the entities.
+func (l *DocList) Pipe(ctx ae.Context) DocsPipe {
+	return DocsPipe{ctx, l.list}
 }
 
 // Keys returns the set's sequence of Key.

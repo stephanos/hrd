@@ -96,10 +96,11 @@ func (k *Key) Incomplete() bool {
 	return k.stringID == "" && k.intID == 0
 }
 
-func (k *Key) toDSKey(ctx ae.Context) *ds.Key {
+// ToDSKey returns the respective datastore.Key.
+func (k *Key) ToDSKey(ctx ae.Context) *ds.Key {
 	var parentKey *ds.Key
 	if k.parent != nil {
-		parentKey = k.parent.toDSKey(ctx)
+		parentKey = k.parent.ToDSKey(ctx)
 	}
 	return ds.NewKey(ctx, k.kind, k.stringID, k.intID, parentKey)
 }
@@ -107,7 +108,7 @@ func (k *Key) toDSKey(ctx ae.Context) *ds.Key {
 func toInternalKeys(ctx ae.Context, keys []*Key) []*types.Key {
 	ret := make([]*types.Key, len(keys))
 	for i, k := range keys {
-		ret[i] = types.NewKey(k.toDSKey(ctx))
+		ret[i] = types.NewKey(k.ToDSKey(ctx))
 	}
 	return ret
 }
