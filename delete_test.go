@@ -36,7 +36,7 @@ var _ = Describe("Deleter", func() {
 		hrdKeys := []*Key{myKind.NewNumKey(1), myKind.NewNumKey(2)}
 
 		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, toInternalKeys(ctx, myKind.name, hrdKeys))
+			Check(keys, Equals, toInternalKeys(ctx, hrdKeys))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}

@@ -13,12 +13,13 @@ import (
 // Key represents the identifier for an entity.
 type Key struct {
 	*ds.Key
-	*KeyResult
+	*KeyState
 }
 
-// KeyResult represents meta data of the datastore operation
+// KeyState represents meta data of the datastore operation
 // the key originates from, if any.
-type KeyResult struct {
+type KeyState struct {
+
 	// Synced is the last time the entity was read/written.
 	Synced *time.Time
 
@@ -28,7 +29,7 @@ type KeyResult struct {
 
 // NewKey creates a Key from a datastore.Key.
 func NewKey(k *ds.Key) *Key {
-	return &Key{k, &KeyResult{}}
+	return &Key{k, &KeyState{}}
 }
 
 // NewKeys creates a sequence of Key from a sequence of datastore.Key.

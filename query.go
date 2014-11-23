@@ -106,7 +106,7 @@ func (qry *Query) NoLimit() (ret *Query) {
 func (qry *Query) Ancestor(k *Key) (ret *Query) {
 	ret = qry.clone()
 	//ret.log("ANCESTOR '%v'", k.String())
-	ret.dsQry = ret.dsQry.Ancestor(k.toDSKey(qry.ctx, qry.kind.name))
+	ret.dsQry = ret.dsQry.Ancestor(k.toDSKey(qry.ctx))
 	return ret
 }
 

@@ -9,7 +9,7 @@ import (
 
 // Key represents the datastore key of an entity.
 type Key struct {
-	*types.KeyResult
+	state *types.KeyState
 
 	kind      string
 	namespace string
@@ -30,7 +30,7 @@ func newKey(key *types.Key) *Key {
 		parent = newKey(types.NewKey(parentKey))
 	}
 
-	return &Key{key.KeyResult, key.Kind(), key.Namespace(), key.StringID(), key.IntID(), parent}
+	return &Key{key.KeyState, key.Kind(), key.Namespace(), key.StringID(), key.IntID(), parent}
 }
 
 func newKeys(keys []*types.Key) []*Key {
@@ -42,11 +42,11 @@ func newKeys(keys []*types.Key) []*Key {
 }
 
 func newNumKey(kind *Kind, id int64, parent *Key) *Key {
-	return &Key{KeyResult: &types.KeyResult{}, kind: kind.name, intID: id, parent: parent}
+	return &Key{state: &types.KeyState{}, kind: kind.name, intID: id, parent: parent}
 }
 
 func newTextKey(kind *Kind, id string, parent *Key) *Key {
-	return &Key{KeyResult: &types.KeyResult{}, kind: kind.name, stringID: id, parent: parent}
+	return &Key{state: &types.KeyState{}, kind: kind.name, stringID: id, parent: parent}
 }
 
 // Kind returns the key's kind (also known as entity type).
@@ -77,18 +77,21 @@ func (k *Key) Namespace() string {
 
 // Exists is whether an entity with this key exists in the datastore.
 func (k *Key) Exists() bool {
-	if k.KeyResult == nil {
+	if k.state == nil {
 		return false
 	}
-	return !k.KeyResult.Synced.IsZero()
+	if t := k.state.Synced; t != nil {
+		return !t.IsZero()
+	}
+	return false
 }
 
 // Error returns an error associated with the key.
 func (k *Key) Error() error {
-	if k.KeyResult == nil {
+	if k.state == nil {
 		return nil
 	}
-	return k.KeyResult.Error
+	return k.state.Error
 }
 
 // Incomplete returns whether the key does not refer to a stored entity.
@@ -97,18 +100,18 @@ func (k *Key) Incomplete() bool {
 	return k.stringID == "" && k.intID == 0
 }
 
-func (k *Key) toDSKey(ctx ae.Context, kind string) *ds.Key {
+func (k *Key) toDSKey(ctx ae.Context) *ds.Key {
 	var parentKey *ds.Key
 	if k.parent != nil {
-		parentKey = k.parent.toDSKey(ctx, kind)
+		parentKey = k.parent.toDSKey(ctx)
 	}
-	return ds.NewKey(ctx, kind, k.stringID, k.intID, parentKey)
+	return ds.NewKey(ctx, k.kind, k.stringID, k.intID, parentKey)
 }
 
-func toInternalKeys(ctx ae.Context, kind string, keys []*Key) []*types.Key {
+func toInternalKeys(ctx ae.Context, keys []*Key) []*types.Key {
 	ret := make([]*types.Key, len(keys))
 	for i, k := range keys {
-		ret[i] = types.NewKey(k.toDSKey(ctx, kind))
+		ret[i] = types.NewKey(k.toDSKey(ctx))
 	}
 	return ret
 }

@@ -72,7 +72,7 @@ func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 }
 
 func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
-	keys, err := dsGet(l.Kind(), toInternalKeys(l.ctx, l.kind.name, l.keys), dst, l.opts.useGlobalCache, multi)
+	keys, err := dsGet(l.Kind(), toInternalKeys(l.ctx, l.keys), dst, l.opts.useGlobalCache, multi)
 	return newKeys(keys), err
 }
 

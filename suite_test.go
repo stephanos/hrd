@@ -31,9 +31,9 @@ func TestSuite(t *testing.T) {
 type MyModel struct{}
 
 func newNumKeys(ids ...int64) []*types.Key {
-	return toInternalKeys(ctx, myKind.name, myKind.NewNumKeys(ids...))
+	return toInternalKeys(ctx, myKind.NewNumKeys(ids...))
 }
 
 func newTextKeys(ids ...string) []*types.Key {
-	return toInternalKeys(ctx, myKind.name, myKind.NewTextKeys(ids...))
+	return toInternalKeys(ctx, myKind.NewTextKeys(ids...))
 }

@@ -17,13 +17,17 @@ var _ = Describe("Operation Options", func() {
 		Check(opts.useGlobalCache, IsTrue)
 	})
 
-	It("configures complete key requirements", func() {
+	It("sets up complete key requirements", func() {
 		opts = opts.Apply(CompleteKeys)
 		Check(opts.completeKeys, IsTrue)
 	})
 
-	It("configures global cache", func() {
+	It("sets up global cache usage", func() {
 		opts = opts.Apply(NoGlobalCache)
 		Check(opts.useGlobalCache, IsFalse)
+	})
+
+	It("does nothing for no parameters", func() {
+		opts = opts.Apply()
 	})
 })

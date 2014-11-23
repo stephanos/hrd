@@ -54,5 +54,5 @@ func (d *Deleter) Entities(srcs interface{}) error {
 }
 
 func (d *Deleter) deleteKeys(keys ...*Key) error {
-	return dsDeleteKeys(d.Kind(), toInternalKeys(d.ctx, d.kind.name, keys))
+	return dsDeleteKeys(d.Kind(), toInternalKeys(d.ctx, keys))
 }
