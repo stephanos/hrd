@@ -11,9 +11,9 @@ import (
 func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
 
 	// in a keys-only query there is no dsts
-	var docSet *trafo.DocSet
+	var docSet *trafo.DocList
 	if dsts != nil {
-		docSet, err = trafo.NewWriteableDocSet(dsts, nil, multi)
+		docSet, err = trafo.NewWriteableDocList(dsts, nil, multi)
 		if err != nil {
 			return
 		}

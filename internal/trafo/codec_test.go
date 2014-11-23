@@ -38,6 +38,8 @@ var _ = Describe("Codec", func() {
 		Check(codec, NotNil)
 	})
 
+	// ==== ERRORS
+
 	It("return error for invalid codec", func() {
 		codec, err := getCodec("invalid-type")
 
@@ -45,65 +47,63 @@ var _ = Describe("Codec", func() {
 		Check(err, NotNil).And(Contains, `value is not a struct, struct pointer or reflect.Type - but "string"`)
 	})
 
-	// ==== ERRORS
-
 	It("rejects invalid field names", func() {
-		type InvalidCodec1 struct {
+		type InvalidModel1 struct {
 			InvalidName string `datastore:"$invalid-name"`
 		}
-		err := CodecSet.Add(InvalidCodec1{})
+		err := CodecSet.Add(InvalidModel1{})
 		Check(err, NotNil).And(Contains, `field "InvalidName" has invalid name (begins with invalid character '$')`)
 
-		type InvalidCodec2 struct {
+		type InvalidModel2 struct {
 			InvalidName string `datastore:"invalid@name"`
 		}
-		err = CodecSet.Add(InvalidCodec2{})
+		err = CodecSet.Add(InvalidModel2{})
 		Check(err, NotNil).And(Contains, `field "InvalidName" has invalid name (contains invalid character '@')`)
 	})
 
 	It("rejects duplicate field names", func() {
-		type InvalidCodec struct {
+		type InvalidModel struct {
 			ID1 string `datastore:"id"`
 			ID2 string `datastore:"id"`
 		}
-		err := CodecSet.Add(InvalidCodec{})
+		err := CodecSet.Add(InvalidModel{})
 		Check(err, NotNil).And(Contains, `duplicate field name "id"`)
 	})
 
 	It("rejects invalid field type", func() {
-		type InvalidCodec struct {
+		type InvalidModel struct {
 			Ptr *string
 		}
-		err := CodecSet.Add(InvalidCodec{})
+		err := CodecSet.Add(InvalidModel{})
 		Check(err, NotNil).And(Contains, `field "Ptr" has invalid type (field is a pointer)`)
 	})
 
 	It("rejects invalid map key type", func() {
-		type InvalidCodec struct {
+		type InvalidModel struct {
 			Map map[int]string
 		}
-		err := CodecSet.Add(InvalidCodec{})
+		err := CodecSet.Add(InvalidModel{})
 		Check(err, NotNil).And(Contains, `field "Map" has invalid map key type 'int' - only 'string' is allowed`)
 	})
 
 	//	It("rejects recursive struct", func() {
-	//		type InvalidCodec struct {
-	//			Recursive []InvalidCodec
+	//		type InvalidModel struct {
+	//			Recursive []InvalidModel
 	//		}
 	//
-	//		err := CodecSet.Add(InvalidCodec{})
+	//		err := CodecSet.Add(InvalidModel{})
 	//		Check(err, NotNil).And(Contains, `TODO`)
 	//	})
 
 	//	It("rejects slice of slices", func() {
-	//		type InvalidSubCodec struct {
-	//			Slice []string
+	//		type Model struct {
+	//			InnerSlice []string
 	//		}
-	//		type InvalidCodec struct {
-	//			Slice []InvalidSubCodec
+	//		type InvalidModel struct {
+	//			OuterSlide []Model
 	//		}
 	//
-	//		err := CodecSet.Add(InvalidCodec{})
+	//		err := CodecSet.Add(InvalidModel{})
 	//		Check(err, NotNil).And(Contains, `TODO`)
 	//	})
 })

@@ -23,15 +23,12 @@ func TestSuite(t *testing.T) {
 	defer ctx.Close()
 
 	CodecSet.AddMust(SimpleModel{})
-	CodecSet.AddMust(InvalidModel{})
 	CodecSet.AddMust(ComplexModel{})
 
 	RunSpecs(t, "HRD Trafo Suite")
 }
 
 // ==== MODELS
-
-type InvalidModel struct{}
 
 type SimpleModel struct {
 	entity.NumID

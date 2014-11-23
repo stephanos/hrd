@@ -27,7 +27,7 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 		return nil, err
 	}
 
-	docs, err := trafo.NewWriteableDocSet(dst, keys, multi)
+	docs, err := trafo.NewWriteableDocList(dst, keys, multi)
 	if err != nil {
 		return nil, err
 	}

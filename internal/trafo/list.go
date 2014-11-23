@@ -7,8 +7,8 @@ import (
 	"github.com/101loops/hrd/internal/types"
 )
 
-// DocSet represents a collection of Doc.
-type DocSet struct {
+// DocList represents a collection of Doc.
+type DocList struct {
 	list     []*Doc
 	keyList  []*types.Key
 	srcVal   reflect.Value
@@ -22,8 +22,8 @@ var (
 	typeOfInt64 = reflect.TypeOf(int64(0))
 )
 
-// NewReadableDocSet returns a new DocSet, suitable for reading from it.
-func NewReadableDocSet(kind *types.Kind, src interface{}) (*DocSet, error) {
+// NewReadableDocList returns a new DocList, suitable for reading from it.
+func NewReadableDocList(kind *types.Kind, src interface{}) (*DocList, error) {
 	srcVal := reflect.ValueOf(src)
 	if src == nil || (srcVal.Kind() == reflect.Ptr && srcVal.IsNil()) {
 		return nil, fmt.Errorf("value must be non-nil")
@@ -52,22 +52,21 @@ func NewReadableDocSet(kind *types.Kind, src interface{}) (*DocSet, error) {
 		if err != nil {
 			return nil, err
 		}
+		list[i] = d
 
 		key, err := types.GetEntityKey(kind, entity)
 		if err != nil {
 			return nil, err
 		}
 		keys[i] = key
-
-		list[i] = d
 	}
 
-	return &DocSet{list: list, keyList: keys}, nil
+	return &DocList{list: list, keyList: keys}, nil
 }
 
-// NewWriteableDocSet creates a new DocSet, suitable for writing to it.
-func NewWriteableDocSet(src interface{}, keys []*types.Key, multi bool) (*DocSet, error) {
-	ret := &DocSet{keyList: keys}
+// NewWriteableDocList creates a new DocList, suitable for writing to it.
+func NewWriteableDocList(src interface{}, keys []*types.Key, multi bool) (*DocList, error) {
+	ret := &DocList{keyList: keys}
 	keysLen := len(keys)
 
 	// resolve pointer
@@ -143,34 +142,34 @@ func NewWriteableDocSet(src interface{}, keys []*types.Key, multi bool) (*DocSet
 }
 
 // List returns the set's sequence of Doc.
-func (set *DocSet) List() []*Doc {
-	return set.list
+func (l *DocList) List() []*Doc {
+	return l.list
 }
 
 // Keys returns the set's sequence of Key.
-func (set *DocSet) Keys() []*types.Key {
-	return set.keyList
+func (l *DocList) Keys() []*types.Key {
+	return l.keyList
 }
 
 // Get returns the set's nth Doc.
 // it is created first if it doesn't already exist.
-func (set *DocSet) Get(nth int) (ret *Doc, err error) {
-	if nth < len(set.list) {
-		ret = set.list[nth]
+func (l *DocList) Get(nth int) (ret *Doc, err error) {
+	if nth < len(l.list) {
+		ret = l.list[nth]
 	} else {
-		ret, err = newDocFromType(set.elemType)
+		ret, err = newDocFromType(l.elemType)
 	}
 	return
 }
 
 // Add appends a new Doc to the set.
-func (set *DocSet) Add(key *types.Key, doc *Doc) {
-	set.list = append(set.list, doc)
+func (l *DocList) Add(key *types.Key, doc *Doc) {
+	l.list = append(l.list, doc)
 	doc.SetKey(key)
 
-	if set.srcKind == reflect.Map {
+	if l.srcKind == reflect.Map {
 		var v reflect.Value
-		switch set.keyType {
+		switch l.keyType {
 		case typeOfInt64:
 			v = reflect.ValueOf(key.IntID())
 		case typeOfStr:
@@ -178,8 +177,8 @@ func (set *DocSet) Add(key *types.Key, doc *Doc) {
 		default:
 			v = reflect.ValueOf(key)
 		}
-		set.srcVal.SetMapIndex(v, doc.srcVal)
-	} else if set.srcKind == reflect.Slice {
-		set.srcVal.Set(reflect.Append(set.srcVal, doc.srcVal))
+		l.srcVal.SetMapIndex(v, doc.srcVal)
+	} else if l.srcKind == reflect.Slice {
+		l.srcVal.Set(reflect.Append(l.srcVal, doc.srcVal))
 	}
 }

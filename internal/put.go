@@ -21,7 +21,7 @@ var (
 func Put(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
 	ctx := kind.Context
 
-	docs, err := trafo.NewReadableDocSet(kind, src)
+	docs, err := trafo.NewReadableDocList(kind, src)
 	if err != nil {
 		return nil, err
 	}
