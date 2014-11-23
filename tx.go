@@ -33,7 +33,7 @@ func (tx *Transactor) XG(enable ...bool) *Transactor {
 
 // Run executes a function in a transaction.
 func (tx *Transactor) Run(f func(_ TX) error) error {
-	return dsTransact(tx.ctx, func(ctx ae.Context) error {
+	return dsTransact(tx.ctx, tx.crossGroup, func(ctx ae.Context) error {
 		return f(ctx)
-	}, tx.crossGroup)
+	})
 }

@@ -6,7 +6,7 @@ import (
 )
 
 // Transact runs a function in a transaction.
-func Transact(ctx ae.Context, f func(_ ae.Context) error, crossGroup bool) error {
+func Transact(ctx ae.Context, crossGroup bool, f func(_ ae.Context) error) error {
 	return ds.RunInTransaction(ctx, func(ctx ae.Context) error {
 		var dsErr error
 		dsErr = f(ctx)
