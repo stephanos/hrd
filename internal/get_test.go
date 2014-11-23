@@ -28,10 +28,10 @@ func dsLoadTests(useGlobalCache bool) {
 		kind = randomKind()
 
 		entities := make([]interface{}, 4)
-		for i := int64(0); i < 4; i++ {
-			entity := &MyModel{}
-			entity.SetID(i + 1)
-			entities[i] = entity
+		for i := int64(1); i < 5; i++ {
+			entity := &MyModel{Num: i}
+			entity.SetID(i)
+			entities[i-1] = entity
 		}
 		keys, err := Put(kind, entities, true)
 		Check(err, IsNil)
@@ -49,6 +49,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(keys, HasLen, 1)
 		Check(keys[0].Synced, NotNil)
 		Check(entity.ID(), EqualsNum, 1)
+		Check(entity.Num, EqualsNum, 1)
 	})
 
 	It("loads multiple entities into slice of struct pointers", func() {
@@ -66,10 +67,15 @@ func dsLoadTests(useGlobalCache bool) {
 
 		Check(keys[0].IntID(), EqualsNum, 1)
 		Check(keys[0].Synced, NotNil)
+		Check(entities[0], NotNil)
+
 		Check(keys[1].IntID(), EqualsNum, 2)
 		Check(keys[1].Synced, NotNil)
+		Check(entities[1], NotNil)
+
 		Check(keys[2].IntID(), EqualsNum, 666)
 		Check(keys[2].Synced, IsNil)
+		// Check(entities[2], IsNil) TODO
 	})
 
 	It("loads multiple entities into map of struct pointers by Key", func() {

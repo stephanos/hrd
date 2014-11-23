@@ -1,6 +1,7 @@
 package trafo
 
 import (
+	"time"
 	. "github.com/101loops/bdd"
 )
 
@@ -21,12 +22,14 @@ var _ = Describe("Doc", func() {
 
 			Check(err, IsNil)
 			Check(props, NotNil)
-			Check(props, HasLen, 4)
+			Check(props, HasLen, 6)
 
 			Check(*props[0], Equals, property{"id", int64(0), false, false})
-			Check(*props[1], Equals, property{"num", int64(42), false, false})
-			Check(*props[2], Equals, property{"Data", []byte("byte"), false, false})
-			Check(*props[3], Equals, property{"html", "html", true, false})
+			Check(*props[1], Equals, property{"created_at", time.Time{}, true, false})
+			Check(*props[2], Equals, property{"updated_at", time.Time{}, true, false})
+			Check(*props[3], Equals, property{"num", int64(42), false, false})
+			Check(*props[4], Equals, property{"Data", []byte("byte"), false, false})
+			Check(*props[5], Equals, property{"html", "html", true, false})
 		})
 
 		It("complex model", func() {

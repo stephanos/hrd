@@ -19,11 +19,11 @@ var _ = Describe("Codec", func() {
 		Check(codec.Complete(), IsTrue)
 
 		fieldNames := codec.FieldNames()
-		Check(fieldNames, HasLen, 5)
-		Check(fieldNames, Equals, []string{"NumID", "Num", "Data", "Text", "Time"})
+		Check(fieldNames, HasLen, 7)
+		Check(fieldNames, Equals, []string{"NumID", "CreatedTime", "UpdatedTime", "Num", "Data", "Text", "Time"})
 
 		fields := codec.Fields()
-		Check(fields, HasLen, 5)
+		Check(fields, HasLen, 7)
 	})
 
 	It("return complex codec", func() {

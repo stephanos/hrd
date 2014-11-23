@@ -21,6 +21,7 @@ Internally it uses [nds](https://github.com/qedus/nds) and  [structor](https://g
 ## ToDos
 - validated projection query
 - in-memory cache
+- field name transformer
 - allow to pass-in logger
 - RPC listener
 - delete from query

@@ -18,6 +18,9 @@ var _ = Describe("Put", func() {
 
 	It("saves an entity without id", func() {
 		entity := &MyModel{}
+		Check(entity.ID(), EqualsNum, 0)
+		Check(entity.UpdatedAt(), IsZero)
+		Check(entity.CreatedAt(), IsZero)
 
 		keys, err := Put(kind, entity, false)
 		Check(err, IsNil)
@@ -26,6 +29,8 @@ var _ = Describe("Put", func() {
 		genID := keys[0].IntID()
 		Check(genID, IsGreaterThan, 0)
 		Check(entity.ID(), Equals, genID)
+		Check(entity.UpdatedAt(), Not(IsZero))
+		Check(entity.CreatedAt(), Not(IsZero))
 		Check(entity.lifecycle, Equals, []string{"before-save", "after-save"})
 	})
 

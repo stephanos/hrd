@@ -47,6 +47,8 @@ type InvalidModel struct{}
 
 type MyModel struct {
 	entity.NumID
+	entity.CreatedTime
+	entity.UpdatedTime
 
 	Ignore    string    `datastore:"-"`
 	Num       int64     `datastore:"num"`

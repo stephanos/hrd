@@ -35,6 +35,8 @@ type InvalidModel struct{}
 
 type SimpleModel struct {
 	entity.NumID
+	entity.CreatedTime
+	entity.UpdatedTime
 
 	Ignore string    `datastore:"-"`
 	Num    int64     `datastore:"num"`

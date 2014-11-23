@@ -120,6 +120,56 @@ func (doc *Doc) val() reflect.Value {
 	return v
 }
 
+// ===== DOC -> []PROPERTY
+
+// Save saves the entity to datastore properties.
+func (doc *Doc) Save(c chan<- ds.Property) error {
+	defer close(c)
+
+	src := doc.get()
+
+	// event hook: before save
+	if hook, ok := src.(entity.BeforeSaver); ok {
+		if err := hook.BeforeSave(); err != nil {
+			return err
+		}
+	}
+
+	// timestamp
+	now := time.Now()
+	if ts, ok := src.(entity.CreateTimestamper); ok {
+		ts.SetCreatedAt(now)
+	}
+	if ts, ok := src.(entity.UpdateTimestamper); ok {
+		ts.SetUpdatedAt(now)
+	}
+
+	// export properties
+	props, err := doc.toProperties("", []string{""}, false)
+	if err != nil {
+		return err
+	}
+
+	// fill channel
+	for _, prop := range props {
+		c <- ds.Property{
+			Name:     prop.name,
+			Value:    prop.value,
+			NoIndex:  !prop.indexed,
+			Multiple: prop.multi,
+		}
+	}
+
+	// event hook: after save
+	if hook, ok := src.(entity.AfterSaver); ok {
+		if err := hook.AfterSave(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*property, err error) {
 	var props []*property
 
@@ -155,71 +205,6 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	}
 
 	return
-}
-
-// Save saves the entity to datastore properties.
-func (doc *Doc) Save(c chan<- ds.Property) error {
-	defer close(c)
-
-	src := doc.get()
-
-	// event: before save
-	if hook, ok := src.(entity.BeforeSaver); ok {
-		if err := hook.BeforeSave(); err != nil {
-			return err
-		}
-	}
-
-	// export properties
-	props, err := doc.toProperties("", []string{""}, false)
-	if err != nil {
-		return err
-	}
-
-	// fill channel
-	for _, prop := range props {
-		c <- ds.Property{
-			Name:     prop.name,
-			Value:    prop.value,
-			NoIndex:  !prop.indexed,
-			Multiple: prop.multi,
-		}
-	}
-
-	// event: after save
-	if hook, ok := src.(entity.AfterSaver); ok {
-		if err := hook.AfterSave(); err != nil {
-			close(c)
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Load loads the entity from datastore properties.
-func (doc *Doc) Load(c <-chan ds.Property) error {
-	dst := doc.get()
-
-	// event: before load
-	if hook, ok := dst.(entity.BeforeLoader); ok {
-		if err := hook.BeforeLoad(); err != nil {
-			return err
-		}
-	}
-
-	if err := ds.LoadStruct(dst, c); err != nil {
-		return err
-	}
-
-	// event: after load
-	if hook, ok := dst.(entity.AfterLoader); ok {
-		if err := hook.AfterLoad(); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func itemToProperties(prefix, name string, tags []string, multi bool, v reflect.Value) (props []*property, err error) {
@@ -297,4 +282,34 @@ func itemToProperties(prefix, name string, tags []string, multi bool, v reflect.
 	}
 
 	return
+}
+
+// ===== []PROPERTY -> DOC
+
+// Load loads the entity from datastore properties.
+func (doc *Doc) Load(c <-chan ds.Property) error {
+	var err error
+	dst := doc.get()
+
+	// event hook: before load
+	if hook, ok := dst.(entity.BeforeLoader); ok {
+		err = hook.BeforeLoad()
+	}
+	if err != nil {
+		for _ = range c {
+			// channel must be drained before returning ...
+		}
+		return err
+	}
+
+	if err = ds.LoadStruct(dst, c); err != nil {
+		return err
+	}
+
+	// event hook: after load
+	if hook, ok := dst.(entity.AfterLoader); ok {
+		err = hook.AfterLoad()
+	}
+
+	return err
 }
