@@ -4,7 +4,7 @@ import (
 	ae "appengine"
 )
 
-// Kind represents a entity category in the datastore.
+// Kind represents an entity category in the datastore.
 type Kind struct {
 	Context ae.Context
 	Name    string

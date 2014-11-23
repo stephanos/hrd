@@ -120,7 +120,7 @@ func (doc *Doc) val() reflect.Value {
 	return v
 }
 
-// ===== DOC -> []PROPERTY
+// ===== Doc -> []Property
 
 // Save saves the entity to datastore properties.
 func (doc *Doc) Save(c chan<- ds.Property) error {
@@ -186,7 +186,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 		// for slice fields (that aren't []byte), save each element
 		if fVal.Kind() == reflect.Slice && fVal.Type() != typeOfByteSlice {
 			for i := 0; i < fVal.Len(); i++ {
-				props, err = itemToProperties(prefix, name, aggrTags, true, fVal.Index(i))
+				props, err = fieldToProps(prefix, name, aggrTags, true, fVal.Index(i))
 				if err != nil {
 					return
 				}
@@ -197,7 +197,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 
 		// TODO: for map fields, save each element
 
-		props, err = itemToProperties(prefix, name, aggrTags, multi, fVal)
+		props, err = fieldToProps(prefix, name, aggrTags, multi, fVal)
 		if err != nil {
 			return
 		}
@@ -207,7 +207,7 @@ func (doc *Doc) toProperties(prefix string, tags []string, multi bool) (res []*p
 	return
 }
 
-func itemToProperties(prefix, name string, tags []string, multi bool, v reflect.Value) (props []*property, err error) {
+func fieldToProps(prefix, name string, tags []string, multi bool, v reflect.Value) (props []*property, err error) {
 
 	// dereference pointers, ignore nil
 	if v.Kind() == reflect.Ptr {
@@ -284,7 +284,7 @@ func itemToProperties(prefix, name string, tags []string, multi bool, v reflect.
 	return
 }
 
-// ===== []PROPERTY -> DOC
+// ===== []Property -> Doc
 
 // Load loads the entity from datastore properties.
 func (doc *Doc) Load(c <-chan ds.Property) error {
