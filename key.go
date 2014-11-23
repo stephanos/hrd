@@ -21,10 +21,6 @@ type Key struct {
 }
 
 func newKey(key *types.Key) *Key {
-	if key == nil {
-		return nil
-	}
-
 	var parent *Key
 	if parentKey := key.Parent(); parentKey != nil {
 		parent = newKey(types.NewKey(parentKey))

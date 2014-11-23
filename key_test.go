@@ -38,12 +38,14 @@ var _ = Describe("Key", func() {
 
 	It("creates a new key", func() {
 		dsKey1 := ds.NewKey(ctx, "my-kind", "abc", 0, nil)
-		dsKey2 := ds.NewKey(ctx, "my-kind", "", 42, dsKey1)
-		key := newKey(types.NewKey(dsKey2))
+		key1 := newKey(types.NewKey(dsKey1))
+		Check(key1, Equals,
+			&Key{state: &types.KeyState{}, kind: "my-kind", stringID: "abc", parent: nil})
 
-		Check(key, Equals,
-			&Key{state: &types.KeyState{}, kind: "my-kind", intID: 42,
-				parent: &Key{state: &types.KeyState{}, kind: "my-kind", stringID: "abc"}})
+		dsKey2 := ds.NewKey(ctx, "my-kind", "", 42, dsKey1)
+		key2 := newKey(types.NewKey(dsKey2))
+		Check(key2, Equals,
+			&Key{state: &types.KeyState{}, kind: "my-kind", intID: 42, parent: key1})
 	})
 
 	It("returns whether it exists", func() {
