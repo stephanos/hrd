@@ -53,12 +53,12 @@ func validateCodec(_ *structor.Set, codec *structor.Codec) error {
 
 		label, err := validateFieldName(labels, field)
 		if err != nil {
-			return fmt.Errorf("field %q has invalid name (%v)", field.Name, err)
+			return fmt.Errorf("field %q %v", field.Name, err)
 		}
 
 		fType, err := validateFieldType(field)
 		if err != nil {
-			return fmt.Errorf("field %q has invalid type (%v)", field.Name, err)
+			return fmt.Errorf("field %q %v", field.Name, err)
 		}
 
 		subType := subTypeOf(fType, field.ElemType)
@@ -76,13 +76,13 @@ func validateFieldType(field *structor.FieldCodec) (reflect.Type, error) {
 	fType := field.Type
 
 	if fType.Kind() == reflect.Ptr {
-		return nil, fmt.Errorf("field is a pointer")
+		return nil, fmt.Errorf("has invalid type 'pointer'")
 	}
 
 	if field.KeyType != nil {
 		keyType := *field.KeyType
 		if keyType != typeOfStr {
-			return nil, fmt.Errorf("field %q has invalid map key type '%v' - only 'string' is allowed", field.Name, keyType)
+			return nil, fmt.Errorf("has invalid map key type '%v' - only 'string' is allowed", keyType)
 		}
 	}
 

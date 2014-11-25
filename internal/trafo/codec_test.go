@@ -52,13 +52,13 @@ var _ = Describe("Codec", func() {
 			InvalidName string `datastore:"$invalid-name"`
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" has invalid name (begins with invalid character '$')`)
+		Check(err, NotNil).And(Contains, `field "InvalidName" begins with invalid character '$'`)
 
 		type Wrapper struct {
 			InvalidModel
 		}
 		err = CodecSet.Add(Wrapper{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" has invalid name (begins with invalid character '$')`)
+		Check(err, NotNil).And(Contains, `field "InvalidName" begins with invalid character '$'`)
 	})
 
 	It("rejects fields containing invalid character", func() {
@@ -66,13 +66,13 @@ var _ = Describe("Codec", func() {
 			InvalidName string `datastore:"invalid@name"`
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" has invalid name (contains invalid character '@')`)
+		Check(err, NotNil).And(Contains, `field "InvalidName" contains invalid character '@'`)
 
 		type Wrapper struct {
 			InvalidModel
 		}
 		err = CodecSet.Add(Wrapper{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" has invalid name (contains invalid character '@')`)
+		Check(err, NotNil).And(Contains, `field "InvalidName" contains invalid character '@'`)
 	})
 
 	It("rejects duplicate field names", func() {
@@ -89,7 +89,7 @@ var _ = Describe("Codec", func() {
 			Ptr *string
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "Ptr" has invalid type (field is a pointer)`)
+		Check(err, NotNil).And(Contains, `field "Ptr" has invalid type 'pointer'`)
 	})
 
 	It("rejects invalid map key type", func() {
@@ -109,15 +109,15 @@ var _ = Describe("Codec", func() {
 		Check(err, NotNil).And(Contains, `recursive struct at field "Recursive"`)
 	})
 
-//	It("rejects slice of slices", func() {
-//		type Model struct {
-//			InnerSlice []string
-//		}
-//		type InvalidModel struct {
-//			OuterSlide []Model
-//		}
-//
-//		err := CodecSet.Add(InvalidModel{})
-//		Check(err, NotNil).And(Contains, `TODO`)
-//	})
+	//	It("rejects slice of slices", func() {
+	//		type Model struct {
+	//			InnerSlice []string
+	//		}
+	//		type InvalidModel struct {
+	//			OuterSlide []Model
+	//		}
+	//
+	//		err := CodecSet.Add(InvalidModel{})
+	//		Check(err, NotNil).And(Contains, `TODO`)
+	//	})
 })
