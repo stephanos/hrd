@@ -63,7 +63,7 @@ func validateCodec(_ *structor.Set, codec *structor.Codec) error {
 
 		subType := subTypeOf(fType, field.ElemType)
 		if subType != nil && subType.Kind() == reflect.Struct {
-			if err := validateSubType(labels, label, field.Name, subType); err != nil {
+			if err := validateSubType(labels, label, field.Name, subType, fType.Kind()); err != nil {
 				return err
 			}
 		}
@@ -128,7 +128,9 @@ func subTypeOf(fieldType reflect.Type, elemType *reflect.Type) reflect.Type {
 	return nil
 }
 
-func validateSubType(labels map[string]bool, fLabel string, fName string, subType reflect.Type) error {
+func validateSubType(labels map[string]bool, fLabel string, fName string,
+	subType reflect.Type, parentKind reflect.Kind) error {
+
 	subCodec, err := CodecSet.Get(subType)
 	if err != nil {
 		return fmt.Errorf("error processing field %q (%v)", fName, err)
@@ -154,7 +156,7 @@ func validateSubType(labels map[string]bool, fLabel string, fName string, subTyp
 		}
 	}
 
-	if subType.Kind() == reflect.Slice && hasSlice {
+	if parentKind == reflect.Slice && hasSlice {
 		return fmt.Errorf("field %q leads to a slice of slices", fName)
 	}
 

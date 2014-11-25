@@ -111,15 +111,15 @@ var _ = Describe("Codec", func() {
 		Check(err, NotNil).And(Contains, `recursive struct at field "Recursive"`)
 	})
 
-	//	It("rejects slice of slices", func() {
-	//		type Model struct {
-	//			InnerSlice []string
-	//		}
-	//		type InvalidModel struct {
-	//			OuterSlide []Model
-	//		}
-	//
-	//		err := CodecSet.Add(InvalidModel{})
-	//		Check(err, NotNil).And(Contains, `TODO`)
-	//	})
+	It("rejects slice of slices", func() {
+		type Model struct {
+			InnerSlice []string
+		}
+		type InvalidModel struct {
+			OuterSlide []Model
+		}
+
+		err := CodecSet.Add(InvalidModel{})
+		Check(err, NotNil).And(Contains, `field "OuterSlide" leads to a slice of slices`)
+	})
 })
