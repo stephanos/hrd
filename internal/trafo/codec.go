@@ -8,6 +8,8 @@ import (
 	"unicode"
 
 	"github.com/101loops/structor"
+
+	ae "appengine"
 )
 
 const (
@@ -21,6 +23,7 @@ var (
 	typeOfStr       = reflect.TypeOf("")
 	typeOfByteSlice = reflect.TypeOf([]byte(nil))
 	typeOfTime      = reflect.TypeOf(time.Time{})
+	typeOfGeoPoint  = reflect.TypeOf(ae.GeoPoint{})
 )
 
 func init() {
@@ -58,8 +61,9 @@ func validateCodec(_ *structor.Set, codec *structor.Codec) error {
 			return fmt.Errorf("field %q has invalid type (%v)", field.Name, err)
 		}
 
-		if subType := subTypeOf(fType, field.ElemType); subType != nil {
-			if err := validateSubType(labels, label, field.Name, *subType); err != nil {
+		subType := subTypeOf(fType, field.ElemType)
+		if subType != nil && subType.Kind() == reflect.Struct {
+			if err := validateSubType(labels, label, field.Name, subType); err != nil {
 				return err
 			}
 		}
@@ -110,14 +114,14 @@ func validateFieldName(labels map[string]bool, field *structor.FieldCodec) (stri
 	return label, nil
 }
 
-func subTypeOf(fieldType reflect.Type, elemType *reflect.Type) *reflect.Type {
+func subTypeOf(fieldType reflect.Type, elemType *reflect.Type) reflect.Type {
 	if fieldType.Kind() == reflect.Struct {
 		if fieldType != typeOfTime {
-			return &fieldType
+			return fieldType
 		}
-	} else if elemType == nil {
-		if fieldType != typeOfByteSlice {
-			return elemType
+	} else if elemType != nil {
+		if fieldType != typeOfByteSlice && fieldType != typeOfGeoPoint {
+			return *elemType
 		}
 	}
 
@@ -136,8 +140,6 @@ func validateSubType(labels map[string]bool, fLabel string, fName string, subTyp
 
 	hasSlice := false
 	for _, subField := range subCodec.Fields() {
-		fmt.Printf("%v\n", subField)
-
 		subLabel := strings.ToLower(subField.Label)
 		if !subField.Tag.HasModifier("inline") {
 			subLabel = fLabel + propertySeparator + subLabel
@@ -147,7 +149,6 @@ func validateSubType(labels map[string]bool, fLabel string, fName string, subTyp
 		}
 		labels[subLabel] = true
 
-		fmt.Printf("%v: %v\n", subLabel, subField.Type)
 		if subField.Type.Kind() == reflect.Slice {
 			hasSlice = true
 		}
