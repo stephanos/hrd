@@ -133,6 +133,10 @@ func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool
 		p.Value = x.ToDSKey(ctx)
 	case time.Time:
 		p.Value = x
+	case ae.BlobKey:
+		p.Value = x
+	case ae.GeoPoint:
+		p.Value = x
 	case []byte:
 		p.Value = x
 		p.NoIndex = true

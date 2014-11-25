@@ -3,10 +3,12 @@ package trafo
 import (
 	"time"
 	. "github.com/101loops/bdd"
+
+	ae "appengine"
 	ds "appengine/datastore"
 )
 
-var _ = Describe("Save", func() {
+var _ = Describe("Doc Save", func() {
 
 	toProps := func(src interface{}) ([]*ds.Property, error) {
 		CodecSet.AddMust(src)
@@ -17,7 +19,7 @@ var _ = Describe("Save", func() {
 		return doc.Save(ctx)
 	}
 
-	It("save primitives", func() {
+	It("saves primitives", func() {
 		type MyModel struct {
 			I   int
 			I8  int8
@@ -34,8 +36,7 @@ var _ = Describe("Save", func() {
 			int(1), int8(2), int16(3), int32(4), int64(5), true, "test", float32(1.0), float64(2.0),
 		})
 		Check(err, IsNil)
-		Check(props, NotNil)
-		Check(props, HasLen, 9)
+		Check(props, NotNil).And(HasLen, 9)
 
 		Check(*props[0], Equals, ds.Property{"I", int64(1), true, false})
 		Check(*props[1], Equals, ds.Property{"I8", int64(2), true, false})
@@ -48,7 +49,28 @@ var _ = Describe("Save", func() {
 		Check(*props[8], Equals, ds.Property{"F64", float64(2.0), true, false})
 	})
 
-	It("simple model", func() {
+	It("saves known complex types", func() {
+		type MyModel struct {
+			B  []byte
+			T  time.Time
+			BK ae.BlobKey
+			GP ae.GeoPoint
+		}
+
+		entity := &MyModel{
+			[]byte("test"), time.Now(), ae.BlobKey("bkey"), ae.GeoPoint{1, 2},
+		}
+		props, err := toProps(entity)
+		Check(err, IsNil)
+		Check(props, NotNil).And(HasLen, 4)
+
+		Check(*props[0], Equals, ds.Property{"B", entity.B, true, false})
+		Check(*props[1], Equals, ds.Property{"T", entity.T, true, false})
+		Check(*props[2], Equals, ds.Property{"BK", entity.BK, true, false})
+		Check(*props[3], Equals, ds.Property{"GP", entity.GP, true, false})
+	})
+
+	It("saves simple model", func() {
 		doc, err := newDocFromInst(&SimpleModel{
 			Num:  42,
 			Text: "html",
@@ -71,7 +93,7 @@ var _ = Describe("Save", func() {
 		Check(*props[5], Equals, ds.Property{"html", "html", false, false})
 	})
 
-	It("complex model", func() {
+	It("saves complex model", func() {
 		doc, err := newDocFromInst(&ComplexModel{})
 		Check(err, IsNil)
 		Check(doc, NotNil)
@@ -85,7 +107,7 @@ var _ = Describe("Save", func() {
 		Check(*props[0], Equals, ds.Property{"tag.Val", "", true, false})
 	})
 
-	It("complex model with inner struct", func() {
+	It("saves complex model with inner struct", func() {
 		doc, err := newDocFromInst(&ComplexModel{
 			Pair: Pair{"life", "42"},
 		})
@@ -124,7 +146,7 @@ var _ = Describe("Save", func() {
 		})
 	*/
 
-	It("complex model with slice of structs", func() {
+	It("saves complex model with slice of structs", func() {
 		doc, err := newDocFromInst(&ComplexModel{
 			Pairs: []Pair{Pair{"Bill", "Bob"}, Pair{"Barb", "Betty"}},
 		})
