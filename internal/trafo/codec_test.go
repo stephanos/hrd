@@ -54,8 +54,9 @@ var _ = Describe("Codec", func() {
 		err := CodecSet.Add(InvalidModel{})
 		Check(err, NotNil).And(Contains, `field "InvalidName" begins with invalid character '$'`)
 
+		// as sub-field:
 		type Wrapper struct {
-			InvalidModel
+			Inner InvalidModel
 		}
 		err = CodecSet.Add(Wrapper{})
 		Check(err, NotNil).And(Contains, `field "InvalidName" begins with invalid character '$'`)
@@ -68,8 +69,9 @@ var _ = Describe("Codec", func() {
 		err := CodecSet.Add(InvalidModel{})
 		Check(err, NotNil).And(Contains, `field "InvalidName" contains invalid character '@'`)
 
+		// as sub-field:
 		type Wrapper struct {
-			InvalidModel
+			Inner InvalidModel
 		}
 		err = CodecSet.Add(Wrapper{})
 		Check(err, NotNil).And(Contains, `field "InvalidName" contains invalid character '@'`)
