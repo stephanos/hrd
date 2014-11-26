@@ -53,21 +53,24 @@ var _ = Describe("Doc Save", func() {
 		type MyModel struct {
 			B  []byte
 			T  time.Time
+			K  *ds.Key
 			BK ae.BlobKey
 			GP ae.GeoPoint
 		}
 
+		dsKey := ds.NewKey(ctx, "kind", "", 42, nil)
 		entity := &MyModel{
-			[]byte("test"), time.Now(), ae.BlobKey("bkey"), ae.GeoPoint{1, 2},
+			[]byte("test"), time.Now(), dsKey, ae.BlobKey("bkey"), ae.GeoPoint{1, 2},
 		}
 		props, err := toProps(entity)
 		Check(err, IsNil)
-		Check(props, NotNil).And(HasLen, 4)
+		Check(props, NotNil).And(HasLen, 5)
 
 		Check(*props[0], Equals, ds.Property{"B", entity.B, true, false})
 		Check(*props[1], Equals, ds.Property{"T", entity.T, true, false})
-		Check(*props[2], Equals, ds.Property{"BK", entity.BK, true, false})
-		Check(*props[3], Equals, ds.Property{"GP", entity.GP, true, false})
+		Check(*props[2], Equals, ds.Property{"K", entity.K, true, false})
+		Check(*props[3], Equals, ds.Property{"BK", entity.BK, true, false})
+		Check(*props[4], Equals, ds.Property{"GP", entity.GP, true, false})
 	})
 
 	It("saves simple model", func() {

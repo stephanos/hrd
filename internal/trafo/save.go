@@ -89,14 +89,6 @@ func (doc *Doc) toProperties(ctx ae.Context, prefix string, tags []string, multi
 
 func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool, v reflect.Value) (props []*ds.Property, err error) {
 
-	// dereference pointers, ignore nil
-	if v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return
-		}
-		v = v.Elem()
-	}
-
 	// process tags
 	indexed := false
 	inlined := false

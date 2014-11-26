@@ -10,6 +10,7 @@ import (
 	"github.com/101loops/structor"
 
 	ae "appengine"
+	ds "appengine/datastore"
 )
 
 const (
@@ -21,6 +22,7 @@ var (
 	CodecSet *structor.Set
 
 	typeOfStr       = reflect.TypeOf("")
+	typeOfDSKey     = reflect.TypeOf((*ds.Key)(nil))
 	typeOfByteSlice = reflect.TypeOf([]byte(nil))
 	typeOfTime      = reflect.TypeOf(time.Time{})
 	typeOfGeoPoint  = reflect.TypeOf(ae.GeoPoint{})
@@ -75,7 +77,7 @@ func validateCodec(_ *structor.Set, codec *structor.Codec) error {
 func validateFieldType(field *structor.FieldCodec) (reflect.Type, error) {
 	fType := field.Type
 
-	if fType.Kind() == reflect.Ptr {
+	if fType.Kind() == reflect.Ptr && fType != typeOfDSKey {
 		return nil, fmt.Errorf("has invalid type 'pointer'")
 	}
 
