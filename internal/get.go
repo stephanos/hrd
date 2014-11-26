@@ -27,14 +27,14 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 		return nil, err
 	}
 
+	ctx := kind.Context
+	ctx.Infof(LogDatastoreAction("getting", "from", keys, kind.Name))
+
 	docList, err := trafo.NewWriteableDocList(dst, keys, multi)
 	if err != nil {
 		return nil, err
 	}
-	docsPipe := docList.Pipe(kind.Context)
-
-	ctx := kind.Context
-	ctx.Infof(LogDatastoreAction("getting", "from", keys, kind.Name))
+	docsPipe := docList.Pipe(ctx)
 
 	var dsErr error
 	dsKeys := toDSKeys(keys)
@@ -43,7 +43,7 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 	}
 	dsErr = dsGet(ctx, dsKeys, docsPipe.Properties())
 
-	return applyResult(docsPipe.Docs, dsKeys, dsErr)
+	return docList.ApplyResult(dsKeys, dsErr)
 }
 
 func validateGetKeys(kind *types.Kind, keys []*types.Key) error {

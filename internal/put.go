@@ -39,7 +39,7 @@ func Put(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, er
 		return nil, dsErr
 	}
 
-	return applyResult(docsPipe.Docs, dsKeys, dsErr)
+	return docList.ApplyResult(dsKeys, dsErr)
 }
 
 func validatePutKeys(kind *types.Kind, keys []*types.Key, completeKeys bool) error {

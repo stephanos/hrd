@@ -3,10 +3,12 @@ package trafo
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/101loops/hrd/internal/types"
 
 	ae "appengine"
+	ds "appengine/datastore"
 )
 
 // DocList represents a collection of Doc.
@@ -183,4 +185,42 @@ func (l *DocList) Add(key *types.Key, doc *Doc) {
 	} else if l.srcKind == reflect.Slice {
 		l.srcVal.Set(reflect.Append(l.srcVal, doc.srcVal))
 	}
+}
+
+func (l *DocList) ApplyResult(dsKeys []*ds.Key, dsErr error) ([]*types.Key, error) {
+	now := time.Now()
+	keys := make([]*types.Key, len(dsKeys))
+
+	var mErr ae.MultiError
+	if dsErr, ok := dsErr.(ae.MultiError); ok {
+		mErr = dsErr
+	}
+
+	hasErr := false
+	dsDocs := l.list
+	for i := range dsKeys {
+		keys[i] = types.NewKey(dsKeys[i])
+
+		if mErr == nil || mErr[i] == nil {
+			if dsDocs != nil {
+				dsDocs[i].SetKey(keys[i])
+			}
+			keys[i].Synced = &now
+			continue
+		}
+
+		if mErr[i] == ds.ErrNoSuchEntity {
+			dsDocs[i].Nil() // not found: set to 'nil'
+			mErr[i] = nil   // ignore error
+			continue
+		}
+
+		hasErr = true
+		keys[i].Error = mErr[i]
+	}
+
+	if hasErr {
+		return keys, mErr
+	}
+	return keys, nil
 }

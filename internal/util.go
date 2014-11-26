@@ -2,12 +2,9 @@ package internal
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/101loops/hrd/internal/trafo"
 	"github.com/101loops/hrd/internal/types"
 
-	ae "appengine"
 	ds "appengine/datastore"
 )
 
@@ -27,41 +24,4 @@ func toDSKeys(keys []*types.Key) []*ds.Key {
 		ret[i] = k.Key
 	}
 	return ret
-}
-
-func applyResult(dsDocs []*trafo.Doc, dsKeys []*ds.Key, dsErr error) ([]*types.Key, error) {
-	now := time.Now()
-	keys := make([]*types.Key, len(dsKeys))
-
-	var mErr ae.MultiError
-	if dsErr, ok := dsErr.(ae.MultiError); ok {
-		mErr = dsErr
-	}
-
-	hasErr := false
-	for i := range dsKeys {
-		keys[i] = types.NewKey(dsKeys[i])
-
-		if mErr == nil || mErr[i] == nil {
-			if dsDocs != nil {
-				dsDocs[i].SetKey(keys[i])
-			}
-			keys[i].Synced = &now
-			continue
-		}
-
-		if mErr[i] == ds.ErrNoSuchEntity {
-			dsDocs[i].Nil() // not found: set to 'nil'
-			mErr[i] = nil   // ignore error
-			continue
-		}
-
-		hasErr = true
-		keys[i].Error = mErr[i]
-	}
-
-	if hasErr {
-		return keys, mErr
-	}
-	return keys, nil
 }

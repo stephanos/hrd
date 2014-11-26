@@ -55,7 +55,7 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 		}
 	}
 
-	keys, err = applyResult(dsDocs, dsKeys, err)
+	keys, err = docList.ApplyResult(dsKeys, err)
 	if dsDocs != nil {
 		for i := range keys {
 			docList.Add(keys[i], dsDocs[i])
