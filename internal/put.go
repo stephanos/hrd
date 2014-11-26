@@ -21,19 +21,19 @@ var (
 func Put(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
 	ctx := kind.Context
 
-	docs, err := trafo.NewReadableDocList(kind, src)
+	docList, err := trafo.NewReadableDocList(kind, src)
 	if err != nil {
 		return nil, err
 	}
 
-	keys := docs.Keys()
+	keys := docList.Keys()
 	if err := validatePutKeys(kind, keys, completeKeys); err != nil {
 		return nil, err
 	}
 
 	ctx.Infof(LogDatastoreAction("putting", "in", keys, kind.Name))
 
-	docsPipe := docs.Pipe(kind.Context)
+	docsPipe := docList.Pipe(kind.Context)
 	dsKeys, dsErr := ndsPut(ctx, toDSKeys(keys), docsPipe.Properties())
 	if dsErr != nil {
 		return nil, dsErr

@@ -27,11 +27,11 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 		return nil, err
 	}
 
-	docs, err := trafo.NewWriteableDocList(dst, keys, multi)
+	docList, err := trafo.NewWriteableDocList(dst, keys, multi)
 	if err != nil {
 		return nil, err
 	}
-	docsPipe := docs.Pipe(kind.Context)
+	docsPipe := docList.Pipe(kind.Context)
 
 	ctx := kind.Context
 	ctx.Infof(LogDatastoreAction("getting", "from", keys, kind.Name))
