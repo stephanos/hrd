@@ -11,9 +11,9 @@ import (
 func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
 
 	// in a keys-only query there is no dsts
-	var docSet *trafo.DocList
+	var docList *trafo.DocList
 	if dsts != nil {
-		docSet, err = trafo.NewWriteableDocList(dsts, nil, multi)
+		docList, err = trafo.NewWriteableDocList(dsts, nil, multi)
 		if err != nil {
 			return
 		}
@@ -25,8 +25,8 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 
 		// prepare next doc
 		var doc *trafo.Doc
-		if docSet != nil {
-			doc, err = docSet.Get(i)
+		if docList != nil {
+			doc, err = docList.Get(i)
 			if err != nil {
 				return
 			}
@@ -58,7 +58,7 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 	keys, err = applyResult(dsDocs, dsKeys, err)
 	if dsDocs != nil {
 		for i := range keys {
-			docSet.Add(keys[i], dsDocs[i])
+			docList.Add(keys[i], dsDocs[i])
 		}
 	}
 
