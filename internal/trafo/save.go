@@ -52,6 +52,7 @@ func (doc *Doc) Save(ctx ae.Context) (props []*ds.Property, err error) {
 
 func (doc *Doc) toProperties(ctx ae.Context, prefix string, tags []string, multi bool) (res []*ds.Property, err error) {
 	var props []*ds.Property
+	res = make([]*ds.Property, 0)
 
 	srcVal := doc.val()
 	for _, fCodec := range doc.codec.Fields() {
@@ -74,8 +75,6 @@ func (doc *Doc) toProperties(ctx ae.Context, prefix string, tags []string, multi
 			}
 			continue
 		}
-
-		// TODO: for map fields, save each element
 
 		props, err = fieldToProps(ctx, prefix, name, aggrTags, multi, fVal)
 		if err != nil {
