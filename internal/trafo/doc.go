@@ -54,7 +54,7 @@ func newDocFromType(typ reflect.Type) (*Doc, error) {
 }
 
 // Nil sets the value of the entity to nil.
-func (doc *Doc) nil() {
+func (doc *Doc) Nil() {
 	dst := doc.val()
 	dst.Set(reflect.New(dst.Type()).Elem())
 }
@@ -64,7 +64,7 @@ func (doc *Doc) get() interface{} {
 	return doc.srcVal.Interface()
 }
 
-// SetKey assigns a key to the entity.
+// setKey assigns a key to the entity.
 func (doc *Doc) setKey(key *types.Key) {
 	src := doc.get()
 

@@ -210,7 +210,7 @@ func (l *DocList) ApplyResult(dsKeys []*ds.Key, dsErr error) ([]*types.Key, erro
 		}
 
 		if mErr[i] == ds.ErrNoSuchEntity {
-			dsDocs[i].nil() // not found: set to 'nil'
+			dsDocs[i].Nil() // not found: set to 'nil'
 			mErr[i] = nil   // ignore error
 			continue
 		}
