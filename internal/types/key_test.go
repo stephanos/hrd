@@ -2,6 +2,7 @@ package types
 
 import (
 	. "github.com/101loops/bdd"
+	"github.com/101loops/hrd/internal/fixture"
 
 	ds "appengine/datastore"
 )
@@ -53,7 +54,7 @@ var _ = Describe("Key", func() {
 		Context("a single entity", func() {
 
 			It("with numeric id", func() {
-				entity := entityWithNumID{}
+				entity := fixture.EntityWithNumID{}
 				entity.SetID(42)
 
 				key, err := GetEntityKey(kind, &entity)
@@ -62,7 +63,7 @@ var _ = Describe("Key", func() {
 			})
 
 			It("with text id", func() {
-				entity := entityWithTextID{}
+				entity := fixture.EntityWithTextID{}
 				entity.SetID("abc")
 
 				key, err := GetEntityKey(kind, &entity)
@@ -71,7 +72,7 @@ var _ = Describe("Key", func() {
 			})
 
 			It("with numeric parent id", func() {
-				entity := entityWithParentNumID{}
+				entity := fixture.EntityWithParentNumID{}
 				entity.SetID(42)
 				entity.SetParent("my-parent", 66)
 
@@ -82,7 +83,7 @@ var _ = Describe("Key", func() {
 			})
 
 			It("with text parent id", func() {
-				entity := entityWithParentTextID{}
+				entity := fixture.EntityWithParentTextID{}
 				entity.SetID("abc")
 				entity.SetParent("my-parent", "xyz")
 
@@ -113,8 +114,8 @@ var _ = Describe("Key", func() {
 		Context("mutliple entities", func() {
 
 			It("in a slice", func() {
-				entities := []*entityWithNumID{
-					&entityWithNumID{}, &entityWithNumID{},
+				entities := []*fixture.EntityWithNumID{
+					&fixture.EntityWithNumID{}, &fixture.EntityWithNumID{},
 				}
 				entities[0].SetID(1)
 				entities[1].SetID(2)
@@ -128,8 +129,8 @@ var _ = Describe("Key", func() {
 			})
 
 			It("in a map", func() {
-				entities := map[int]*entityWithTextID{
-					0: &entityWithTextID{}, 1: &entityWithTextID{},
+				entities := map[int]*fixture.EntityWithTextID{
+					0: &fixture.EntityWithTextID{}, 1: &fixture.EntityWithTextID{},
 				}
 				entities[0].SetID("abc")
 				entities[1].SetID("xyz")
