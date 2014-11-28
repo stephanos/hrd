@@ -169,7 +169,7 @@ func (l *DocList) Get(nth int) (ret *Doc, err error) {
 // Add appends a new Doc to the set.
 func (l *DocList) Add(key *types.Key, doc *Doc) {
 	l.list = append(l.list, doc)
-	doc.SetKey(key)
+	doc.setKey(key)
 
 	if l.srcKind == reflect.Map {
 		var v reflect.Value
@@ -203,14 +203,14 @@ func (l *DocList) ApplyResult(dsKeys []*ds.Key, dsErr error) ([]*types.Key, erro
 
 		if mErr == nil || mErr[i] == nil {
 			if dsDocs != nil {
-				dsDocs[i].SetKey(keys[i])
+				dsDocs[i].setKey(keys[i])
 			}
 			keys[i].Synced = &now
 			continue
 		}
 
 		if mErr[i] == ds.ErrNoSuchEntity {
-			dsDocs[i].Nil() // not found: set to 'nil'
+			dsDocs[i].nil() // not found: set to 'nil'
 			mErr[i] = nil   // ignore error
 			continue
 		}

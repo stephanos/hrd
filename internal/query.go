@@ -38,7 +38,7 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 		if err == ds.Done {
 			if !multi {
 				if doc != nil {
-					doc.Nil()
+					docList.Get(0).Nil()
 				}
 				return nil, nil
 			}
