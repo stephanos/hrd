@@ -115,7 +115,7 @@ func dsLoadTests(useGlobalCache bool) {
 			keys, err := Get(kind, types.NewKeys(dsKey), nil, useGlobalCache, false)
 
 			Check(keys, IsNil)
-			Check(err, NotNil).And(Contains, `invalid value kind "invalid" (wanted non-nil pointer)`)
+			Check(err, ErrorContains, `invalid value kind "invalid" (wanted non-nil pointer)`)
 		})
 
 		// NOTE: other cases of invalid entity/entities are checked inside the trafo package
@@ -130,7 +130,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 			Check(keys, IsNil)
 			Check(entity, IsNil)
-			Check(err, NotNil).And(Contains, "invalid key kind 'wrong-kind'")
+			Check(err, ErrorContains, "invalid key kind 'wrong-kind'")
 		})
 
 		It("should not load empty keys", func() {
@@ -138,7 +138,7 @@ func dsLoadTests(useGlobalCache bool) {
 			keys, err := Get(kind, nil, &entities, useGlobalCache, false)
 
 			Check(keys, IsNil)
-			Check(err, NotNil).And(Contains, "no keys provided")
+			Check(err, ErrorContains, "no keys provided")
 		})
 
 		It("should not load incomplete key", func() {
@@ -147,7 +147,7 @@ func dsLoadTests(useGlobalCache bool) {
 			keys, err := Get(kind, types.NewKeys(incompleteKey), &entity, useGlobalCache, false)
 
 			Check(keys, IsNil)
-			Check(err, NotNil).And(Contains, "is incomplete")
+			Check(err, ErrorContains, "is incomplete")
 		})
 	})
 }

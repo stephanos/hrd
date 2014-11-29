@@ -35,26 +35,26 @@ var _ = Describe("Doc", func() {
 		It("should not create new Doc from unknown struct", func() {
 			doc, err := newDocFromInst(UnknownModel{})
 			Check(doc, IsNil)
-			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
+			Check(err, ErrorContains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 
 		It("should not create new Doc from pointer to unknown struct", func() {
 			doc, err := newDocFromInst(&UnknownModel{})
 			Check(doc, IsNil)
-			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
+			Check(err, ErrorContains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 
 		It("should not create new Doc from non-struct", func() {
 			doc, err := newDocFromInst("invalid")
 			Check(doc, IsNil)
-			Check(err, NotNil).And(Contains, `invalid value kind "string" (wanted struct or struct pointer)`)
+			Check(err, ErrorContains, `invalid value kind "string" (wanted struct or struct pointer)`)
 		})
 
 		It("should not create new Doc from pointer to non-struct", func() {
 			invalidEntity := "invalid"
 			doc, err := newDocFromInst(&invalidEntity)
 			Check(doc, IsNil)
-			Check(err, NotNil).And(Contains, `invalid value kind "string" (wanted struct pointer)`)
+			Check(err, ErrorContains, `invalid value kind "string" (wanted struct pointer)`)
 		})
 	})
 
@@ -69,7 +69,7 @@ var _ = Describe("Doc", func() {
 		It("should not create new Doc from pointer to unknown struct", func() {
 			doc, err := newDocFromType(reflect.TypeOf(&UnknownModel{}))
 			Check(doc, IsNil)
-			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
+			Check(err, ErrorContains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 	})
 

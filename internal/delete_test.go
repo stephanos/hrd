@@ -103,13 +103,13 @@ var _ = Describe("Delete", func() {
 		var entity string
 		err := Delete(kind, entity, false)
 
-		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+		Check(err, ErrorContains, `value type "string" does not provide ID()`)
 	})
 
 	It("should not delete invalid entities", func() {
 		entities := []string{"a", "b", "c"}
 		err := Delete(kind, entities, true)
 
-		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+		Check(err, ErrorContains, `value type "string" does not provide ID()`)
 	})
 })

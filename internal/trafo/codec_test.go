@@ -44,7 +44,7 @@ var _ = Describe("Codec", func() {
 		codec, err := getCodec("invalid-type")
 
 		Check(codec, IsNil)
-		Check(err, NotNil).And(Contains, `value is not a struct, struct pointer or reflect.Type - but "string"`)
+		Check(err, ErrorContains, `value is not a struct, struct pointer or reflect.Type - but "string"`)
 	})
 
 	It("should reject field beginning with invalid character", func() {
@@ -52,14 +52,14 @@ var _ = Describe("Codec", func() {
 			InvalidName string `datastore:"$invalid-name"`
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" begins with invalid character '$'`)
+		Check(err, ErrorContains, `field "InvalidName" begins with invalid character '$'`)
 
 		// as sub-field:
 		type Wrapper struct {
 			Inner InvalidModel
 		}
 		err = CodecSet.Add(Wrapper{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" begins with invalid character '$'`)
+		Check(err, ErrorContains, `field "InvalidName" begins with invalid character '$'`)
 	})
 
 	It("should reject fields containing invalid character", func() {
@@ -67,14 +67,14 @@ var _ = Describe("Codec", func() {
 			InvalidName string `datastore:"invalid@name"`
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" contains invalid character '@'`)
+		Check(err, ErrorContains, `field "InvalidName" contains invalid character '@'`)
 
 		// as sub-field:
 		type Wrapper struct {
 			Inner InvalidModel
 		}
 		err = CodecSet.Add(Wrapper{})
-		Check(err, NotNil).And(Contains, `field "InvalidName" contains invalid character '@'`)
+		Check(err, ErrorContains, `field "InvalidName" contains invalid character '@'`)
 	})
 
 	It("should reject duplicate field names", func() {
@@ -83,7 +83,7 @@ var _ = Describe("Codec", func() {
 			ID2 string `datastore:"id"`
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `duplicate field name "id"`)
+		Check(err, ErrorContains, `duplicate field name "id"`)
 	})
 
 	It("should reject invalid field type", func() {
@@ -91,7 +91,7 @@ var _ = Describe("Codec", func() {
 			Ptr *string
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "Ptr" has invalid type 'pointer'`)
+		Check(err, ErrorContains, `field "Ptr" has invalid type 'pointer'`)
 	})
 
 	It("should reject invalid map key type", func() {
@@ -99,7 +99,7 @@ var _ = Describe("Codec", func() {
 			Map map[int]string
 		}
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "Map" has invalid map key type 'int' - only 'string' is allowed`)
+		Check(err, ErrorContains, `field "Map" has invalid map key type 'int' - only 'string' is allowed`)
 	})
 
 	It("should reject recursive struct", func() {
@@ -108,7 +108,7 @@ var _ = Describe("Codec", func() {
 		}
 
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `recursive struct at field "Recursive"`)
+		Check(err, ErrorContains, `recursive struct at field "Recursive"`)
 	})
 
 	It("should reject slice of slices", func() {
@@ -120,6 +120,6 @@ var _ = Describe("Codec", func() {
 		}
 
 		err := CodecSet.Add(InvalidModel{})
-		Check(err, NotNil).And(Contains, `field "OuterSlide" leads to a slice of slices`)
+		Check(err, ErrorContains, `field "OuterSlide" leads to a slice of slices`)
 	})
 })

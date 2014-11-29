@@ -80,7 +80,7 @@ var _ = Describe("Put", func() {
 		keys, err := Put(kind, nil, false)
 
 		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "must be non-nil")
+		Check(err, ErrorContains, "must be non-nil")
 	})
 
 	// NOTE: other cases of invalid entity/entities are checked inside the trafo package
@@ -90,7 +90,7 @@ var _ = Describe("Put", func() {
 		keys, err := Put(kind, entity, true)
 
 		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "is incomplete")
+		Check(err, ErrorContains, "is incomplete")
 	})
 
 	It("should not save empty entities", func() {
@@ -98,6 +98,6 @@ var _ = Describe("Put", func() {
 		keys, err := Put(kind, entities, false)
 
 		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "no keys provided")
+		Check(err, ErrorContains, "no keys provided")
 	})
 })

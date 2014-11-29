@@ -96,7 +96,7 @@ var _ = Describe("Key", func() {
 			key, err := GetEntityKey(kind, &entity)
 
 			Check(key, IsNil)
-			Check(err, NotNil).And(Contains, `value type "*string" does not provide ID()`)
+			Check(err, ErrorContains, `value type "*string" does not provide ID()`)
 		})
 
 		It("should not create a Key from an invalid entity collection", func() {
@@ -104,7 +104,7 @@ var _ = Describe("Key", func() {
 			key, err := GetEntitiesKeys(kind, &invalidEntities)
 
 			Check(key, IsNil)
-			Check(err, NotNil).And(Contains, `value must be a slice or map, but is "string"`)
+			Check(err, ErrorContains, `value must be a slice or map, but is "string"`)
 		})
 	})
 
@@ -145,7 +145,7 @@ var _ = Describe("Key", func() {
 			keys, err := GetEntitiesKeys(kind, invalidEntities)
 
 			Check(keys, IsNil)
-			Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+			Check(err, ErrorContains, `value type "string" does not provide ID()`)
 		})
 
 		It("should not create a Key from a map of invalid entities", func() {
@@ -153,7 +153,7 @@ var _ = Describe("Key", func() {
 			keys, err := GetEntitiesKeys(kind, invalidEntities)
 
 			Check(keys, IsNil)
-			Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
+			Check(err, ErrorContains, `value type "string" does not provide ID()`)
 		})
 	})
 })
