@@ -187,14 +187,14 @@ var _ = Describe("DocList", func() {
 				var invalidMap []string
 				list, err := NewWriteableDocList(&invalidMap, keys, true)
 				Check(list, IsNil)
-				Check(err, NotNil).And(Contains, `invalid value element kind "string" (wanted pointer)`)
+				Check(err, NotNil).And(Contains, `invalid value element type "string" (wanted struct pointer)`)
 			})
 
 			It("should not create list from slice of non-struct pointers", func() {
 				var invalidMap []*string
 				list, err := NewWriteableDocList(&invalidMap, keys, true)
 				Check(list, IsNil)
-				Check(err, NotNil).And(Contains, `invalid value element kind "string" (wanted struct)`)
+				Check(err, NotNil).And(Contains, `invalid value element type "*string" (wanted struct pointer)`)
 			})
 		})
 	})
