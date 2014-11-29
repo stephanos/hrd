@@ -40,6 +40,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 1)
+			Check(list.Keys(), Equals, keys[0:1])
 		})
 
 		It("should create list from slice of struct pointers", func() {
@@ -47,7 +48,10 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 2)
+			Check(list.Keys(), Equals, keys[0:2])
 		})
+
+		// ==== ERRORS
 
 		It("should not create list not from nil value", func() {
 			list, err := NewReadableDocList(kind, nil)
@@ -75,6 +79,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 1)
+			Check(list.Keys(), Equals, keys[0:1])
 		})
 
 		It("should create list from slice", func() {
@@ -84,6 +89,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 4)
+			Check(list.Keys(), Equals, keys)
 		})
 
 		It("should create list from map of entities by string", func() {
@@ -93,6 +99,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 4)
+			Check(list.Keys(), Equals, keys)
 		})
 
 		It("should create list from map of entities by int64", func() {
@@ -102,6 +109,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 4)
+			Check(list.Keys(), Equals, keys)
 		})
 
 		It("should create list from map of entities by Key pointer", func() {
@@ -111,6 +119,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 4)
+			Check(list.Keys(), Equals, keys)
 		})
 
 		It("should create list from map", func() {
@@ -120,6 +129,7 @@ var _ = Describe("DocList", func() {
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 4)
+			Check(list.Keys(), Equals, keys)
 		})
 
 		// ==== ERRORS
