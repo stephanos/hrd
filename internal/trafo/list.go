@@ -107,15 +107,13 @@ func NewWriteableDocList(src interface{}, keys []*types.Key, multi bool) (*DocLi
 		// make sure the Kind's elements are structs
 		ret.elemType = srcType.Elem()
 		collElemKind := ret.elemType.Kind()
-		switch collElemKind {
-		case reflect.Struct:
-		case reflect.Ptr:
-			collElemKind := ret.elemType.Elem().Kind()
+		if collElemKind == reflect.Ptr {
+			collElemKind = ret.elemType.Elem().Kind()
 			if collElemKind != reflect.Struct {
-				return nil, fmt.Errorf("invalid value element kind (%q)", collElemKind)
+				return nil, fmt.Errorf("invalid value element kind %q (wanted struct)", collElemKind)
 			}
-		default:
-			return nil, fmt.Errorf("invalid value element kind (%q)", collElemKind)
+		} else {
+			return nil, fmt.Errorf("invalid value element kind %q (wanted pointer)", collElemKind)
 		}
 
 		// generate list of doc
