@@ -86,8 +86,26 @@ var _ = Describe("DocList", func() {
 			Check(list.list, HasLen, 4)
 		})
 
-		It("should create list from map", func() {
+		It("should create list from map of entities by string", func() {
 			var entityMap map[string]*fixture.EntityWithNumID
+			list, err := NewWriteableDocList(&entityMap, keys, true)
+
+			Check(err, IsNil)
+			Check(list, NotNil)
+			Check(list.list, HasLen, 4)
+		})
+
+		It("should create list from map of entities by int64", func() {
+			var entityMap map[int64]*fixture.EntityWithNumID
+			list, err := NewWriteableDocList(&entityMap, keys, true)
+
+			Check(err, IsNil)
+			Check(list, NotNil)
+			Check(list.list, HasLen, 4)
+		})
+
+		It("should create list from map of entities by Key pointer", func() {
+			var entityMap map[*types.Key]*fixture.EntityWithNumID
 			list, err := NewWriteableDocList(&entityMap, keys, true)
 
 			Check(err, IsNil)
@@ -126,6 +144,12 @@ var _ = Describe("DocList", func() {
 			//		Check(list, IsNil)
 			//		Check(err, NotNil).And(Contains, `invalid value kind "ptr" (wanted non-nil pointer)`)
 			//	})
+
+			It("should not create list for single entity and multiple keys", func() {
+				list, err := NewWriteableDocList(&(entities[0]), keys, false)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `wanted exactly 1 key (got 4)`)
+			})
 		})
 
 		Context("multiple keys", func() {
@@ -147,6 +171,20 @@ var _ = Describe("DocList", func() {
 				list, err := NewWriteableDocList(&entityMap, keys, true)
 				Check(list, IsNil)
 				Check(err, NotNil).And(Contains, "invalid value key")
+			})
+
+			It("should not create list from slice of non-structs", func() {
+				var invalidMap []string
+				list, err := NewWriteableDocList(&invalidMap, keys, true)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `invalid value element kind ("string")`)
+			})
+
+			It("should not create list from slice of non-struct pointers", func() {
+				var invalidMap []*string
+				list, err := NewWriteableDocList(&invalidMap, keys, true)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `invalid value element kind ("string")`)
 			})
 		})
 	})
