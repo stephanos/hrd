@@ -60,7 +60,7 @@ func validateGetKeys(kind *types.Kind, keys []*types.Key) error {
 	for _, k := range keys {
 		keyKind := k.Kind()
 		if keyKind != kind.Name {
-			err := fmt.Errorf("invalid key kind '%v' for Kind '%v'", keyKind, kind.Name)
+			err := fmt.Errorf("invalid key kind '%v' for kind '%v'", keyKind, kind.Name)
 			return logErr(kind.Context, err)
 		}
 	}

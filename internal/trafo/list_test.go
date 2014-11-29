@@ -104,17 +104,50 @@ var _ = Describe("DocList", func() {
 			Check(list.list, HasLen, 4)
 		})
 
-		It("should not create list from non-pointer", func() {
-			list, err := NewWriteableDocList(*(entities[0]), keys[0:1], false)
-			Check(list, IsNil)
-			Check(err, NotNil).And(Contains, `invalid value kind "struct" (wanted non-nil pointer)`)
+		// ==== ERRORS
+
+		Context("single key", func() {
+
+			It("should not create list from non-pointer", func() {
+				list, err := NewWriteableDocList("invalid", keys[0:1], false)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `invalid value kind "string" (wanted non-nil pointer)`)
+			})
+
+			It("should not create list from nil pointer", func() {
+				var entity *fixture.EntityWithNumID
+				list, err := NewWriteableDocList(entity, keys[0:1], false)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `invalid value kind "ptr" (wanted non-nil pointer)`)
+			})
+
+			//	It("should not create list from non-reference struct", func() {
+			//		list, err := NewWriteableDocList(entities[0], keys[0:1], false)
+			//		Check(list, IsNil)
+			//		Check(err, NotNil).And(Contains, `invalid value kind "ptr" (wanted non-nil pointer)`)
+			//	})
 		})
 
-		It("should not create list from nil pointer", func() {
-			var entity *fixture.EntityWithNumID
-			list, err := NewWriteableDocList(entity, keys[0:1], false)
-			Check(list, IsNil)
-			Check(err, NotNil).And(Contains, `invalid value kind "ptr" (wanted non-nil pointer)`)
+		Context("multiple keys", func() {
+
+			It("should not create list with multiple keys from struct", func() {
+				list, err := NewWriteableDocList(entities[0], keys, true)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `invalid value kind "struct" (wanted map or slice)`)
+			})
+
+			It("should not create list with multiple keys from struct pointer", func() {
+				list, err := NewWriteableDocList(&(entities[0]), keys, true)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, `invalid value kind "ptr" (wanted map or slice)`)
+			})
+
+			It("should not create list from map with invalid key type", func() {
+				var entityMap map[bool]*fixture.EntityWithNumID
+				list, err := NewWriteableDocList(&entityMap, keys, true)
+				Check(list, IsNil)
+				Check(err, NotNil).And(Contains, "invalid value key")
+			})
 		})
 	})
 })

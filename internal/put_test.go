@@ -83,20 +83,7 @@ var _ = Describe("Put", func() {
 		Check(err, NotNil).And(Contains, "must be non-nil")
 	})
 
-	It("should not save non-struct entity", func() {
-		keys, err := Put(kind, 42, false)
-
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "int")
-	})
-
-	It("should not save entity without ID()", func() {
-		invalidMdl := &InvalidModel{}
-		keys, err := Put(kind, invalidMdl, false)
-
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "does not provide ID")
-	})
+	// NOTE: other cases of invalid entity/entities are checked inside the trafo package
 
 	It("should not save complete entity without Id", func() {
 		entity := &MyModel{}

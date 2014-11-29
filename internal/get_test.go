@@ -108,69 +108,46 @@ func dsLoadTests(useGlobalCache bool) {
 
 	// ==== ERRORS
 
-	It("should not load entity into invalid type", func() {
-		var entity string
-		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
+	Context("invalid entity", func() {
 
-		Check(keys, IsNil)
-		Check(err, NotNil).And("invalid value kind").And(Contains, "string")
+		It("should not save nil entity", func() {
+			dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
+			keys, err := Get(kind, types.NewKeys(dsKey), nil, useGlobalCache, false)
+
+			Check(keys, IsNil)
+			Check(err, NotNil).And(Contains, `invalid value kind "invalid" (wanted non-nil pointer)`)
+		})
+
+		// NOTE: other cases of invalid entity/entities are checked inside the trafo package
 	})
 
-	It("should not load entity into non-pointer struct", func() {
-		var entity MyModel
-		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
+	Context("invalid key", func() {
 
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "struct")
-	})
+		It("should not accept key for different Kind", func() {
+			var entity *MyModel
+			invalidKey := ds.NewKey(ctx, "wrong-kind", "", 1, nil)
+			keys, err := Get(kind, types.NewKeys(invalidKey), &entity, useGlobalCache, false)
 
-	It("should not load entity into non-reference struct", func() {
-		var entity *MyModel
-		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
-		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
+			Check(keys, IsNil)
+			Check(entity, IsNil)
+			Check(err, NotNil).And(Contains, "invalid key kind 'wrong-kind'")
+		})
 
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "ptr")
-	})
+		It("should not load empty keys", func() {
+			var entities []*MyModel
+			keys, err := Get(kind, nil, &entities, useGlobalCache, false)
 
-	It("should not load entities into map with invalid key", func() {
-		var entities map[bool]*MyModel
-		dsKeys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name, "", 1, nil),
-			ds.NewKey(ctx, kind.Name, "", 2, nil),
-		}
-		keys, err := Get(kind, types.NewKeys(dsKeys...), &entities, useGlobalCache, true)
+			Check(keys, IsNil)
+			Check(err, NotNil).And(Contains, "no keys provided")
+		})
 
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "invalid value key")
-	})
+		It("should not load incomplete key", func() {
+			var entity *MyModel
+			incompleteKey := ds.NewKey(ctx, kind.Name, "", 0, nil)
+			keys, err := Get(kind, types.NewKeys(incompleteKey), &entity, useGlobalCache, false)
 
-	It("should not accept key for different Kind", func() {
-		var entity *MyModel
-		invalidKey := ds.NewKey(ctx, "wrong-kind", "", 1, nil)
-		keys, err := Get(kind, types.NewKeys(invalidKey), &entity, useGlobalCache, false)
-
-		Check(keys, IsNil)
-		Check(entity, IsNil)
-		Check(err, NotNil).And(Contains, "invalid key kind 'wrong-kind'")
-	})
-
-	It("should not load empty keys", func() {
-		var entities []*MyModel
-		keys, err := Get(kind, nil, &entities, useGlobalCache, false)
-
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "no keys provided")
-	})
-
-	It("should not load incomplete key", func() {
-		var entity *MyModel
-		incompleteKey := ds.NewKey(ctx, kind.Name, "", 0, nil)
-		keys, err := Get(kind, types.NewKeys(incompleteKey), &entity, useGlobalCache, false)
-
-		Check(keys, IsNil)
-		Check(err, NotNil).And(Contains, "is incomplete")
+			Check(keys, IsNil)
+			Check(err, NotNil).And(Contains, "is incomplete")
+		})
 	})
 }
