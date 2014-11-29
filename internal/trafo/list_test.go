@@ -2,7 +2,7 @@ package trafo
 
 import (
 	. "github.com/101loops/bdd"
-	"github.com/101loops/hrd/internal/fixture"
+	"github.com/101loops/hrd/entity/fixture"
 	"github.com/101loops/hrd/internal/types"
 
 	ds "appengine/datastore"
