@@ -150,12 +150,12 @@ func (l *DocList) Pipe(ctx ae.Context) DocsPipe {
 	return DocsPipe{ctx, l.list}
 }
 
-// Keys returns the set's sequence of Key.
+// Keys returns the list's sequence of Key.
 func (l *DocList) Keys() []*types.Key {
 	return l.keyList
 }
 
-// Get returns the set's nth Doc.
+// Get returns the list's nth Doc.
 // it is created first if it doesn't already exist.
 func (l *DocList) Get(nth int) (ret *Doc, err error) {
 	if nth < len(l.list) {
@@ -166,7 +166,7 @@ func (l *DocList) Get(nth int) (ret *Doc, err error) {
 	return
 }
 
-// Add appends a new Doc to the set.
+// Add appends a new Doc to the list.
 func (l *DocList) Add(key *types.Key, doc *Doc) {
 	l.list = append(l.list, doc)
 	doc.setKey(key)
