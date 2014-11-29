@@ -14,7 +14,7 @@ var _ = Describe("Doc", func() {
 	type MyModel struct{}
 	type UnknownModel struct{}
 
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		CodecSet.AddMust(MyModel{})
 	})
 
@@ -32,16 +32,29 @@ var _ = Describe("Doc", func() {
 			Check(doc, NotNil)
 		})
 
-		It("unknown struct", func() {
+		It("but not unknown struct", func() {
 			doc, err := newDocFromInst(UnknownModel{})
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 
-		It("pointer to unknown struct", func() {
+		It("but not pointer to unknown struct", func() {
 			doc, err := newDocFromInst(&UnknownModel{})
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
+		})
+
+		It("but not non-struct", func() {
+			doc, err := newDocFromInst("invalid")
+			Check(doc, IsNil)
+			Check(err, NotNil).And(Contains, `invalid value kind "string" (wanted struct or struct pointer)`)
+		})
+
+		It("but not pointer to non-struct", func() {
+			invalidEntity := "invalid"
+			doc, err := newDocFromInst(&invalidEntity)
+			Check(doc, IsNil)
+			Check(err, NotNil).And(Contains, `invalid value kind "string" (wanted struct pointer)`)
 		})
 	})
 
@@ -53,7 +66,7 @@ var _ = Describe("Doc", func() {
 			Check(doc, NotNil)
 		})
 
-		It("pointer to unknown struct", func() {
+		It("but not pointer to unknown struct", func() {
 			doc, err := newDocFromType(reflect.TypeOf(&UnknownModel{}))
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")

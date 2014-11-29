@@ -6,6 +6,7 @@ import (
 
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity"
+	"github.com/101loops/hrd/internal/fixture"
 
 	"appengine/aetest"
 )
@@ -24,6 +25,11 @@ func TestSuite(t *testing.T) {
 
 	CodecSet.AddMust(SimpleModel{})
 	CodecSet.AddMust(ComplexModel{})
+
+	CodecSet.AddMust(&fixture.EntityWithNumID{})
+	CodecSet.AddMust(&fixture.EntityWithTextID{})
+	CodecSet.AddMust(&fixture.EntityWithParentNumID{})
+	CodecSet.AddMust(&fixture.EntityWithParentTextID{})
 
 	RunSpecs(t, "HRD Trafo Suite")
 }
