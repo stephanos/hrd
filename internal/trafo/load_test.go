@@ -32,6 +32,10 @@ func (l *loadEntity) AfterLoad() error {
 var _ = Describe("Doc: Load", func() {
 
 	var entity loadEntity
+	var validProps = []ds.Property{
+		{Name: "A", Value: "abc"},
+		{Name: "B", Value: int64(1)},
+	}
 
 	BeforeEach(func() {
 		entity = loadEntity{}
@@ -43,7 +47,7 @@ var _ = Describe("Doc: Load", func() {
 		Check(err, IsNil)
 		Check(doc, NotNil)
 
-		c := newPropertyChannel()
+		c := newPropertyChannel(validProps)
 		err = doc.Load(c)
 		Check(err, IsNil)
 		Check(c, IsClosed)
@@ -53,17 +57,25 @@ var _ = Describe("Doc: Load", func() {
 		Check(res.B, EqualsNum, 1)
 	})
 
-	It("should return an error when BeforeLoad errs", func() {
+	It("should return an error when loading fails", func() {
+		doc, _ := newDocFromInst(&entity)
+
+		c := newPropertyChannel([]ds.Property{{Name: "Invalid"}})
+		err := doc.Load(c)
+
+		Check(err, ErrorContains, `cannot load field "Invalid" into a "trafo.loadEntity": no such struct field`)
+		Check(c, IsClosed)
+	})
+
+	It("should return an error when BeforeLoad fails", func() {
 		entity.beforeFunc = func() error {
 			return fmt.Errorf("an error")
 		}
 
-		doc, err := newDocFromInst(&entity)
-		Check(err, IsNil)
-		Check(doc, NotNil)
+		doc, _ := newDocFromInst(&entity)
+		c := newPropertyChannel(validProps)
 
-		c := newPropertyChannel()
-		err = doc.Load(c)
+		err := doc.Load(c)
 		Check(err, ErrorContains, "an error")
 		Check(c, IsClosed)
 
@@ -71,17 +83,15 @@ var _ = Describe("Doc: Load", func() {
 		Check(res.A, Equals, "")
 	})
 
-	It("should return an error when AfterLoad errs", func() {
+	It("should return an error when AfterLoad fails", func() {
 		entity.afterFunc = func() error {
 			return fmt.Errorf("an error")
 		}
 
-		doc, err := newDocFromInst(&entity)
-		Check(err, IsNil)
-		Check(doc, NotNil)
+		doc, _ := newDocFromInst(&entity)
+		c := newPropertyChannel(validProps)
 
-		c := newPropertyChannel()
-		err = doc.Load(c)
+		err := doc.Load(c)
 		Check(err, ErrorContains, "an error")
 		Check(c, IsClosed)
 
@@ -91,11 +101,12 @@ var _ = Describe("Doc: Load", func() {
 	})
 })
 
-func newPropertyChannel() chan ds.Property {
+func newPropertyChannel(props []ds.Property) chan ds.Property {
 	c := make(chan ds.Property)
 	go func() {
-		c <- ds.Property{Name: "A", Value: "abc"}
-		c <- ds.Property{Name: "B", Value: int64(1)}
+		for _, p := range props {
+			c <- p
+		}
 		close(c)
 	}()
 	return c
