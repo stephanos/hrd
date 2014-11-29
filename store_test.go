@@ -4,7 +4,7 @@ import . "github.com/101loops/bdd"
 
 var _ = Describe("Store", func() {
 
-	It("initializes and is configurable", func() {
+	It("should initialize and be configurable", func() {
 		Check(myStore.opts.useGlobalCache, IsTrue)
 		Check(myStore.CreatedAt(), Not(IsZero))
 
@@ -12,7 +12,7 @@ var _ = Describe("Store", func() {
 		Check(myStore.opts.useGlobalCache, IsFalse)
 	})
 
-	It("creates a kind", func() {
+	It("should create a kind", func() {
 		newKind := myStore.Kind("new-kind")
 
 		Check(newKind.opts, NotNil)
@@ -20,7 +20,7 @@ var _ = Describe("Store", func() {
 		Check(newKind.Name(), Equals, "new-kind")
 	})
 
-	It("registers a new entity", func() {
+	It("should register a new entity", func() {
 		type MyModel1 struct{}
 		err := myStore.RegisterEntity(&MyModel1{})
 		Check(err, IsNil)

@@ -4,14 +4,14 @@ import . "github.com/101loops/bdd"
 
 var _ = Describe("Kind", func() {
 
-	It("creates numeric key", func() {
+	It("should create numeric key", func() {
 		key := myKind.NewNumKey(42)
 
 		Check(key.IntID(), EqualsNum, 42)
 		Check(key.Parent(), IsNil)
 	})
 
-	It("creates numeric keys", func() {
+	It("should create numeric keys", func() {
 		keys := myKind.NewNumKeys(1, 2)
 
 		Check(keys, HasLen, 2)
@@ -19,7 +19,7 @@ var _ = Describe("Kind", func() {
 		Check(keys[1].IntID(), EqualsNum, 2)
 	})
 
-	It("creates numeric key with parent", func() {
+	It("should create numeric key with parent", func() {
 		key := myKind.NewNumKey(42, myKind.NewNumKey(66))
 
 		Check(key.IntID(), EqualsNum, 42)
@@ -27,14 +27,14 @@ var _ = Describe("Kind", func() {
 		Check(key.Parent().IntID(), EqualsNum, 66)
 	})
 
-	It("creates text key", func() {
+	It("should create text key", func() {
 		key := myKind.NewTextKey("abc")
 
 		Check(key.StringID(), Equals, "abc")
 		Check(key.Parent(), IsNil)
 	})
 
-	It("creates text keys", func() {
+	It("should create text keys", func() {
 		keys := myKind.NewTextKeys("abc", "xyz")
 
 		Check(keys, HasLen, 2)
@@ -42,7 +42,7 @@ var _ = Describe("Kind", func() {
 		Check(keys[1].StringID(), Equals, "xyz")
 	})
 
-	It("creates text key with parent", func() {
+	It("should create text key with parent", func() {
 		key := myKind.NewTextKey("abc", myKind.NewTextKey("xyz"))
 
 		Check(key.StringID(), Equals, "abc")

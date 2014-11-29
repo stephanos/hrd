@@ -33,51 +33,51 @@ var _ = Describe("DocList", func() {
 		}
 	})
 
-	Context("create readable list", func() {
+	Context("readable list", func() {
 
-		It("from struct pointer", func() {
+		It("should create list from struct pointer", func() {
 			list, err := NewReadableDocList(kind, entities[0])
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 1)
 		})
 
-		It("from slice of struct pointers", func() {
+		It("should create list from slice of struct pointers", func() {
 			list, err := NewReadableDocList(kind, entities[0:2])
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 2)
 		})
 
-		It("but not from nil value", func() {
+		It("should not create list not from nil value", func() {
 			list, err := NewReadableDocList(kind, nil)
 			Check(list, IsNil)
 			Check(err, NotNil).And(Contains, "value must be non-nil")
 		})
 
-		It("but not from unknown struct pointer", func() {
+		It("should not create list from unknown struct pointer", func() {
 			list, err := NewReadableDocList(kind, &UnknownModel{})
 			Check(list, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 
-		It("but not from invalid entity pointer", func() {
+		It("should not create list from invalid entity pointer", func() {
 			list, err := NewReadableDocList(kind, &InvalidModel{})
 			Check(list, IsNil)
 			Check(err, NotNil).And(Contains, `value type "*trafo.InvalidModel" does not provide ID()`)
 		})
 	})
 
-	Context("create writeable list", func() {
+	Context("writeable list", func() {
 
-		It("from struct pointer", func() {
+		It("should create list from struct pointer", func() {
 			list, err := NewWriteableDocList(&(entities[0]), keys[0:1], false)
 			Check(err, IsNil)
 			Check(list, NotNil)
 			Check(list.list, HasLen, 1)
 		})
 
-		It("from slice", func() {
+		It("should create list from slice", func() {
 			var entitySlice []*fixture.EntityWithNumID
 			list, err := NewWriteableDocList(&entitySlice, keys, true)
 
@@ -86,7 +86,7 @@ var _ = Describe("DocList", func() {
 			Check(list.list, HasLen, 4)
 		})
 
-		It("from map", func() {
+		It("should create list from map", func() {
 			var entityMap map[string]*fixture.EntityWithNumID
 			list, err := NewWriteableDocList(&entityMap, keys, true)
 
@@ -95,7 +95,7 @@ var _ = Describe("DocList", func() {
 			Check(list.list, HasLen, 4)
 		})
 
-		It("from map", func() {
+		It("should create list from map", func() {
 			var entityMap map[string]*fixture.EntityWithNumID
 			list, err := NewWriteableDocList(&entityMap, keys, true)
 
@@ -104,13 +104,13 @@ var _ = Describe("DocList", func() {
 			Check(list.list, HasLen, 4)
 		})
 
-		It("but not from non-pointer", func() {
+		It("should not create list from non-pointer", func() {
 			list, err := NewWriteableDocList(*(entities[0]), keys[0:1], false)
 			Check(list, IsNil)
 			Check(err, NotNil).And(Contains, `invalid value kind "struct" (wanted non-nil pointer)`)
 		})
 
-		It("but not from nil pointer", func() {
+		It("should not create list from nil pointer", func() {
 			var entity *fixture.EntityWithNumID
 			list, err := NewWriteableDocList(entity, keys[0:1], false)
 			Check(list, IsNil)

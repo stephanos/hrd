@@ -8,7 +8,7 @@ import (
 
 var _ = Describe("Transact", func() {
 
-	It("runs operations inside a transaction", func() {
+	It("should run operations inside a transaction", func() {
 		kind := randomKind()
 
 		Transact(ctx, false, func(ctx ae.Context) error {

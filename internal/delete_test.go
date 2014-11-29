@@ -31,7 +31,7 @@ var _ = Describe("Delete", func() {
 		clearCache()
 	})
 
-	It("delete entities by key", func() {
+	It("should delete entities by key", func() {
 		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
@@ -41,7 +41,7 @@ var _ = Describe("Delete", func() {
 		Check(existsInDB(key), IsFalse)
 	})
 
-	It("deletes multiple entities by key", func() {
+	It("should delete multiple entities by key", func() {
 		keys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
@@ -56,7 +56,7 @@ var _ = Describe("Delete", func() {
 		Check(existsInDB(keys[1]), IsFalse)
 	})
 
-	It("deletes entity", func() {
+	It("should delete entity", func() {
 		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
@@ -66,7 +66,7 @@ var _ = Describe("Delete", func() {
 		Check(existsInDB(key), IsFalse)
 	})
 
-	It("deletes slice of entities", func() {
+	It("should delete slice of entities", func() {
 		keys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
@@ -81,7 +81,7 @@ var _ = Describe("Delete", func() {
 		Check(existsInDB(keys[1]), IsFalse)
 	})
 
-	It("deletes map of entities", func() {
+	It("should delete map of entities", func() {
 		keys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
 			ds.NewKey(ctx, kind.Name, "", 2, nil),
@@ -99,14 +99,14 @@ var _ = Describe("Delete", func() {
 
 	// ==== ERRORS
 
-	It("does not delete invalid entity", func() {
+	It("should not delete invalid entity", func() {
 		var entity string
 		err := Delete(kind, entity, false)
 
 		Check(err, NotNil).And(Contains, `value type "string" does not provide ID()`)
 	})
 
-	It("does not delete invalid entities", func() {
+	It("should not delete invalid entities", func() {
 		entities := []string{"a", "b", "c"}
 		err := Delete(kind, entities, true)
 

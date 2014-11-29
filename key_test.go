@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("Key", func() {
 
-	It("creates numeric key", func() {
+	It("should create numeric key", func() {
 		k1 := newNumKey(myKind, 1, nil)
 		Check(k1.Kind(), Equals, "my-kind")
 		Check(k1.Namespace(), Equals, "")
@@ -23,7 +23,7 @@ var _ = Describe("Key", func() {
 		Check(k2.Parent(), Equals, k1)
 	})
 
-	It("creates text key", func() {
+	It("should create text key", func() {
 		k1 := newTextKey(myKind, "abc", nil)
 		Check(k1.Kind(), Equals, "my-kind")
 		Check(k1.Namespace(), Equals, "")
@@ -36,7 +36,7 @@ var _ = Describe("Key", func() {
 		Check(k2.Parent(), Equals, k1)
 	})
 
-	It("creates a new key", func() {
+	It("should create a new key", func() {
 		dsKey1 := ds.NewKey(ctx, "my-kind", "abc", 0, nil)
 		key1 := newKey(types.NewKey(dsKey1))
 		Check(key1, Equals,
@@ -48,7 +48,7 @@ var _ = Describe("Key", func() {
 			&Key{state: &types.KeyState{}, kind: "my-kind", intID: 42, parent: key1})
 	})
 
-	It("returns whether it exists", func() {
+	It("should return whether it exists", func() {
 		k := newTextKey(myKind, "abc", nil)
 		Check(k.Exists(), IsFalse)
 
@@ -60,7 +60,7 @@ var _ = Describe("Key", func() {
 		Check(k.Exists(), IsTrue)
 	})
 
-	It("returns last operation error", func() {
+	It("should return the last operation error", func() {
 		k := newTextKey(myKind, "abc", nil)
 		Check(k.Error(), IsNil)
 
@@ -71,7 +71,7 @@ var _ = Describe("Key", func() {
 		Check(k.Error(), NotNil)
 	})
 
-	It("converts to datastore.Key", func() {
+	It("should convert to datastore.Key", func() {
 		k1 := newNumKey(myKind, 42, nil)
 		k2 := newTextKey(myKind, "abc", k1)
 		dsKey := k2.ToDSKey(ctx)

@@ -18,7 +18,7 @@ var _ = Describe("Loader", func() {
 		dsGet = internal.Get
 	})
 
-	It("loads an entity", func() {
+	It("should load an entity", func() {
 		entity := &MyModel{}
 
 		dsGet = func(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bool, multi bool) ([]*types.Key, error) {
@@ -35,7 +35,7 @@ var _ = Describe("Loader", func() {
 		Check(ret, Equals, key)
 	})
 
-	It("loads multiple entities", func() {
+	It("should load multiple entities", func() {
 		entities := []*MyModel{&MyModel{}, &MyModel{}}
 
 		dsGet = func(kind *types.Kind, keys []*types.Key, dsts interface{}, _ bool, multi bool) ([]*types.Key, error) {
@@ -51,7 +51,7 @@ var _ = Describe("Loader", func() {
 		Check(ret, Equals, keys)
 	})
 
-	It("can skip the global cache", func() {
+	It("should be able to skip the global cache", func() {
 		dsGet = func(_ *types.Kind, _ []*types.Key, _ interface{}, useGlobalCache bool, _ bool) ([]*types.Key, error) {
 			Check(useGlobalCache, IsFalse)
 			return nil, nil
@@ -60,7 +60,7 @@ var _ = Describe("Loader", func() {
 		myKind.Load(ctx).Opts(NoGlobalCache).ID(42).GetOne(nil)
 	})
 
-	Context("creates single-entity loader from", func() {
+	Context("should create single-entity loader from", func() {
 		It("key", func() {
 			sl := myKind.Load(ctx).Key(myKind.NewNumKey(42))
 			Check(sl.loader.keys, Equals, myKind.NewNumKeys(42))
@@ -77,7 +77,7 @@ var _ = Describe("Loader", func() {
 		})
 	})
 
-	Context("creates multi-entity loader from", func() {
+	Context("should create multi-entity loader from", func() {
 		It("keys", func() {
 			ml := myKind.Load(ctx).Keys(myKind.NewNumKeys(1, 2))
 			Check(ml.loader.keys, Equals, myKind.NewNumKeys(1, 2))

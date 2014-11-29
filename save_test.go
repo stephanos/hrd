@@ -18,7 +18,7 @@ var _ = Describe("Saver", func() {
 		dsPut = internal.Put
 	})
 
-	It("saves an entity", func() {
+	It("should save an entity", func() {
 		entity := &MyModel{}
 
 		dsPut = func(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
@@ -33,7 +33,7 @@ var _ = Describe("Saver", func() {
 		Check(key, Equals, myKind.NewNumKey(42))
 	})
 
-	It("saves multiple entities", func() {
+	It("should save multiple entities", func() {
 		entities := []*MyModel{&MyModel{}, &MyModel{}}
 
 		dsPut = func(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, error) {
@@ -48,7 +48,7 @@ var _ = Describe("Saver", func() {
 		Check(keys, Equals, myKind.NewNumKeys(1, 2))
 	})
 
-	It("can require complete keys", func() {
+	It("should be able to require complete keys", func() {
 		dsPut = func(_ *types.Kind, _ interface{}, completeKeys bool) ([]*types.Key, error) {
 			Check(completeKeys, IsTrue)
 			return nil, nil

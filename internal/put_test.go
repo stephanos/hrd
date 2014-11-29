@@ -16,7 +16,7 @@ var _ = Describe("Put", func() {
 		clearCache()
 	})
 
-	It("saves an entity without id", func() {
+	It("should save an entity without id", func() {
 		entity := &MyModel{}
 		Check(entity.ID(), EqualsNum, 0)
 		Check(entity.UpdatedAt(), IsZero)
@@ -34,7 +34,7 @@ var _ = Describe("Put", func() {
 		Check(entity.lifecycle, Equals, []string{"before-save", "after-save"})
 	})
 
-	It("saves multiple entities without id", func() {
+	It("should save multiple entities without id", func() {
 		entities := []*MyModel{
 			&MyModel{}, &MyModel{},
 		}
@@ -49,7 +49,7 @@ var _ = Describe("Put", func() {
 		Check(entities[1].ID(), EqualsNum, keys[1].IntID())
 	})
 
-	It("saves an entity with id", func() {
+	It("should save an entity with id", func() {
 		entity := &MyModel{}
 		entity.SetID(42)
 
@@ -61,7 +61,7 @@ var _ = Describe("Put", func() {
 		Check(keys[0].IntID(), EqualsNum, 42)
 	})
 
-	It("saves multiple entities with id", func() {
+	It("should save multiple entities with id", func() {
 		entities := []*MyModel{&MyModel{}, &MyModel{}}
 		entities[0].SetID(1)
 		entities[1].SetID(2)
@@ -76,21 +76,21 @@ var _ = Describe("Put", func() {
 
 	// ==== ERRORS
 
-	It("does not save nil entity", func() {
+	It("should not save nil entity", func() {
 		keys, err := Put(kind, nil, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "must be non-nil")
 	})
 
-	It("does not save non-struct entity", func() {
+	It("should not save non-struct entity", func() {
 		keys, err := Put(kind, 42, false)
 
 		Check(keys, IsNil)
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "int")
 	})
 
-	It("does not save entity without ID()", func() {
+	It("should not save entity without ID()", func() {
 		invalidMdl := &InvalidModel{}
 		keys, err := Put(kind, invalidMdl, false)
 
@@ -98,7 +98,7 @@ var _ = Describe("Put", func() {
 		Check(err, NotNil).And(Contains, "does not provide ID")
 	})
 
-	It("does not save complete entity without Id", func() {
+	It("should not save complete entity without Id", func() {
 		entity := &MyModel{}
 		keys, err := Put(kind, entity, true)
 
@@ -106,7 +106,7 @@ var _ = Describe("Put", func() {
 		Check(err, NotNil).And(Contains, "is incomplete")
 	})
 
-	It("does not save empty entities", func() {
+	It("should not save empty entities", func() {
 		entities := []*MyModel{}
 		keys, err := Put(kind, entities, false)
 

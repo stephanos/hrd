@@ -18,39 +18,39 @@ var _ = Describe("Doc", func() {
 		CodecSet.AddMust(MyModel{})
 	})
 
-	Context("create from instance", func() {
+	Context("instance", func() {
 
-		It("known struct", func() {
+		It("should create new Doc from known struct", func() {
 			doc, err := newDocFromInst(MyModel{})
 			Check(err, IsNil)
 			Check(doc, NotNil)
 		})
 
-		It("pointer to known struct", func() {
+		It("should create new Doc from pointer to known struct", func() {
 			doc, err := newDocFromInst(&MyModel{})
 			Check(err, IsNil)
 			Check(doc, NotNil)
 		})
 
-		It("but not unknown struct", func() {
+		It("should not create new Doc from unknown struct", func() {
 			doc, err := newDocFromInst(UnknownModel{})
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 
-		It("but not pointer to unknown struct", func() {
+		It("should not create new Doc from pointer to unknown struct", func() {
 			doc, err := newDocFromInst(&UnknownModel{})
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 
-		It("but not non-struct", func() {
+		It("should not create new Doc from non-struct", func() {
 			doc, err := newDocFromInst("invalid")
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, `invalid value kind "string" (wanted struct or struct pointer)`)
 		})
 
-		It("but not pointer to non-struct", func() {
+		It("should not create new Doc from pointer to non-struct", func() {
 			invalidEntity := "invalid"
 			doc, err := newDocFromInst(&invalidEntity)
 			Check(doc, IsNil)
@@ -58,15 +58,15 @@ var _ = Describe("Doc", func() {
 		})
 	})
 
-	Context("create from type", func() {
+	Context("type", func() {
 
-		It("pointer to known struct", func() {
+		It("should create new Doc from pointer to known struct", func() {
 			doc, err := newDocFromType(reflect.TypeOf(&MyModel{}))
 			Check(err, IsNil)
 			Check(doc, NotNil)
 		})
 
-		It("but not pointer to unknown struct", func() {
+		It("should not create new Doc from pointer to unknown struct", func() {
 			doc, err := newDocFromType(reflect.TypeOf(&UnknownModel{}))
 			Check(doc, IsNil)
 			Check(err, NotNil).And(Contains, "no registered codec found for type 'trafo.UnknownModel'")
@@ -75,7 +75,7 @@ var _ = Describe("Doc", func() {
 
 	Context("set key", func() {
 
-		It("with numeric id", func() {
+		It("should set key from with numeric id", func() {
 			entity := fixture.EntityWithNumID{}
 			CodecSet.AddMust(entity)
 
@@ -85,7 +85,7 @@ var _ = Describe("Doc", func() {
 			Check(entity.ID(), EqualsNum, 42)
 		})
 
-		It("with text id", func() {
+		It("should set key from text id", func() {
 			entity := fixture.EntityWithTextID{}
 			CodecSet.AddMust(entity)
 
@@ -95,7 +95,7 @@ var _ = Describe("Doc", func() {
 			Check(entity.ID(), Equals, "abc")
 		})
 
-		It("with numeric parent id", func() {
+		It("should set key from numeric parent id", func() {
 			entity := fixture.EntityWithParentNumID{}
 			CodecSet.AddMust(entity)
 
@@ -109,7 +109,7 @@ var _ = Describe("Doc", func() {
 			Check(parentID, EqualsNum, 2)
 		})
 
-		It("with text parent id", func() {
+		It("should set key from text parent id", func() {
 			entity := fixture.EntityWithParentTextID{}
 			CodecSet.AddMust(entity)
 

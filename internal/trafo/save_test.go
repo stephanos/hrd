@@ -20,7 +20,7 @@ var _ = Describe("Doc Save", func() {
 	}
 
 	Context("fields", func() {
-		It("serializes primitives", func() {
+		It("should serialize primitives", func() {
 			type MyModel struct {
 				I   int
 				I8  int8
@@ -50,7 +50,7 @@ var _ = Describe("Doc Save", func() {
 			Check(*props[8], Equals, ds.Property{"F64", float64(2.0), true, false})
 		})
 
-		It("serializes known complex types", func() {
+		It("should serialize known complex types", func() {
 			type MyModel struct {
 				B  []byte
 				T  time.Time
@@ -76,7 +76,7 @@ var _ = Describe("Doc Save", func() {
 	})
 
 	Context("tags", func() {
-		It("omits fields", func() {
+		It("should omit fields", func() {
 			type MyModel struct {
 				Bool    bool   `datastore:",omitempty"`
 				Integer int64  `datastore:",omitempty"`
@@ -87,7 +87,7 @@ var _ = Describe("Doc Save", func() {
 			Check(props, NotNil).And(HasLen, 0)
 		})
 
-		It("indexes fields", func() {
+		It("should index fields", func() {
 			type MyModel struct {
 				Field string `datastore:",index"`
 				Empty string `datastore:",index:omitempty"`
@@ -101,7 +101,7 @@ var _ = Describe("Doc Save", func() {
 		})
 	})
 
-	It("saves simple model", func() {
+	It("should save simple model", func() {
 		doc, err := newDocFromInst(&SimpleModel{
 			Num:  42,
 			Text: "html",
@@ -124,7 +124,7 @@ var _ = Describe("Doc Save", func() {
 		Check(*props[5], Equals, ds.Property{"html", "html", false, false})
 	})
 
-	It("saves complex model", func() {
+	It("should save complex model", func() {
 		doc, err := newDocFromInst(&ComplexModel{})
 		Check(err, IsNil)
 		Check(doc, NotNil)
@@ -138,7 +138,7 @@ var _ = Describe("Doc Save", func() {
 		Check(*props[0], Equals, ds.Property{"tag.Val", "", true, false})
 	})
 
-	It("saves complex model with inner struct", func() {
+	It("should save complex model with inner struct", func() {
 		doc, err := newDocFromInst(&ComplexModel{
 			Pair: Pair{"life", "42"},
 		})
@@ -155,7 +155,7 @@ var _ = Describe("Doc Save", func() {
 		Check(*props[1], Equals, ds.Property{"tag.Val", "42", true, false})
 	})
 
-	It("saves complex model with slice of structs", func() {
+	It("should save complex model with slice of structs", func() {
 		doc, err := newDocFromInst(&ComplexModel{
 			Pairs: []Pair{Pair{"Bill", "Bob"}, Pair{"Barb", "Betty"}},
 		})

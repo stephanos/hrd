@@ -25,7 +25,7 @@ func dsTransactTests(crossGroup bool) {
 		dsTransact = internal.Transact
 	})
 
-	It("runs a transaction", func() {
+	It("should run a transaction", func() {
 		txErr := fmt.Errorf("tx error")
 
 		tx := myStore.TX(ctx).XG(crossGroup)

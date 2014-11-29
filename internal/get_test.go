@@ -40,7 +40,7 @@ func dsLoadTests(useGlobalCache bool) {
 		clearCache()
 	})
 
-	It("loads an entity", func() {
+	It("should load an entity", func() {
 		var entity *MyModel
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := Get(kind, types.NewKeys(dsKey), &entity, useGlobalCache, false)
@@ -52,7 +52,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(entity.Num, EqualsNum, 1)
 	})
 
-	It("loads multiple entities into slice of struct pointers", func() {
+	It("should load multiple entities into slice of struct pointers", func() {
 		var entities []*MyModel
 		dsKeys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
@@ -78,7 +78,7 @@ func dsLoadTests(useGlobalCache bool) {
 		// Check(entities[2], IsNil) TODO
 	})
 
-	It("loads multiple entities into map of struct pointers by Key", func() {
+	It("should load multiple entities into map of struct pointers by Key", func() {
 		var entities map[*types.Key]*MyModel
 		dsKeys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
@@ -92,7 +92,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(entities, HasLen, 3)
 	})
 
-	It("loads multiple entities into map of struct pointers by int64", func() {
+	It("should load multiple entities into map of struct pointers by int64", func() {
 		var entities map[int64]*MyModel
 		dsKeys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
@@ -108,7 +108,7 @@ func dsLoadTests(useGlobalCache bool) {
 
 	// ==== ERRORS
 
-	It("does not load entity into invalid type", func() {
+	It("should not load entity into invalid type", func() {
 		var entity string
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
@@ -117,7 +117,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(err, NotNil).And("invalid value kind").And(Contains, "string")
 	})
 
-	It("does not load entity into non-pointer struct", func() {
+	It("should not load entity into non-pointer struct", func() {
 		var entity MyModel
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
@@ -126,7 +126,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "struct")
 	})
 
-	It("does not load entity into non-reference struct", func() {
+	It("should not load entity into non-reference struct", func() {
 		var entity *MyModel
 		dsKey := ds.NewKey(ctx, kind.Name, "", 1, nil)
 		keys, err := Get(kind, types.NewKeys(dsKey), entity, useGlobalCache, false)
@@ -135,7 +135,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(err, NotNil).And(Contains, "invalid value kind").And(Contains, "ptr")
 	})
 
-	It("does not load entities into map with invalid key", func() {
+	It("should not load entities into map with invalid key", func() {
 		var entities map[bool]*MyModel
 		dsKeys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil),
@@ -147,7 +147,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(err, NotNil).And(Contains, "invalid value key")
 	})
 
-	It("does not accept key for different Kind", func() {
+	It("should not accept key for different Kind", func() {
 		var entity *MyModel
 		invalidKey := ds.NewKey(ctx, "wrong-kind", "", 1, nil)
 		keys, err := Get(kind, types.NewKeys(invalidKey), &entity, useGlobalCache, false)
@@ -157,7 +157,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(err, NotNil).And(Contains, "invalid key kind 'wrong-kind'")
 	})
 
-	It("does not load empty keys", func() {
+	It("should not load empty keys", func() {
 		var entities []*MyModel
 		keys, err := Get(kind, nil, &entities, useGlobalCache, false)
 
@@ -165,7 +165,7 @@ func dsLoadTests(useGlobalCache bool) {
 		Check(err, NotNil).And(Contains, "no keys provided")
 	})
 
-	It("does not load incomplete key", func() {
+	It("should not load incomplete key", func() {
 		var entity *MyModel
 		incompleteKey := ds.NewKey(ctx, kind.Name, "", 0, nil)
 		keys, err := Get(kind, types.NewKeys(incompleteKey), &entity, useGlobalCache, false)
