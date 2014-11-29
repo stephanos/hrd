@@ -4,12 +4,15 @@ import (
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/internal/fixture"
 	"github.com/101loops/hrd/internal/types"
+
+	ds "appengine/datastore"
 )
 
 var _ = Describe("DocList", func() {
 
 	var (
 		kind     *types.Kind
+		keys     []*types.Key
 		entities []*fixture.EntityWithNumID
 	)
 
@@ -20,11 +23,13 @@ var _ = Describe("DocList", func() {
 		CodecSet.AddMust(&InvalidModel{})
 		kind = types.NewKind(ctx, "my-kind")
 
+		keys = make([]*types.Key, 4)
 		entities = make([]*fixture.EntityWithNumID, 4)
 		for i := int64(0); i < 4; i++ {
 			entity := &fixture.EntityWithNumID{}
 			entity.SetID(i + 1)
 			entities[i] = entity
+			keys[i] = types.NewKey(ds.NewKey(ctx, kind.Name, "", entity.ID(), nil))
 		}
 	})
 
@@ -60,6 +65,56 @@ var _ = Describe("DocList", func() {
 			list, err := NewReadableDocList(kind, &InvalidModel{})
 			Check(list, IsNil)
 			Check(err, NotNil).And(Contains, `value type "*trafo.InvalidModel" does not provide ID()`)
+		})
+	})
+
+	Context("create writeable list", func() {
+
+		It("from struct pointer", func() {
+			list, err := NewWriteableDocList(&(entities[0]), keys[0:1], false)
+			Check(err, IsNil)
+			Check(list, NotNil)
+			Check(list.list, HasLen, 1)
+		})
+
+		It("from slice", func() {
+			var entitySlice []*fixture.EntityWithNumID
+			list, err := NewWriteableDocList(&entitySlice, keys, true)
+
+			Check(err, IsNil)
+			Check(list, NotNil)
+			Check(list.list, HasLen, 4)
+		})
+
+		It("from map", func() {
+			var entityMap map[string]*fixture.EntityWithNumID
+			list, err := NewWriteableDocList(&entityMap, keys, true)
+
+			Check(err, IsNil)
+			Check(list, NotNil)
+			Check(list.list, HasLen, 4)
+		})
+
+		It("from map", func() {
+			var entityMap map[string]*fixture.EntityWithNumID
+			list, err := NewWriteableDocList(&entityMap, keys, true)
+
+			Check(err, IsNil)
+			Check(list, NotNil)
+			Check(list.list, HasLen, 4)
+		})
+
+		It("but not from non-pointer", func() {
+			list, err := NewWriteableDocList(*(entities[0]), keys[0:1], false)
+			Check(list, IsNil)
+			Check(err, NotNil).And(Contains, `invalid value kind "struct" (wanted non-nil pointer)`)
+		})
+
+		It("but not from nil pointer", func() {
+			var entity *fixture.EntityWithNumID
+			list, err := NewWriteableDocList(entity, keys[0:1], false)
+			Check(list, IsNil)
+			Check(err, NotNil).And(Contains, `invalid value kind "ptr" (wanted non-nil pointer)`)
 		})
 	})
 })
