@@ -25,7 +25,7 @@ var _ = Describe("Saver", func() {
 			// TODO
 			Check(completeKeys, IsFalse)
 			Check(kind.Name, Equals, "my-kind")
-			return newNumKeys(42), nil
+			return toInternalKeys(myKind.NewNumKeys(42)), nil
 		}
 
 		key, err := myKind.Save(ctx).Entity(entity)
@@ -40,7 +40,7 @@ var _ = Describe("Saver", func() {
 			// TODO
 			Check(completeKeys, IsFalse)
 			Check(kind.Name, Equals, "my-kind")
-			return newNumKeys(1, 2), nil
+			return toInternalKeys(myKind.NewNumKeys(1, 2)), nil
 		}
 
 		keys, err := myKind.Save(ctx).Entities(entities)

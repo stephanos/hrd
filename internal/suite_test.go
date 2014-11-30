@@ -13,7 +13,6 @@ import (
 	"github.com/101loops/hrd/internal/types"
 
 	"appengine/aetest"
-	ds "appengine/datastore"
 	"appengine/memcache"
 )
 
@@ -84,9 +83,9 @@ func clearCache() {
 	memcache.Flush(ctx)
 }
 
-func existsInDB(dsKey *ds.Key) bool {
+func existsInDB(keys ...*types.Key) bool {
 	var entity *MyModel
-	keys, err := Get(types.NewKind(ctx, dsKey.Kind()), []*types.Key{types.NewKey(dsKey)}, &entity, false, false)
+	keys, err := Get(types.NewKind(ctx, keys[0].Kind), keys, &entity, false, false)
 	if err != nil {
 		panic(err)
 	}

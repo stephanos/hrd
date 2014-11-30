@@ -18,8 +18,15 @@ type DSKeyConverter interface {
 
 // Key represents the identifier for an entity.
 type Key struct {
-	*ds.Key
 	*KeyState
+
+	Kind      string
+	Namespace string
+
+	StringID string
+	IntID    int64
+
+	Parent *Key
 }
 
 // KeyState represents meta data of the datastore operation
@@ -33,31 +40,56 @@ type KeyState struct {
 	Error error
 }
 
-// NewKey creates a Key from a datastore.Key.
-func NewKey(k *ds.Key) *Key {
-	return &Key{k, &KeyState{}}
+func NewKey(kind, stringID string, intID int64, parent *Key) *Key {
+	return &Key{
+		Kind: kind, StringID: stringID, IntID: intID, Parent: parent, KeyState: &KeyState{},
+	}
 }
 
-// NewKeys creates a sequence of Key from a sequence of datastore.Key.
-func NewKeys(keys ...*ds.Key) []*Key {
+// ImportKey creates a Key from a datastore.Key.
+func ImportKey(dsKey *ds.Key) *Key {
+	if dsKey == nil {
+		return nil
+	}
+	key := NewKey(dsKey.Kind(), dsKey.StringID(), dsKey.IntID(), ImportKey(dsKey.Parent()))
+	key.Namespace = dsKey.Namespace()
+	return key
+}
+
+// ImportKeys creates a sequence of Key from a sequence of datastore.Key.
+func ImportKeys(keys ...*ds.Key) []*Key {
 	ret := make([]*Key, len(keys))
 	for i, k := range keys {
-		ret[i] = NewKey(k)
+		ret[i] = ImportKey(k)
 	}
 	return ret
 }
 
-func (key *Key) String() string {
-	return keyToString(key.Key)
+// Incomplete returns whether the key does not refer to a stored entity.
+// In particular, whether the key has a zero StringID and a zero IntID.
+func (k *Key) Incomplete() bool {
+	return k.StringID == "" && k.IntID == 0
+}
+
+func (k *Key) ToDSKey(ctx ae.Context) *ds.Key {
+	var parentKey *ds.Key
+	if k.Parent != nil {
+		parentKey = k.Parent.ToDSKey(ctx)
+	}
+	return ds.NewKey(ctx, k.Kind, k.StringID, k.IntID, parentKey)
+}
+
+func (k *Key) String() string {
+	return keyToString(k)
 }
 
 // keyToString returns a string representation of the passed-in datastore.Key.
-func keyToString(key *ds.Key) string {
+func keyToString(key *Key) string {
 	if key == nil {
 		return ""
 	}
-	ret := fmt.Sprintf("Key{'%v', %v}", key.Kind(), keyStringID(key))
-	parent := keyToString(key.Parent())
+	ret := fmt.Sprintf("Key{'%v', %v}", key.Kind, keyStringID(key))
+	parent := keyToString(key.Parent)
 	if parent != "" {
 		ret += fmt.Sprintf("[Parent%v]", parent)
 	}
@@ -65,33 +97,31 @@ func keyToString(key *ds.Key) string {
 }
 
 // keyStringID returns the ID of the passed-in datastore.Key as a string.
-func keyStringID(key *ds.Key) (id string) {
-	id = key.StringID()
-	if id == "" && key.IntID() > 0 {
-		id = fmt.Sprintf("%v", key.IntID())
+func keyStringID(key *Key) (id string) {
+	id = key.StringID
+	if id == "" && key.IntID > 0 {
+		id = fmt.Sprintf("%v", key.IntID)
 	}
 	return
 }
 
 // GetEntityKey extracts a new Key from the given entity.
 func GetEntityKey(kind *Kind, src interface{}) (*Key, error) {
-	ctx := kind.Context
-
-	var parentKey *ds.Key
+	var parentKey *Key
 	if parentIdent, ok := src.(entity.ParentNumIdentifier); ok {
 		kind, id := parentIdent.Parent()
-		parentKey = ds.NewKey(ctx, kind, "", id, nil)
+		parentKey = NewKey(kind, "", id, nil)
 	}
 	if parentIdent, ok := src.(entity.ParentTextIdentifier); ok {
 		kind, id := parentIdent.Parent()
-		parentKey = ds.NewKey(ctx, kind, id, 0, nil)
+		parentKey = NewKey(kind, id, 0, nil)
 	}
 
 	if ident, ok := src.(entity.NumIdentifier); ok {
-		return NewKey(ds.NewKey(ctx, kind.Name, "", ident.ID(), parentKey)), nil
+		return NewKey(kind.Name, "", ident.ID(), parentKey), nil
 	}
 	if ident, ok := src.(entity.TextIdentifier); ok {
-		return NewKey(ds.NewKey(ctx, kind.Name, ident.ID(), 0, parentKey)), nil
+		return NewKey(kind.Name, ident.ID(), 0, parentKey), nil
 	}
 
 	return nil, fmt.Errorf("value type %q does not provide ID()", reflect.TypeOf(src))

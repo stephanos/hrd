@@ -167,9 +167,9 @@ func (l *DocList) Add(key *types.Key, doc *Doc) {
 		var v reflect.Value
 		switch l.keyType {
 		case typeOfInt64:
-			v = reflect.ValueOf(key.IntID())
+			v = reflect.ValueOf(key.IntID)
 		case typeOfStr:
-			v = reflect.ValueOf(key.StringID())
+			v = reflect.ValueOf(key.StringID)
 		default:
 			v = reflect.ValueOf(key)
 		}
@@ -191,7 +191,7 @@ func (l *DocList) ApplyResult(dsKeys []*ds.Key, dsErr error) ([]*types.Key, erro
 	hasErr := false
 	dsDocs := l.list
 	for i := range dsKeys {
-		keys[i] = types.NewKey(dsKeys[i])
+		keys[i] = types.ImportKey(dsKeys[i])
 
 		if mErr == nil || mErr[i] == nil {
 			if dsDocs != nil {

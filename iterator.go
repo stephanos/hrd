@@ -34,5 +34,5 @@ func (it *Iterator) get(dsts interface{}, multi bool) ([]*Key, error) {
 	}
 
 	keys, err := dsIterate(it.dsIt, dsts, multi)
-	return newKeys(keys), err
+	return importKeys(keys), err
 }

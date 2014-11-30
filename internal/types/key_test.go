@@ -18,34 +18,33 @@ var _ = Describe("Key", func() {
 	})
 
 	It("should create a new key", func() {
-		key := NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil))
+		key := NewKey("my-kind", "", 42, nil)
 
 		Check(key, NotNil)
-		Check(key.IntID(), EqualsNum, 42)
+		Check(key.IntID, EqualsNum, 42)
 	})
 
 	It("should create multiple new keys", func() {
 		dsKeys := []*ds.Key{
 			ds.NewKey(ctx, kind.Name, "", 1, nil), ds.NewKey(ctx, kind.Name, "", 2, nil),
 		}
-		keys := NewKeys(dsKeys...)
+		keys := ImportKeys(dsKeys...)
 
 		Check(keys, HasLen, 2)
-		Check(keys[0].IntID(), EqualsNum, 1)
-		Check(keys[0].Kind(), Equals, kind.Name)
-		Check(keys[1].IntID(), EqualsNum, 2)
-		Check(keys[1].Kind(), Equals, kind.Name)
+		Check(keys[0].IntID, EqualsNum, 1)
+		Check(keys[0].Kind, Equals, kind.Name)
+		Check(keys[1].IntID, EqualsNum, 2)
+		Check(keys[1].Kind, Equals, kind.Name)
 	})
 
 	It("should return string representation of Key", func() {
-		str := NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)).String()
+		str := NewKey("my-kind", "abc", 0, nil).String()
 		Check(str, Equals, "Key{'my-kind', abc}")
 
-		str = NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil)).String()
+		str = NewKey("my-kind", "", 42, nil).String()
 		Check(str, Equals, "Key{'my-kind', 42}")
 
-		str = NewKey(ds.NewKey(ctx, "my-child", "", 42,
-			ds.NewKey(ctx, "my-parent", "parent", 0, nil))).String()
+		str = NewKey("my-child", "", 42, NewKey("my-parent", "parent", 0, nil)).String()
 		Check(str, Equals, "Key{'my-child', 42}[ParentKey{'my-parent', parent}]")
 	})
 
@@ -57,7 +56,7 @@ var _ = Describe("Key", func() {
 
 			key, err := GetEntityKey(kind, &entity)
 			Check(err, IsNil)
-			Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil)))
+			Check(key, Equals, NewKey("my-kind", "", 42, nil))
 		})
 
 		It("should return a new Key from text id", func() {
@@ -66,7 +65,7 @@ var _ = Describe("Key", func() {
 
 			key, err := GetEntityKey(kind, &entity)
 			Check(err, IsNil)
-			Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)))
+			Check(key, Equals, NewKey("my-kind", "abc", 0, nil))
 		})
 
 		It("should return a new Key from numeric parent id", func() {
@@ -76,8 +75,7 @@ var _ = Describe("Key", func() {
 
 			key, err := GetEntityKey(kind, &entity)
 			Check(err, IsNil)
-			Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "", 42,
-				ds.NewKey(ctx, "my-parent", "", 66, nil))))
+			Check(key, Equals, NewKey("my-kind", "", 42, NewKey("my-parent", "", 66, nil)))
 		})
 
 		It("should return a new Key from text parent id", func() {
@@ -87,8 +85,7 @@ var _ = Describe("Key", func() {
 
 			key, err := GetEntityKey(kind, &entity)
 			Check(err, IsNil)
-			Check(key, Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0,
-				ds.NewKey(ctx, "my-parent", "xyz", 0, nil))))
+			Check(key, Equals, NewKey("my-kind", "abc", 0, NewKey("my-parent", "xyz", 0, nil)))
 		})
 
 		It("should not create a Key from an invalid entity", func() {
@@ -121,8 +118,8 @@ var _ = Describe("Key", func() {
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 2)
-			Check(keys[0], Equals, NewKey(ds.NewKey(ctx, "my-kind", "", 1, nil)))
-			Check(keys[1], Equals, NewKey(ds.NewKey(ctx, "my-kind", "", 2, nil)))
+			Check(keys[0], Equals, NewKey("my-kind", "", 1, nil))
+			Check(keys[1], Equals, NewKey("my-kind", "", 2, nil))
 		})
 
 		It("should return a new Key from a map", func() {
@@ -136,8 +133,8 @@ var _ = Describe("Key", func() {
 
 			Check(err, IsNil)
 			Check(keys, HasLen, 2)
-			Check(keys[0], Equals, NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)))
-			Check(keys[1], Equals, NewKey(ds.NewKey(ctx, "my-kind", "xyz", 0, nil)))
+			Check(keys[0], Equals, NewKey("my-kind", "abc", 0, nil))
+			Check(keys[1], Equals, NewKey("my-kind", "xyz", 0, nil))
 		})
 
 		It("should not create a Key from a slice of invalid entities", func() {

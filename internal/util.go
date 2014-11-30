@@ -5,6 +5,7 @@ import (
 
 	"github.com/101loops/hrd/internal/types"
 
+	ae "appengine"
 	ds "appengine/datastore"
 )
 
@@ -17,11 +18,10 @@ func LogDatastoreAction(verb string, prop string, keys []*types.Key, kind string
 	return fmt.Sprintf("%v %v items %v %q", verb, len(keys), prop, kind)
 }
 
-// toDSKeys converts a sequence of Key to a sequence of datastore.Key.
-func toDSKeys(keys []*types.Key) []*ds.Key {
+func toDSKeys(ctx ae.Context, keys []*types.Key) []*ds.Key {
 	ret := make([]*ds.Key, len(keys))
-	for i, k := range keys {
-		ret[i] = k.Key
+	for i, key := range keys {
+		ret[i] = key.ToDSKey(ctx)
 	}
 	return ret
 }

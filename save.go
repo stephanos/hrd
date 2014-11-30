@@ -39,5 +39,5 @@ func (s *Saver) Entities(srcs interface{}) ([]*Key, error) {
 
 func (s *Saver) put(src interface{}) ([]*Key, error) {
 	keys, err := dsPut(s.Kind(), src, s.opts.completeKeys)
-	return newKeys(keys), err
+	return importKeys(keys), err
 }

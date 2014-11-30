@@ -5,8 +5,6 @@ import (
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity/fixture"
 	"github.com/101loops/hrd/internal/types"
-
-	ds "appengine/datastore"
 )
 
 var _ = Describe("Doc", func() {
@@ -80,7 +78,7 @@ var _ = Describe("Doc", func() {
 			CodecSet.AddMust(entity)
 
 			doc, _ := newDocFromInst(&entity)
-			doc.setKey(types.NewKey(ds.NewKey(ctx, "my-kind", "", 42, nil)))
+			doc.setKey(types.NewKey("my-kind", "", 42, nil))
 
 			Check(entity.ID(), EqualsNum, 42)
 		})
@@ -90,7 +88,7 @@ var _ = Describe("Doc", func() {
 			CodecSet.AddMust(entity)
 
 			doc, _ := newDocFromInst(&entity)
-			doc.setKey(types.NewKey(ds.NewKey(ctx, "my-kind", "abc", 0, nil)))
+			doc.setKey(types.NewKey("my-kind", "abc", 0, nil))
 
 			Check(entity.ID(), Equals, "abc")
 		})
@@ -100,8 +98,7 @@ var _ = Describe("Doc", func() {
 			CodecSet.AddMust(entity)
 
 			doc, _ := newDocFromInst(&entity)
-			doc.setKey(types.NewKey(ds.NewKey(ctx, "my-kind", "", 1,
-				ds.NewKey(ctx, "my-kind", "", 2, nil))))
+			doc.setKey(types.NewKey("my-kind", "", 1, types.NewKey("my-kind", "", 2, nil)))
 
 			Check(entity.ID(), EqualsNum, 1)
 			parentKind, parentID := entity.Parent()
@@ -114,8 +111,7 @@ var _ = Describe("Doc", func() {
 			CodecSet.AddMust(entity)
 
 			doc, _ := newDocFromInst(&entity)
-			doc.setKey(types.NewKey(ds.NewKey(ctx, "my-kind", "abc", 0,
-				ds.NewKey(ctx, "my-kind", "xyz", 0, nil))))
+			doc.setKey(types.NewKey("my-kind", "abc", 0, types.NewKey("my-kind", "xyz", 0, nil)))
 
 			Check(entity.ID(), Equals, "abc")
 			parentKind, parentID := entity.Parent()

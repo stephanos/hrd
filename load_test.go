@@ -26,7 +26,7 @@ var _ = Describe("Loader", func() {
 			Check(dst, Equals, entity)
 			Check(useGlobalCache, IsTrue)
 			Check(kind.Name, Equals, "my-kind")
-			Check(keys, Equals, newNumKeys(42))
+			Check(keys, Equals, toInternalKeys(myKind.NewNumKeys(42)))
 			return keys, nil
 		}
 
@@ -42,7 +42,7 @@ var _ = Describe("Loader", func() {
 			Check(multi, IsTrue)
 			Check(dsts, Equals, entities)
 			Check(kind.Name, Equals, "my-kind")
-			Check(keys, Equals, newNumKeys(1, 2))
+			Check(keys, Equals, toInternalKeys(myKind.NewNumKeys(1, 2)))
 			return keys, nil
 		}
 

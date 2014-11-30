@@ -36,39 +36,40 @@ var _ = Describe("Key", func() {
 		Check(k2.Parent(), Equals, k1)
 	})
 
-	It("should create a new key", func() {
-		dsKey1 := ds.NewKey(ctx, "my-kind", "abc", 0, nil)
-		key1 := newKey(types.NewKey(dsKey1))
-		Check(key1, Equals,
-			&Key{state: &types.KeyState{}, kind: "my-kind", stringID: "abc", parent: nil})
+	It("should import key", func() {
+		key0 := importKey(nil)
+		Check(key0, IsNil)
 
-		dsKey2 := ds.NewKey(ctx, "my-kind", "", 42, dsKey1)
-		key2 := newKey(types.NewKey(dsKey2))
-		Check(key2, Equals,
-			&Key{state: &types.KeyState{}, kind: "my-kind", intID: 42, parent: key1})
+		intKey1 := types.NewKey("my-kind", "abc", 0, nil)
+		key1 := importKey(intKey1)
+		Check(key1, Equals, newTextKey(myKind, "abc", nil))
+
+		intKey2 := types.NewKey("my-kind", "", 42, intKey1)
+		key2 := importKey(intKey2)
+		Check(key2, Equals, newNumKey(myKind, 42, key1))
 	})
 
 	It("should return whether it exists", func() {
 		k := newTextKey(myKind, "abc", nil)
 		Check(k.Exists(), IsFalse)
 
-		k.state = nil
-		Check(k.Exists(), IsFalse)
-
 		now := time.Now()
-		k.state = &types.KeyState{Synced: &now}
+		k.inner.Synced = &now
 		Check(k.Exists(), IsTrue)
+
+		k.inner.Synced = nil
+		Check(k.Exists(), IsFalse)
 	})
 
 	It("should return the last operation error", func() {
 		k := newTextKey(myKind, "abc", nil)
 		Check(k.Error(), IsNil)
 
-		k.state = nil
-		Check(k.Error(), IsNil)
-
-		k.state = &types.KeyState{Error: fmt.Errorf("some error")}
+		k.inner.Error = fmt.Errorf("some error")
 		Check(k.Error(), NotNil)
+
+		k.inner.Error = nil
+		Check(k.Error(), IsNil)
 	})
 
 	It("should convert to datastore.Key", func() {

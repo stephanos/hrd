@@ -21,7 +21,7 @@ var _ = Describe("Transact", func() {
 			Check(err, IsNil)
 			Check(keys[0].Synced, NotNil)
 
-			err = DeleteKeys(kind, keys)
+			err = DeleteKeys(kind, keys...)
 			Check(err, IsNil)
 
 			keys, err = Get(kind, key, &entity, false, false)

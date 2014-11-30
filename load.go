@@ -72,8 +72,8 @@ func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 }
 
 func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
-	keys, err := dsGet(l.Kind(), toInternalKeys(l.ctx, l.keys), dst, l.opts.useGlobalCache, multi)
-	return newKeys(keys), err
+	keys, err := dsGet(l.Kind(), toInternalKeys(l.keys), dst, l.opts.useGlobalCache, multi)
+	return importKeys(keys), err
 }
 
 // MultiLoader is a special Loader that allows to fetch multiple entities

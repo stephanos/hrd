@@ -31,13 +31,13 @@ func Delete(kind *types.Kind, src interface{}, multi bool) error {
 		return err
 	}
 
-	return DeleteKeys(kind, keys)
+	return DeleteKeys(kind, keys...)
 }
 
 // DeleteKeys deletes the entities for the given keys.
-func DeleteKeys(kind *types.Kind, keys []*types.Key) error {
+func DeleteKeys(kind *types.Kind, keys ...*types.Key) error {
 	ctx := kind.Context
-	dsKeys := toDSKeys(keys)
+	dsKeys := toDSKeys(ctx, keys)
 
 	ctx.Infof(LogDatastoreAction("deleting", "from", keys, kind.Name))
 

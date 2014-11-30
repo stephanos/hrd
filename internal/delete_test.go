@@ -3,8 +3,6 @@ package internal
 import (
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/internal/types"
-
-	ds "appengine/datastore"
 )
 
 var _ = Describe("Delete", func() {
@@ -32,24 +30,24 @@ var _ = Describe("Delete", func() {
 	})
 
 	It("should delete entities by key", func() {
-		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
+		key := types.NewKey(kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
-		err := DeleteKeys(kind, types.NewKeys(key))
+		err := DeleteKeys(kind, key)
 
 		Check(err, IsNil)
 		Check(existsInDB(key), IsFalse)
 	})
 
 	It("should delete multiple entities by key", func() {
-		keys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name, "", 1, nil),
-			ds.NewKey(ctx, kind.Name, "", 2, nil),
+		keys := []*types.Key{
+			types.NewKey(kind.Name, "", 1, nil),
+			types.NewKey(kind.Name, "", 2, nil),
 		}
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
 
-		err := DeleteKeys(kind, types.NewKeys(keys...))
+		err := DeleteKeys(kind, keys...)
 
 		Check(err, IsNil)
 		Check(existsInDB(keys[0]), IsFalse)
@@ -57,7 +55,7 @@ var _ = Describe("Delete", func() {
 	})
 
 	It("should delete entity", func() {
-		key := ds.NewKey(ctx, kind.Name, "", 1, nil)
+		key := types.NewKey(kind.Name, "", 1, nil)
 		Check(existsInDB(key), IsTrue)
 
 		err := Delete(kind, entities[0], false)
@@ -67,9 +65,9 @@ var _ = Describe("Delete", func() {
 	})
 
 	It("should delete slice of entities", func() {
-		keys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name, "", 1, nil),
-			ds.NewKey(ctx, kind.Name, "", 2, nil),
+		keys := []*types.Key{
+			types.NewKey(kind.Name, "", 1, nil),
+			types.NewKey(kind.Name, "", 2, nil),
 		}
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)
@@ -82,9 +80,9 @@ var _ = Describe("Delete", func() {
 	})
 
 	It("should delete map of entities", func() {
-		keys := []*ds.Key{
-			ds.NewKey(ctx, kind.Name, "", 1, nil),
-			ds.NewKey(ctx, kind.Name, "", 2, nil),
+		keys := []*types.Key{
+			types.NewKey(kind.Name, "", 1, nil),
+			types.NewKey(kind.Name, "", 2, nil),
 		}
 		Check(existsInDB(keys[0]), IsTrue)
 		Check(existsInDB(keys[1]), IsTrue)

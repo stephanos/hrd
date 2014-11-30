@@ -68,24 +68,24 @@ func (doc *Doc) get() interface{} {
 func (doc *Doc) setKey(key *types.Key) {
 	src := doc.get()
 
-	var parentKey = key.Parent()
+	var parentKey = key.Parent
 	if parentKey != nil {
-		id := parentKey.IntID()
+		id := parentKey.IntID
 		if parent, ok := src.(entity.ParentNumIdentifier); id != 0 && ok {
-			parent.SetParent(parentKey.Kind(), id)
+			parent.SetParent(parentKey.Kind, id)
 		} else {
-			sid := parentKey.StringID()
+			sid := parentKey.StringID
 			if parent, ok := src.(entity.ParentTextIdentifier); sid != "" && ok {
-				parent.SetParent(parentKey.Kind(), sid)
+				parent.SetParent(parentKey.Kind, sid)
 			}
 		}
 	}
 
-	id := key.IntID()
+	id := key.IntID
 	if ident, ok := src.(entity.NumIdentifier); id != 0 && ok {
 		ident.SetID(id)
 	} else {
-		sid := key.StringID()
+		sid := key.StringID
 		if ident, ok := src.(entity.TextIdentifier); sid != "" && ok {
 			ident.SetID(sid)
 		}

@@ -26,7 +26,7 @@ var _ = Describe("Put", func() {
 		Check(err, IsNil)
 		Check(keys, HasLen, 1)
 
-		genID := keys[0].IntID()
+		genID := keys[0].IntID
 		Check(genID, IsGreaterThan, 0)
 		Check(entity.ID(), Equals, genID)
 		Check(entity.UpdatedAt(), Not(IsZero))
@@ -43,10 +43,10 @@ var _ = Describe("Put", func() {
 		Check(err, IsNil)
 		Check(keys, HasLen, 2)
 
-		Check(keys[0].IntID(), IsGreaterThan, 0)
-		Check(entities[0].ID(), EqualsNum, keys[0].IntID())
-		Check(keys[1].IntID(), IsGreaterThan, 0)
-		Check(entities[1].ID(), EqualsNum, keys[1].IntID())
+		Check(keys[0].IntID, IsGreaterThan, 0)
+		Check(entities[0].ID(), EqualsNum, keys[0].IntID)
+		Check(keys[1].IntID, IsGreaterThan, 0)
+		Check(entities[1].ID(), EqualsNum, keys[1].IntID)
 	})
 
 	It("should save an entity with id", func() {
@@ -58,7 +58,7 @@ var _ = Describe("Put", func() {
 		Check(keys, HasLen, 1)
 
 		Check(entity.ID(), EqualsNum, 42)
-		Check(keys[0].IntID(), EqualsNum, 42)
+		Check(keys[0].IntID, EqualsNum, 42)
 	})
 
 	It("should save multiple entities with id", func() {
@@ -70,8 +70,8 @@ var _ = Describe("Put", func() {
 		Check(err, IsNil)
 		Check(keys, HasLen, 2)
 
-		Check(keys[0].IntID(), EqualsNum, 1)
-		Check(keys[1].IntID(), EqualsNum, 2)
+		Check(keys[0].IntID, EqualsNum, 1)
+		Check(keys[1].IntID, EqualsNum, 2)
 	})
 
 	// ==== ERRORS

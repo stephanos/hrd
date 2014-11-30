@@ -37,7 +37,7 @@ func Get(kind *types.Kind, keys []*types.Key, dst interface{}, useGlobalCache bo
 	docsPipe := docList.Pipe(ctx)
 
 	var dsErr error
-	dsKeys := toDSKeys(keys)
+	dsKeys := toDSKeys(ctx, keys)
 	if useGlobalCache {
 		dsErr = ndsGet(ctx, dsKeys, docsPipe.Properties())
 	}
@@ -58,7 +58,7 @@ func validateGetKeys(kind *types.Kind, keys []*types.Key) error {
 	}
 
 	for _, k := range keys {
-		keyKind := k.Kind()
+		keyKind := k.Kind
 		if keyKind != kind.Name {
 			err := fmt.Errorf("invalid key kind '%v' for kind '%v'", keyKind, kind.Name)
 			return logErr(kind.Context, err)

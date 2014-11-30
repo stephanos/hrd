@@ -4,8 +4,6 @@ import (
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity/fixture"
 	"github.com/101loops/hrd/internal/types"
-
-	ds "appengine/datastore"
 )
 
 var _ = Describe("DocList", func() {
@@ -29,7 +27,7 @@ var _ = Describe("DocList", func() {
 			entity := &fixture.EntityWithNumID{}
 			entity.SetID(i + 1)
 			entities[i] = entity
-			keys[i] = types.NewKey(ds.NewKey(ctx, kind.Name, "", entity.ID(), nil))
+			keys[i] = types.NewKey(kind.Name, "", entity.ID(), nil)
 		}
 	})
 

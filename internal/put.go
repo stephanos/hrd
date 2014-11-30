@@ -34,7 +34,7 @@ func Put(kind *types.Kind, src interface{}, completeKeys bool) ([]*types.Key, er
 	ctx.Infof(LogDatastoreAction("putting", "in", keys, kind.Name))
 
 	docsPipe := docList.Pipe(kind.Context)
-	dsKeys, dsErr := ndsPut(ctx, toDSKeys(keys), docsPipe.Properties())
+	dsKeys, dsErr := ndsPut(ctx, toDSKeys(ctx, keys), docsPipe.Properties())
 	if dsErr != nil {
 		return nil, dsErr
 	}

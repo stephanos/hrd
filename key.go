@@ -9,74 +9,69 @@ import (
 
 // Key represents the datastore key of an entity.
 type Key struct {
-	state *types.KeyState
-
-	kind      string
-	namespace string
-
-	stringID string
-	intID    int64
-
-	parent *Key
+	inner *types.Key
 }
 
-func newKey(key *types.Key) *Key {
-	var parent *Key
-	if parentKey := key.Parent(); parentKey != nil {
-		parent = newKey(types.NewKey(parentKey))
+func importKey(key *types.Key) *Key {
+	if key == nil {
+		return nil
 	}
-
-	return &Key{key.KeyState, key.Kind(), key.Namespace(), key.StringID(), key.IntID(), parent}
+	return &Key{key}
 }
 
-func newKeys(keys []*types.Key) []*Key {
+func importKeys(keys []*types.Key) []*Key {
 	ret := make([]*Key, len(keys))
-	for i, k := range keys {
-		ret[i] = newKey(k)
+	for i, key := range keys {
+		ret[i] = importKey(key)
 	}
 	return ret
 }
 
+func newKey(kind string, stringID string, intID int64, parent *Key) *Key {
+	var parentKey *types.Key
+	if parent != nil {
+		parentKey = parent.inner
+	}
+	return importKey(types.NewKey(kind, stringID, intID, parentKey))
+}
+
 func newNumKey(kind *Kind, id int64, parent *Key) *Key {
-	return &Key{state: &types.KeyState{}, kind: kind.name, intID: id, parent: parent}
+	return newKey(kind.name, "", id, parent)
 }
 
 func newTextKey(kind *Kind, id string, parent *Key) *Key {
-	return &Key{state: &types.KeyState{}, kind: kind.name, stringID: id, parent: parent}
+	return newKey(kind.name, id, 0, parent)
 }
 
 // Kind returns the key's kind (also known as entity type).
 func (k *Key) Kind() string {
-	return k.kind
+	return k.inner.Kind
 }
 
 // StringID returns the key's string ID
-// (also known as an entity name or key name), which may be "".
+// (also known as an entity name or key name), which may be empty.
 func (k *Key) StringID() string {
-	return k.stringID
+	return k.inner.StringID
 }
 
-// IntID returns the key's integer ID, which may be 0.
+// IntID returns the key's integer ID, which may be zero.
 func (k *Key) IntID() int64 {
-	return k.intID
+	return k.inner.IntID
 }
 
 // Parent returns the key's parent key, which may be nil.
 func (k *Key) Parent() *Key {
-	return k.parent
+	return importKey(k.inner.Parent)
 }
 
 // Namespace returns the key's namespace.
 func (k *Key) Namespace() string {
-	return k.namespace
+	return k.inner.Namespace
 }
 
 // Exists is whether an entity with this key exists in the datastore.
 func (k *Key) Exists() bool {
-	if k.state == nil {
-		return false
-	}
-	if t := k.state.Synced; t != nil {
+	if t := k.inner.Synced; t != nil {
 		return !t.IsZero()
 	}
 	return false
@@ -84,31 +79,24 @@ func (k *Key) Exists() bool {
 
 // Error returns an error associated with the key.
 func (k *Key) Error() error {
-	if k.state == nil {
-		return nil
-	}
-	return k.state.Error
+	return k.inner.Error
 }
 
 // Incomplete returns whether the key does not refer to a stored entity.
 // In particular, whether the key has a zero StringID and a zero IntID.
 func (k *Key) Incomplete() bool {
-	return k.stringID == "" && k.intID == 0
+	return k.inner.Incomplete()
 }
 
 // ToDSKey returns the respective datastore.Key.
 func (k *Key) ToDSKey(ctx ae.Context) *ds.Key {
-	var parentKey *ds.Key
-	if k.parent != nil {
-		parentKey = k.parent.ToDSKey(ctx)
-	}
-	return ds.NewKey(ctx, k.kind, k.stringID, k.intID, parentKey)
+	return k.inner.ToDSKey(ctx)
 }
 
-func toInternalKeys(ctx ae.Context, keys []*Key) []*types.Key {
+func toInternalKeys(keys []*Key) []*types.Key {
 	ret := make([]*types.Key, len(keys))
 	for i, k := range keys {
-		ret[i] = types.NewKey(k.ToDSKey(ctx))
+		ret[i] = k.inner
 	}
 	return ret
 }

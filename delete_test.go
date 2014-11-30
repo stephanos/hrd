@@ -12,7 +12,7 @@ var _ = Describe("Deleter", func() {
 		dsDelete = func(_ *types.Kind, _ interface{}, _ bool) error {
 			panic("unexpected call")
 		}
-		dsDeleteKeys = func(_ *types.Kind, _ []*types.Key) error {
+		dsDeleteKeys = func(_ *types.Kind, _ ...*types.Key) error {
 			panic("unexpected call")
 		}
 	})
@@ -23,8 +23,8 @@ var _ = Describe("Deleter", func() {
 	})
 
 	It("should delete an entity by key", func() {
-		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, newNumKeys(42))
+		dsDeleteKeys = func(kind *types.Kind, keys ...*types.Key) error {
+			Check(keys, Equals, toInternalKeys(myKind.NewNumKeys(42)))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}
@@ -35,8 +35,8 @@ var _ = Describe("Deleter", func() {
 	It("should delete multiple entities by key", func() {
 		hrdKeys := []*Key{myKind.NewNumKey(1), myKind.NewNumKey(2)}
 
-		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, toInternalKeys(ctx, hrdKeys))
+		dsDeleteKeys = func(kind *types.Kind, keys ...*types.Key) error {
+			Check(keys, Equals, toInternalKeys(hrdKeys))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}
@@ -45,8 +45,8 @@ var _ = Describe("Deleter", func() {
 	})
 
 	It("should delete an entity by numeric id", func() {
-		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, newNumKeys(42))
+		dsDeleteKeys = func(kind *types.Kind, keys ...*types.Key) error {
+			Check(keys, Equals, toInternalKeys(myKind.NewNumKeys(42)))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}
@@ -55,8 +55,8 @@ var _ = Describe("Deleter", func() {
 	})
 
 	It("should delete multiple entities by numeric id", func() {
-		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, newNumKeys(1, 2))
+		dsDeleteKeys = func(kind *types.Kind, keys ...*types.Key) error {
+			Check(keys, Equals, toInternalKeys(myKind.NewNumKeys(1, 2)))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}
@@ -65,8 +65,8 @@ var _ = Describe("Deleter", func() {
 	})
 
 	It("should delete an entity by text id", func() {
-		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, newTextKeys("a"))
+		dsDeleteKeys = func(kind *types.Kind, keys ...*types.Key) error {
+			Check(keys, Equals, toInternalKeys(myKind.NewTextKeys("a")))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}
@@ -75,8 +75,8 @@ var _ = Describe("Deleter", func() {
 	})
 
 	It("should delete multiple entities by text id", func() {
-		dsDeleteKeys = func(kind *types.Kind, keys []*types.Key) error {
-			Check(keys, Equals, newTextKeys("a", "z"))
+		dsDeleteKeys = func(kind *types.Kind, keys ...*types.Key) error {
+			Check(keys, Equals, toInternalKeys(myKind.NewTextKeys("a", "z")))
 			Check(kind.Name, Equals, "my-kind")
 			return nil
 		}
