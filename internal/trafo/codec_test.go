@@ -84,6 +84,17 @@ var _ = Describe("Codec", func() {
 		}
 		err := CodecSet.Add(InvalidModel{})
 		Check(err, ErrorContains, `duplicate field name "id"`)
+
+		// from sub-field:
+		type InnerModel struct {
+			ID string `datastore:"id,inline"`
+		}
+		type MyModel struct {
+			ID         string `datastore:"id"`
+			InnerModel `datastore:"inner"`
+		}
+		err = CodecSet.Add(MyModel{})
+		Check(err, ErrorContains, `duplicate field name "id"`)
 	})
 
 	It("should reject invalid field type", func() {
