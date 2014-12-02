@@ -76,6 +76,7 @@ var _ = Describe("Doc Save", func() {
 	})
 
 	Context("tags", func() {
+
 		It("should omit fields", func() {
 			type MyModel struct {
 				Bool    bool   `datastore:",omitempty"`
@@ -98,6 +99,22 @@ var _ = Describe("Doc Save", func() {
 			Check(props, NotNil).And(HasLen, 2)
 			Check(*props[0], Equals, ds.Property{"Field", "something", false, false})
 			Check(*props[1], Equals, ds.Property{"Empty", "", true, false})
+		})
+
+		It("should inline fields", func() {
+			type InnerModel struct {
+				In  string `datastore:"in,inline"`
+				Out string `datastore:"out"`
+			}
+			type MyModel struct {
+				InnerModel `datastore:"inner"`
+			}
+			props, err := toProps(&MyModel{InnerModel{"in", "out"}})
+
+			Check(err, IsNil)
+			Check(props, NotNil).And(HasLen, 2)
+			Check(*props[0], Equals, ds.Property{"in", "in", true, false})
+			Check(*props[1], Equals, ds.Property{"inner.out", "out", true, false})
 		})
 	})
 
