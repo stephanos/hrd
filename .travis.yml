@@ -12,7 +12,6 @@ install:
   - goapp get github.com/101loops/bdd
   - goapp get github.com/101loops/iszero
   - goapp get github.com/101loops/structor
-  - goapp get https://github.com/mtibben/gocase
   - goapp get code.google.com/p/go.tools/cmd/cover
 
 script:
