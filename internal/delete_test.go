@@ -8,10 +8,9 @@ import (
 var _ = Describe("Delete", func() {
 
 	var (
-		kind *types.Kind
+		kind     *types.Kind
+		entities []interface{}
 	)
-
-	var entities []interface{}
 
 	BeforeEach(func() {
 		kind = randomKind()

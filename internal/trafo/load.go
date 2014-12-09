@@ -22,10 +22,10 @@ func (doc *Doc) Load(c <-chan ds.Property) error {
 		return err
 	}
 
-	c, err = doc.adaptProperties(c)
-	if err != nil {
-		return err
-	}
+	//	c, err = doc.transformProperties(c)
+	//	if err != nil {
+	//		return err
+	//	}
 
 	if err = ds.LoadStruct(dst, c); err != nil {
 		return err
@@ -39,24 +39,23 @@ func (doc *Doc) Load(c <-chan ds.Property) error {
 	return err
 }
 
-func (doc *Doc) adaptProperties(c <-chan ds.Property) (chan ds.Property, error) {
-	var props []ds.Property
-	for prop := range c {
-		props = append(props, prop)
-	}
-	c2 := make(chan ds.Property, len(props))
-	for _, prop := range props {
-		prop2, err := doc.adaptProperty(prop)
-		if err != nil {
-			return nil, err
-		}
-		c2 <- prop2
-	}
-	close(c2)
-	return c2, nil
-}
-
-func (doc *Doc) adaptProperty(prop ds.Property) (ds.Property, error) {
-	// TODO
-	return prop, nil
-}
+//func (doc *Doc) transformProperties(c <-chan ds.Property) (chan ds.Property, error) {
+//	var props []ds.Property
+//	for prop := range c {
+//		props = append(props, prop)
+//	}
+//	c2 := make(chan ds.Property, len(props))
+//	for _, prop := range props {
+//		prop2, err := doc.transformProperty(prop)
+//		if err != nil {
+//			return nil, err
+//		}
+//		c2 <- prop2
+//	}
+//	close(c2)
+//	return c2, nil
+//}
+//
+//func (doc *Doc) transformProperty(prop ds.Property) (ds.Property, error) {
+//	return prop, nil
+//}

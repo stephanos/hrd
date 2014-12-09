@@ -5,11 +5,11 @@ import . "github.com/101loops/bdd"
 var _ = Describe("Store", func() {
 
 	It("should initialize and be configurable", func() {
-		Check(myStore.opts.useGlobalCache, IsTrue)
+		Check(myStore.opts.NoGlobalCache, IsFalse)
 		Check(myStore.CreatedAt(), Not(IsZero))
 
-		myStore.Opts(NoGlobalCache)
-		Check(myStore.opts.useGlobalCache, IsFalse)
+		myStore.NoGlobalCache()
+		Check(myStore.opts.NoGlobalCache, IsTrue)
 	})
 
 	It("should create a kind", func() {

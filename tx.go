@@ -1,12 +1,16 @@
 package hrd
 
-import ae "appengine"
+import (
+	"github.com/101loops/hrd/internal/types"
+
+	ae "appengine"
+)
 
 // Transactor can run multiple datastore operations inside a transaction.
 // By default it does not handle multiple entity groups.
 type Transactor struct {
 	ctx        ae.Context
-	opts       *opts
+	opts       *types.Opts
 	crossGroup bool
 }
 
@@ -17,7 +21,7 @@ type TX interface {
 }
 
 func newTransactor(s *Store, ctx ae.Context) *Transactor {
-	return &Transactor{ctx: ctx, opts: s.opts.clone()}
+	return &Transactor{ctx: ctx, opts: s.opts.Clone()}
 }
 
 // XG defines whether the transaction can cross multiple entity groups.

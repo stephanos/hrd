@@ -15,7 +15,7 @@ type CreateTimestamper interface {
 // CreatedTime implements the CreateTimestamper.
 // It adds and manages an indexed creation time field.
 type CreatedTime struct {
-	EntityCreatedAt time.Time `datastore:"created_at,index,inline"`
+	EntityCreatedAt time.Time `datastore:"created_at,index"`
 }
 
 // CreatedAt returns the entity's creation time.
@@ -43,7 +43,7 @@ type UpdateTimestamper interface {
 // UpdatedTime implements the UpdateTimestamper.
 // It adds and manages an indexed last updated time field.
 type UpdatedTime struct {
-	EntityUpdatedAt time.Time `datastore:"updated_at,index,inline"`
+	EntityUpdatedAt time.Time `datastore:"updated_at,index"`
 }
 
 // UpdatedAt returns the entity's last update time.

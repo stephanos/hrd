@@ -57,7 +57,7 @@ var _ = Describe("Loader", func() {
 			return nil, nil
 		}
 
-		myKind.Load(ctx).Opts(NoGlobalCache).ID(42).GetOne(nil)
+		myKind.Load(ctx).NoGlobalCache().ID(42).GetOne(nil)
 	})
 
 	Context("should create single-entity loader from", func() {

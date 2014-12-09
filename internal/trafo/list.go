@@ -138,8 +138,8 @@ func NewWriteableDocList(src interface{}, keys []*types.Key, multi bool) (*DocLi
 }
 
 // Pipe returns the a DocsPipe to load/save the entities.
-func (l *DocList) Pipe(ctx ae.Context) DocsPipe {
-	return DocsPipe{ctx, l.list}
+func (l *DocList) Pipe(ctx ae.Context) *DocsPipe {
+	return &DocsPipe{ctx, l.list}
 }
 
 // Keys returns the list's sequence of Key.

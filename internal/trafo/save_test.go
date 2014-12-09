@@ -20,6 +20,7 @@ var _ = Describe("Doc Save", func() {
 	}
 
 	Context("fields", func() {
+
 		It("should serialize primitives", func() {
 			type MyModel struct {
 				I   int
@@ -73,6 +74,25 @@ var _ = Describe("Doc Save", func() {
 			Check(*props[3], Equals, ds.Property{"BK", entity.BK, true, false})
 			Check(*props[4], Equals, ds.Property{"GP", entity.GP, true, false})
 		})
+
+		It("should serialize embedded fields", func() {
+			type Embedded1 struct {
+				Data string
+			}
+			type Embedded2 struct {
+				Data string
+			}
+			type MyModel struct {
+				Embedded1
+				Embedded2 `datastore:"embedded"`
+			}
+
+			props, err := toProps(&MyModel{})
+			Check(err, IsNil)
+			Check(props, NotNil).And(HasLen, 2)
+			Check(*props[0], Equals, ds.Property{"Data", "", true, false})
+			Check(*props[1], Equals, ds.Property{"embedded.Data", "", true, false})
+		})
 	})
 
 	Context("tags", func() {
@@ -99,22 +119,6 @@ var _ = Describe("Doc Save", func() {
 			Check(props, NotNil).And(HasLen, 2)
 			Check(*props[0], Equals, ds.Property{"Field", "something", false, false})
 			Check(*props[1], Equals, ds.Property{"Empty", "", true, false})
-		})
-
-		It("should inline fields", func() {
-			type InnerModel struct {
-				In  string `datastore:"in,inline"`
-				Out string `datastore:"out"`
-			}
-			type MyModel struct {
-				InnerModel `datastore:"inner"`
-			}
-			props, err := toProps(&MyModel{InnerModel{"in", "out"}})
-
-			Check(err, IsNil)
-			Check(props, NotNil).And(HasLen, 2)
-			Check(*props[0], Equals, ds.Property{"in", "in", true, false})
-			Check(*props[1], Equals, ds.Property{"inner.out", "out", true, false})
 		})
 	})
 

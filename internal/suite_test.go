@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"testing"
-	"time"
 
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity"
@@ -49,12 +48,9 @@ type MyModel struct {
 	entity.CreatedTime
 	entity.UpdatedTime
 
-	Ignore    string    `datastore:"-"`
-	Num       int64     `datastore:"num"`
-	Data      []byte    `datastore:",index"`
-	Text      string    `datastore:"html,index"`
-	Time      time.Time `datastore:"timing,index,omitempty"`
 	lifecycle []string
+	Num       int64  `datastore:"num,index"`
+	Text      string `datastore:"text,index"`
 }
 
 func (mdl *MyModel) BeforeLoad() error {

@@ -55,14 +55,17 @@ func (doc *Doc) toProperties(ctx ae.Context, prefix string, tags []string, multi
 	res = make([]*ds.Property, 0)
 
 	srcVal := doc.val()
-	for _, fCodec := range doc.codec.Fields() {
+	for _, fCodec := range doc.codec.Fields {
 		fVal := srcVal.Field(fCodec.Index)
 		if !fVal.IsValid() || !fVal.CanSet() {
 			continue
 		}
 
-		name := fCodec.Label
-		aggrTags := append(tags, fCodec.Tag.Modifiers...)
+		name := fCodec.Attrs["label"].(string)
+		if name == "-" {
+			continue
+		}
+		aggrTags := append(tags, fCodec.Tag.Modifiers()...)
 
 		// for slice fields (that aren't []byte), save each element
 		if fVal.Kind() == reflect.Slice && fVal.Type() != typeOfByteSlice {
@@ -90,7 +93,6 @@ func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool
 
 	// process tags
 	indexed := false
-	inlined := false
 	for _, tag := range tags {
 		tag = strings.ToLower(tag)
 		if tag == "omitempty" {
@@ -102,8 +104,6 @@ func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool
 			if strings.HasSuffix(tag, ":omitempty") && iszero.Value(v) {
 				indexed = false // ignore index if empty
 			}
-		} else if tag == "inline" {
-			inlined = true
 		} else if tag != "" {
 			err = fmt.Errorf("unknown tag %q", tag)
 			return
@@ -111,7 +111,7 @@ func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool
 	}
 
 	p := &ds.Property{Name: name, NoIndex: !indexed, Multiple: multi}
-	if prefix != "" && !inlined {
+	if prefix != "" {
 		p.Name = prefix + propertySeparator + p.Name
 	}
 	props = []*ds.Property{p}

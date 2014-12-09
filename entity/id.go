@@ -12,7 +12,7 @@ type TextIdentifier interface {
 
 // TextID represents an entity's string identifier.
 type TextID struct {
-	Identity string `datastore:"id,inline"`
+	Identity string `datastore:"id"`
 }
 
 // ID returns the string identifier.
@@ -37,7 +37,7 @@ type NumIdentifier interface {
 
 // NumID represents an entity's numeric identifier.
 type NumID struct {
-	Identity int64 `datastore:"id,inline"`
+	Identity int64 `datastore:"id"`
 }
 
 // ID returns the numeric identifier.

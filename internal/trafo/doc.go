@@ -7,10 +7,12 @@ import (
 	"github.com/101loops/hrd/entity"
 	"github.com/101loops/hrd/internal/types"
 	"github.com/101loops/structor"
+
+	ae "appengine"
+	ds "appengine/datastore"
 )
 
 // Doc is a reader and writer for a datastore entity.
-// It implements the datastore's PropertyLoadSaver.
 //
 // It is based on:
 // https://code.google.com/p/appengine-go/source/browse/appengine/datastore/prop.go
@@ -57,6 +59,11 @@ func newDocFromType(typ reflect.Type) (*Doc, error) {
 func (doc *Doc) Nil() {
 	dst := doc.val()
 	dst.Set(reflect.New(dst.Type()).Elem())
+}
+
+// Pipe returns a PropertyLoadSaver to load/save an entity.
+func (doc *Doc) Pipe(ctx ae.Context) ds.PropertyLoadSaver {
+	return &docPipe{ctx, doc}
 }
 
 // get returns the entity.

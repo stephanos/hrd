@@ -4,13 +4,18 @@ import (
 	"github.com/101loops/hrd/internal/trafo"
 	"github.com/101loops/hrd/internal/types"
 
+	ae "appengine"
 	ds "appengine/datastore"
 )
 
-// Iterate loads entities from an iterator.
-func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
+// Count returns the number of results for a query.
+func Count(ctx ae.Context, qry *types.Query) (int, error) {
+	return qry.ToDSQuery(ctx).Count(ctx)
+}
 
-	// in a keys-only query there is no dsts
+// Iterate loads entities from an iterator.
+func Iterate(it *types.Iterator, dsts interface{}, multi bool) (keys []*types.Key, err error) {
+
 	var docList *trafo.DocList
 	if dsts != nil {
 		docList, err = trafo.NewWriteableDocList(dsts, nil, multi)
@@ -23,7 +28,6 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 	var dsKeys []*ds.Key
 	for i := 0; ; i++ {
 
-		// prepare next doc
 		var doc *trafo.Doc
 		if docList != nil {
 			doc, err = docList.Get(i)
@@ -34,7 +38,7 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 		}
 
 		var dsKey *ds.Key
-		dsKey, err = dsIt.Next(doc)
+		dsKey, err = it.Next(doc.Pipe)
 		if err == ds.Done {
 			if !multi {
 				if doc != nil {
@@ -55,12 +59,15 @@ func Iterate(dsIt *ds.Iterator, dsts interface{}, multi bool) (keys []*types.Key
 		}
 	}
 
+	if docList == nil {
+		return types.ImportKeys(dsKeys...), nil
+	}
+
 	keys, err = docList.ApplyResult(dsKeys, err)
 	if dsDocs != nil {
 		for i := range keys {
 			docList.Add(keys[i], dsDocs[i])
 		}
 	}
-
 	return keys, err
 }

@@ -14,9 +14,10 @@ func newLoader(ctx ae.Context, kind *Kind) *Loader {
 	return &Loader{actionContext: newActionContext(ctx, kind)}
 }
 
-// Opts applies a sequence of Opt the Loader's options.
-func (l *Loader) Opts(opts ...Opt) *Loader {
-	l.opts = l.opts.Apply(opts...)
+// NoGlobalCache prevents reading/writing entities from/to memcache.
+func (l *Loader) NoGlobalCache() *Loader {
+	l.opts = l.opts.Clone()
+	l.opts.NoGlobalCache = true
 	return l
 }
 
@@ -72,7 +73,7 @@ func (l *SingleLoader) GetOne(dst interface{}) (*Key, error) {
 }
 
 func (l *Loader) get(dst interface{}, multi bool) ([]*Key, error) {
-	keys, err := dsGet(l.Kind(), toInternalKeys(l.keys), dst, l.opts.useGlobalCache, multi)
+	keys, err := dsGet(l.Kind(), toInternalKeys(l.keys), dst, !l.opts.NoGlobalCache, multi)
 	return importKeys(keys), err
 }
 

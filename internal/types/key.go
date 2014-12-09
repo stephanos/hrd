@@ -40,6 +40,7 @@ type KeyState struct {
 	Error error
 }
 
+// NewKey returns a new Key.
 func NewKey(kind, stringID string, intID int64, parent *Key) *Key {
 	return &Key{
 		Kind: kind, StringID: stringID, IntID: intID, Parent: parent, KeyState: &KeyState{},
@@ -71,6 +72,7 @@ func (k *Key) Incomplete() bool {
 	return k.StringID == "" && k.IntID == 0
 }
 
+// ToDSKey converts the key to a datastore Key.
 func (k *Key) ToDSKey(ctx ae.Context) *ds.Key {
 	var parentKey *ds.Key
 	if k.Parent != nil {

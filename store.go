@@ -14,6 +14,7 @@ import (
 var (
 	dsGet        = internal.Get
 	dsPut        = internal.Put
+	dsCount      = internal.Count
 	dsDelete     = internal.Delete
 	dsIterate    = internal.Iterate
 	dsTransact   = internal.Transact
@@ -23,7 +24,7 @@ var (
 // Store represents the App Engine datastore.
 // Usually there should only be one per application.
 type Store struct {
-	opts      *opts
+	opts      *types.Opts
 	createdAt time.Time
 }
 
@@ -31,14 +32,14 @@ type Store struct {
 func NewStore() *Store {
 	store := &Store{
 		createdAt: time.Now(),
-		opts:      defaultOpts(),
+		opts:      types.DefaultOpts(),
 	}
 	return store
 }
 
-// Opts applies a sequence of Opt the Store's options.
-func (s *Store) Opts(opts ...Opt) *Store {
-	s.opts = s.opts.Apply(opts...)
+// NoGlobalCache prevents reading/writing entities from/to memcache.
+func (s *Store) NoGlobalCache() *Store {
+	s.opts.NoGlobalCache = true
 	return s
 }
 
@@ -72,11 +73,11 @@ func (s *Store) CreatedAt() time.Time {
 type actionContext struct {
 	ctx  ae.Context
 	kind *Kind
-	opts *opts
+	opts *types.Opts
 }
 
 func newActionContext(ctx ae.Context, kind *Kind) *actionContext {
-	return &actionContext{ctx, kind, kind.opts.clone()}
+	return &actionContext{ctx, kind, kind.opts.Clone()}
 }
 
 func (sa *actionContext) Kind() *types.Kind {

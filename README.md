@@ -16,7 +16,9 @@ with very useful additional features.
 - **caching control:** turn caching on/off for queries and entities
 - **logging:** every datastore action is logged for debugging
 
-Internally it uses [nds](https://github.com/qedus/nds) and  [structor](https://github.com/101loops/structor).
+Internally it uses [nds](https://github.com/qedus/nds),
+ [structor](https://github.com/101loops/structor) and
+ [iszero](github.com/101loops/iszero).
 
 ## ToDos
 - validated projection query

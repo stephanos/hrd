@@ -13,9 +13,10 @@ func newSaver(ctx ae.Context, kind *Kind) *Saver {
 	return &Saver{newActionContext(ctx, kind)}
 }
 
-// Opts applies the passed sequence of Opt to the Saver's options.
-func (s *Saver) Opts(opts ...Opt) *Saver {
-	s.opts = s.opts.Apply(opts...)
+// CompleteKeys prevents saving an entity with an incomplete key.
+func (s *Saver) CompleteKeys() *Saver {
+	s.opts = s.opts.Clone()
+	s.opts.CompleteKeys = true
 	return s
 }
 
@@ -38,6 +39,6 @@ func (s *Saver) Entities(srcs interface{}) ([]*Key, error) {
 }
 
 func (s *Saver) put(src interface{}) ([]*Key, error) {
-	keys, err := dsPut(s.Kind(), src, s.opts.completeKeys)
+	keys, err := dsPut(s.Kind(), src, s.opts.CompleteKeys)
 	return importKeys(keys), err
 }

@@ -16,14 +16,7 @@ var _ = Describe("Codec", func() {
 		codec, err = getCodec(entity)
 		Check(err, IsNil)
 		Check(codec, NotNil)
-		Check(codec.Complete(), IsTrue)
-
-		fieldNames := codec.FieldNames()
-		Check(fieldNames, HasLen, 7)
-		Check(fieldNames, Equals, []string{"NumID", "CreatedTime", "UpdatedTime", "Num", "Data", "Text", "Time"})
-
-		fields := codec.Fields()
-		Check(fields, HasLen, 7)
+		Check(codec.Complete, IsTrue)
 	})
 
 	It("should return complex codec", func() {
@@ -87,11 +80,11 @@ var _ = Describe("Codec", func() {
 
 		// from sub-field:
 		type InnerModel struct {
-			ID string `datastore:"id,inline"`
+			ID string `datastore:"id"`
 		}
 		type MyModel struct {
-			ID         string `datastore:"id"`
-			InnerModel `datastore:"inner"`
+			ID string `datastore:"id"`
+			InnerModel
 		}
 		err = CodecSet.Add(MyModel{})
 		Check(err, ErrorContains, `duplicate field name "id"`)

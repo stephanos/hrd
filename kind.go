@@ -1,19 +1,23 @@
 package hrd
 
-import ae "appengine"
+import (
+	"github.com/101loops/hrd/internal/types"
+
+	ae "appengine"
+)
 
 // Kind represents a entity category in the datastore.
 type Kind struct {
 	store *Store
 	name  string
-	opts  *opts
+	opts  *types.Opts
 }
 
 func newKind(store *Store, name string) *Kind {
 	return &Kind{
 		store: store,
 		name:  name,
-		opts:  store.opts.clone(),
+		opts:  store.opts.Clone(),
 	}
 }
 

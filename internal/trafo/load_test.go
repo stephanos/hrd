@@ -42,7 +42,7 @@ var _ = Describe("Doc: Load", func() {
 		CodecSet.AddMust(entity)
 	})
 
-	It("should load an entity from channel properties", func() {
+	It("should load an entity from channel of properties", func() {
 		doc, err := newDocFromInst(&entity)
 		Check(err, IsNil)
 		Check(doc, NotNil)
@@ -55,6 +55,33 @@ var _ = Describe("Doc: Load", func() {
 		res := (doc.get()).(*loadEntity)
 		Check(res.A, Equals, "abc")
 		Check(res.B, EqualsNum, 1)
+	})
+
+	It("should load an entity with inner struct", func() {
+		type InnerModel1 struct {
+			Name string
+		}
+		type InnerModel2 struct {
+			Name string `datastore:"name"`
+		}
+		type MyModel struct {
+			InnerModel1
+			InnerModel2 `datastore:"inner"`
+		}
+
+		CodecSet.AddMust(&MyModel{})
+		doc, _ := newDocFromInst(&MyModel{})
+		c := newPropertyChannel([]ds.Property{
+			{Name: "Name", Value: "him"},
+			{Name: "inner.name", Value: "her"},
+		})
+
+		err := doc.Load(c)
+		Check(err, IsNil)
+
+		res := (doc.get()).(*MyModel)
+		Check(res.InnerModel1.Name, Equals, "him")
+		Check(res.InnerModel2.Name, Equals, "her")
 	})
 
 	It("should return an error when loading fails", func() {

@@ -93,6 +93,10 @@ func (k *Key) ToDSKey(ctx ae.Context) *ds.Key {
 	return k.inner.ToDSKey(ctx)
 }
 
+func (k *Key) String() string {
+	return k.inner.String()
+}
+
 func toInternalKeys(keys []*Key) []*types.Key {
 	ret := make([]*types.Key, len(keys))
 	for i, k := range keys {

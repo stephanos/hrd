@@ -21,10 +21,13 @@ func (p *DocsPipe) Properties() []ds.PropertyLoadSaver {
 }
 
 // docPipe can load/save datastore properties from/to an entity.
+// It implements the datastore's PropertyLoadSaver.
 type docPipe struct {
 	ctx ae.Context
 	doc *Doc
 }
+
+var _ ds.PropertyLoadSaver = (*docPipe)(nil)
 
 func (p *docPipe) Load(c <-chan ds.Property) error {
 	return p.doc.Load(c)

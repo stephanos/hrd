@@ -54,6 +54,6 @@ var _ = Describe("Saver", func() {
 			return nil, nil
 		}
 
-		myKind.Save(ctx).Opts(CompleteKeys).Entity(&MyModel{})
+		myKind.Save(ctx).CompleteKeys().Entity(&MyModel{})
 	})
 })
