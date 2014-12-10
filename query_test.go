@@ -16,7 +16,7 @@ var _ = Describe("Query", func() {
 	)
 
 	BeforeEach(func() {
-		query = newQuery(ctx, myKind)
+		query = myKind.Query(ctx)
 		dsCount = func(_ ae.Context, _ *types.Query) (int, error) {
 			panic("unexpected call")
 		}
@@ -140,50 +140,79 @@ var _ = Describe("Query", func() {
 			}
 		)
 
-		It("should return the result's size", func() {
-			dsCount = func(_ ae.Context, _ *types.Query) (int, error) {
-				return 42, nil
-			}
-			c, err := query.GetCount()
-			Check(c, EqualsNum, 42)
-			Check(err, IsNil)
-
-			dsCount = func(_ ae.Context, _ *types.Query) (int, error) {
-				return 0, fmt.Errorf("an error")
-			}
-			c, err = query.GetCount()
-			Check(c, EqualsNum, 0)
-			Check(err, HasOccurred)
-		})
-
-		It("should return the result's keys", func() {
-			dsIterate = func(_ *types.Iterator, _ interface{}, multi bool) ([]*types.Key, error) {
-				Check(multi, IsTrue)
-				return retKeys, nil
-			}
-			keys, _, err := query.GetKeys()
-			Check(err, IsNil)
-			Check(keys, Equals, importKeys(retKeys))
-		})
-
-		It("should return the first result", func() {
-			var entity MyModel
-
-			dsIterate = func(_ *types.Iterator, _ interface{}, multi bool) ([]*types.Key, error) {
-				Check(multi, IsFalse)
-				return retKeys[0:1], nil
-			}
-			key, err := query.GetFirst(&entity)
-			Check(err, IsNil)
-			Check(key, Equals, importKey(retKeys[0]))
-		})
-
 		It("should return an iterator", func() {
 			it := query.Run()
 			Check(it, NotNil)
 		})
 
-		Context("fetch all entities", func() {
+		Context("count", func() {
+
+			It("should return the result's size", func() {
+				dsCount = func(_ ae.Context, _ *types.Query) (int, error) {
+					return 42, nil
+				}
+				c, err := query.GetCount()
+				Check(c, EqualsNum, 42)
+				Check(err, IsNil)
+			})
+
+			It("should return an error when the operation fails", func() {
+				dsCount = func(_ ae.Context, _ *types.Query) (int, error) {
+					return 0, fmt.Errorf("an error")
+				}
+				c, err := query.GetCount()
+				Check(c, EqualsNum, 0)
+				Check(err, HasOccurred)
+			})
+		})
+
+		Context("keys", func() {
+
+			It("should return the result's keys", func() {
+				dsIterate = func(_ *types.Iterator, _ interface{}, multi bool) ([]*types.Key, error) {
+					Check(multi, IsTrue)
+					return retKeys, nil
+				}
+				keys, _, err := query.GetKeys()
+				Check(err, IsNil)
+				Check(keys, Equals, importKeys(retKeys))
+			})
+
+			It("should return an error when the operation fails", func() {
+				dsIterate = func(_ *types.Iterator, _ interface{}, _ bool) ([]*types.Key, error) {
+					return nil, fmt.Errorf("an error")
+				}
+
+				_, _, err := query.GetKeys()
+				Check(err, HasOccurred)
+			})
+		})
+
+		Context("one entity", func() {
+
+			var entity MyModel
+
+			It("should return the first result", func() {
+				dsIterate = func(_ *types.Iterator, _ interface{}, multi bool) ([]*types.Key, error) {
+					Check(multi, IsFalse)
+					return retKeys[0:1], nil
+				}
+				key, err := query.GetFirst(&entity)
+				Check(err, IsNil)
+				Check(key, Equals, importKey(retKeys[0]))
+			})
+
+			It("should return nil when there is no result", func() {
+				dsIterate = func(_ *types.Iterator, _ interface{}, _ bool) ([]*types.Key, error) {
+					return []*types.Key{}, nil
+				}
+				key, err := query.GetFirst(&entity)
+				Check(err, IsNil)
+				Check(key, IsNil)
+			})
+		})
+
+		Context("all entities", func() {
 
 			var entities []*MyModel
 
@@ -221,6 +250,15 @@ var _ = Describe("Query", func() {
 				fetchWithIterator(query.Limit(1))
 				fetchWithIterator(query.Project("a"))
 				fetchWithIterator(query.NoGlobalCache())
+			})
+
+			It("should return an error when the query fails", func() {
+				dsIterate = func(_ *types.Iterator, _ interface{}, _ bool) ([]*types.Key, error) {
+					return nil, fmt.Errorf("an error")
+				}
+
+				_, _, err := query.GetAll(&entities)
+				Check(err, HasOccurred)
 			})
 		})
 	})

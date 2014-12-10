@@ -37,6 +37,12 @@ var _ = Describe("Key", func() {
 		Check(keys[1].Kind, Equals, kind.Name)
 	})
 
+	It("should return whether Key is incomplete", func() {
+		Check(NewKey("my-kind", "", 0, nil).Incomplete(), IsTrue)
+		Check(NewKey("my-kind", "", 42, nil).Incomplete(), IsFalse)
+		Check(NewKey("my-kind", "abc", 0, nil).Incomplete(), IsFalse)
+	})
+
 	It("should return string representation of Key", func() {
 		str := NewKey("my-kind", "abc", 0, nil).String()
 		Check(str, Equals, "Key{'my-kind', abc}")

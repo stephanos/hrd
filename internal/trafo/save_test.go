@@ -104,6 +104,7 @@ var _ = Describe("Doc Save", func() {
 				String  string `datastore:",omitempty"`
 			}
 			props, err := toProps(&MyModel{})
+
 			Check(err, IsNil)
 			Check(props, NotNil).And(HasLen, 0)
 		})
@@ -119,6 +120,16 @@ var _ = Describe("Doc Save", func() {
 			Check(props, NotNil).And(HasLen, 2)
 			Check(*props[0], Equals, ds.Property{"Field", "something", false, false})
 			Check(*props[1], Equals, ds.Property{"Empty", "", true, false})
+		})
+
+		It("should report invalid tag", func() {
+			type MyModel struct {
+				Field string `datastore:",invalid-tag"`
+			}
+			props, err := toProps(&MyModel{})
+
+			Check(props, IsEmpty)
+			Check(err, Contains, `unknown tag "invalid-tag"`)
 		})
 	})
 

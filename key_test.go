@@ -80,4 +80,9 @@ var _ = Describe("Key", func() {
 		Check(dsKey, Equals,
 			ds.NewKey(ctx, "my-kind", "abc", 0, ds.NewKey(ctx, "my-kind", "", 42, nil)))
 	})
+
+	It("should return string representation", func() {
+		k := newTextKey(myKind, "abc", nil)
+		Check(k.String(), Equals, "Key{'my-kind', abc}")
+	})
 })

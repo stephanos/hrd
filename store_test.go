@@ -26,7 +26,7 @@ var _ = Describe("Store", func() {
 		Check(err, IsNil)
 
 		err = myStore.RegisterEntity("invalid-entity")
-		Check(err, NotNil)
+		Check(err, HasOccurred)
 
 		type MyModel2 struct{}
 		myStore.RegisterEntityMust(&MyModel2{})
