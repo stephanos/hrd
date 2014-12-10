@@ -16,4 +16,12 @@ var _ = Describe("Options", func() {
 		Check(opts.CompleteKeys, IsFalse)
 		Check(opts.NoGlobalCache, IsFalse)
 	})
+
+	It("should return clone", func() {
+		clone := opts.Clone()
+		Check(opts, Equals, clone)
+
+		opts.CompleteKeys = true
+		Check(opts, Not(Equals), clone)
+	})
 })
