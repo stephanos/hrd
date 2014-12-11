@@ -209,13 +209,13 @@ var _ = Describe("Query", func() {
 	It("should not query for invalid entity", func() {
 		_, _, err := runQuery("invalid-entity", true)
 
-		Check(err, HasOccurred).And(Contains, `invalid value kind "string"`)
+		Check(err, ErrorContains, `invalid value kind "string"`)
 	})
 
 	It("should return an error if the query is invalid", func() {
 		query.Filter = append(query.Filter, types.Filter{Filter: "num !=", Value: 0})
 		_, _, err := runQuery(&entities, true)
 
-		Check(err, HasOccurred).And(Contains, `invalid operator "!=" in filter "num !="`)
+		Check(err, ErrorContains, `invalid operator "!=" in filter "num !="`)
 	})
 })
