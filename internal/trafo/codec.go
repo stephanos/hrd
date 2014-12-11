@@ -129,10 +129,7 @@ func validateSubField(labels map[string]bool, parentField *structor.FieldCodec) 
 		return nil
 	}
 
-	subCodec, err := CodecSet.Get(subType)
-	if err != nil {
-		return fmt.Errorf("error processing field %q (%v)", parentField.Name, err)
-	}
+	subCodec, _ := CodecSet.Get(subType)
 	if !subCodec.Complete {
 		return fmt.Errorf("recursive struct at field %q", parentField.Name)
 	}
