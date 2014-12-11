@@ -30,10 +30,7 @@ func Iterate(it *types.Iterator, dsts interface{}, multi bool) (keys []*types.Ke
 
 		var doc *trafo.Doc
 		if docList != nil {
-			doc, err = docList.Get(i)
-			if err != nil {
-				return
-			}
+			doc = docList.Get(i)
 			dsDocs = append(dsDocs, doc)
 		}
 

@@ -149,11 +149,11 @@ func (l *DocList) Keys() []*types.Key {
 
 // Get returns the list's nth Doc.
 // it is created first if it doesn't already exist.
-func (l *DocList) Get(nth int) (ret *Doc, err error) {
+func (l *DocList) Get(nth int) (ret *Doc) {
 	if nth < len(l.list) {
 		ret = l.list[nth]
 	} else {
-		ret, err = newDocFromType(l.elemType)
+		ret, _ = newDocFromType(l.elemType)
 	}
 	return
 }
