@@ -1,8 +1,12 @@
 package internal
 
 import (
+	"fmt"
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/internal/types"
+
+	ae "appengine"
+	ds "appengine/datastore"
 )
 
 var _ = Describe("Put", func() {
@@ -84,6 +88,22 @@ var _ = Describe("Put", func() {
 	})
 
 	// NOTE: other cases of invalid entity/entities are checked inside the trafo package
+
+	It("should return an error when operation fails", func() {
+		_put := ndsPut
+		defer func() {
+			ndsPut = _put
+		}()
+		ndsPut = func(_ ae.Context, _ []*ds.Key, _ interface{}) ([]*ds.Key, error) {
+			return nil, fmt.Errorf("an error")
+		}
+
+		entity := &MyModel{}
+		keys, err := Put(kind, entity, false)
+
+		Check(keys, IsNil)
+		Check(err, HasOccurred)
+	})
 
 	It("should not save complete entity without Id", func() {
 		entity := &MyModel{}

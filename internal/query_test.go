@@ -65,14 +65,14 @@ var _ = Describe("Query", func() {
 		//		childQuery = childColl.Query().Hybrid(hybrid)
 	})
 
-	It("counts entities", func() {
+	It("should counts entities", func() {
 		count, err := Count(ctx, query)
 
 		Check(err, IsNil)
 		Check(count, EqualsNum, 4)
 	})
 
-	It("queries entity keys", func() {
+	It("should query entity keys", func() {
 		query.TypeOf = types.KeysOnlyQuery
 		keys, _, err := runQuery(nil, true)
 
@@ -82,7 +82,7 @@ var _ = Describe("Query", func() {
 		Check(keys[3].IntID, EqualsNum, 4)
 	})
 
-	It("queries no entity", func() {
+	It("should query no entity", func() {
 		query.Filter = append(query.Filter, types.Filter{Filter: "html =", Value: "nonsense"})
 		keys, _, err := runQuery(&entity, false)
 
@@ -91,7 +91,7 @@ var _ = Describe("Query", func() {
 		Check(entity, IsNil)
 	})
 
-	It("queries an entity", func() {
+	It("should query an entity", func() {
 		query.Filter = append(query.Filter, types.Filter{Filter: "num =", Value: 1})
 		keys, _, err := runQuery(&entity, false)
 
@@ -104,7 +104,7 @@ var _ = Describe("Query", func() {
 		Check(entity.lifecycle, Equals, []string{"before-load", "after-load"})
 	})
 
-	It("queries an entity projection", func() {
+	It("should query an entity projection", func() {
 		query.Projection = append(query.Projection, "num")
 		keys, _, err := runQuery(&entity, false)
 
@@ -115,7 +115,7 @@ var _ = Describe("Query", func() {
 		Check(entity.Text, IsZero)
 	})
 
-	It("queries all entities", func() {
+	It("should query all entities", func() {
 		keys, _, err := runQuery(&entities, true)
 
 		Check(err, IsNil)
@@ -127,7 +127,7 @@ var _ = Describe("Query", func() {
 		Check(entities[3].ID(), EqualsNum, 4)
 	})
 
-	It("queries filtered entities", func() {
+	It("should query filtered entities", func() {
 		query.Filter = append(query.Filter, types.Filter{Filter: "text =", Value: "4"})
 		keys, _, err := runQuery(&entities, true)
 
@@ -137,7 +137,7 @@ var _ = Describe("Query", func() {
 		Check(entities[0].Text, Equals, "4")
 	})
 
-	It("queries by ascending order", func() {
+	It("should query by ascending order", func() {
 		query.Order = append(query.Order, types.Order{FieldName: "num", Descending: false})
 		keys, _, err := runQuery(&entities, true)
 
@@ -148,7 +148,7 @@ var _ = Describe("Query", func() {
 		Check(entities[3].ID(), EqualsNum, 4)
 	})
 
-	It("queries by descending order", func() {
+	It("should query by descending order", func() {
 		query.Order = append(query.Order, types.Order{FieldName: "num", Descending: true})
 		keys, _, err := runQuery(&entities, true)
 
@@ -159,7 +159,7 @@ var _ = Describe("Query", func() {
 		Check(entities[3].ID(), EqualsNum, 1)
 	})
 
-	It("query with offset", func() {
+	It("should query with offset", func() {
 		query.Offset = 2
 		keys, _, err := runQuery(&entities, true)
 
@@ -170,7 +170,7 @@ var _ = Describe("Query", func() {
 		Check(entities[1].ID(), EqualsNum, 4)
 	})
 
-	It("query with cursor", func() {
+	It("should query with cursor", func() {
 		query.Limit = 2
 		keys, cursor, err := runQuery(&entities, true)
 
@@ -196,11 +196,32 @@ var _ = Describe("Query", func() {
 		Check(keys[1].IntID, EqualsNum, 2)
 	})
 
-	It("query with eventual consistency", func() {
+	It("should query with eventual consistency", func() {
 		query.Eventual = true
 		keys, _, err := runQuery(&entities, true)
 
 		Check(err, IsNil)
 		Check(keys, HasLen, 4)
+	})
+
+	// ==== ERRORS
+
+	It("should not query for invalid entity", func() {
+		_, _, err := runQuery("invalid-entity", true)
+
+		Check(err, HasOccurred).And(Contains, `invalid value kind "string"`)
+	})
+
+	It("should return an error for invalid entity kind", func() {
+		_, _, err := runQuery(entities, true)
+
+		Check(err, HasOccurred).And(Contains, `invalid value kind "slice"`)
+	})
+
+	It("should return an error if the query is invalid", func() {
+		query.Filter = append(query.Filter, types.Filter{Filter: "num !=", Value: 0})
+		_, _, err := runQuery(&entities, true)
+
+		Check(err, HasOccurred).And(Contains, `invalid operator "!=" in filter "num !="`)
 	})
 })

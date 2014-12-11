@@ -54,6 +54,18 @@ var _ = Describe("Key", func() {
 		Check(str, Equals, "Key{'my-child', 42}[ParentKey{'my-parent', parent}]")
 	})
 
+	It("should return a datastore.Key", func() {
+		dsKey := NewKey("my-kind", "abc", 0, nil).ToDSKey(ctx)
+		Check(dsKey, Equals, ds.NewKey(ctx, "my-kind", "abc", 0, nil))
+
+		dsKey = NewKey("my-kind", "", 42, nil).ToDSKey(ctx)
+		Check(dsKey, Equals, ds.NewKey(ctx, "my-kind", "", 42, nil))
+
+		dsKey = NewKey("my-child", "", 42, NewKey("my-parent", "parent", 0, nil)).ToDSKey(ctx)
+		Check(dsKey, Equals,
+			ds.NewKey(ctx, "my-child", "", 42, ds.NewKey(ctx, "my-parent", "parent", 0, nil)))
+	})
+
 	Context("create key from a single entity", func() {
 
 		It("should return a new Key from numeric id", func() {
