@@ -49,6 +49,14 @@ var _ = Describe("DocList", func() {
 			Check(list.Keys(), Equals, keys[0:2])
 		})
 
+		It("should return a pipe", func() {
+			list, err := NewReadableDocList(kind, entities[0])
+			Check(err, IsNil)
+
+			pipe := list.Pipe(ctx)
+			Check(pipe, NotNil)
+		})
+
 		// ==== ERRORS
 
 		It("should not create list not from nil value", func() {
@@ -132,26 +140,26 @@ var _ = Describe("DocList", func() {
 
 		// ==== ERRORS
 
+		It("should not create list from nil pointer", func() {
+			var entity *fixture.EntityWithNumID
+			list, err := NewWriteableDocList(entity, keys[0:1], false)
+			Check(list, IsNil)
+			Check(err, ErrorContains, `invalid value kind "ptr" (wanted non-nil pointer)`)
+		})
+
+		It("should not create list from non-pointer", func() {
+			list, err := NewWriteableDocList("invalid", keys[0:1], false)
+			Check(list, IsNil)
+			Check(err, ErrorContains, `invalid value kind "string" (wanted non-nil pointer)`)
+		})
+
+		//	It("should not create list from non-reference struct", func() {
+		//		list, err := NewWriteableDocList(entities[0], keys[0:1], false)
+		//		Check(list, IsNil)
+		//		Check(err, ErrorContains, `invalid value kind "ptr" (wanted non-nil pointer)`)
+		//	})
+
 		Context("single key", func() {
-
-			It("should not create list from non-pointer", func() {
-				list, err := NewWriteableDocList("invalid", keys[0:1], false)
-				Check(list, IsNil)
-				Check(err, ErrorContains, `invalid value kind "string" (wanted non-nil pointer)`)
-			})
-
-			It("should not create list from nil pointer", func() {
-				var entity *fixture.EntityWithNumID
-				list, err := NewWriteableDocList(entity, keys[0:1], false)
-				Check(list, IsNil)
-				Check(err, ErrorContains, `invalid value kind "ptr" (wanted non-nil pointer)`)
-			})
-
-			//	It("should not create list from non-reference struct", func() {
-			//		list, err := NewWriteableDocList(entities[0], keys[0:1], false)
-			//		Check(list, IsNil)
-			//		Check(err, ErrorContains, `invalid value kind "ptr" (wanted non-nil pointer)`)
-			//	})
 
 			It("should not create list for single entity and multiple keys", func() {
 				list, err := NewWriteableDocList(&(entities[0]), keys, false)
