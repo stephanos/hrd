@@ -194,7 +194,7 @@ func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	}
 
 	it := qry.Run()
-	keys, err := refactorit.GetAll(dsts)
+	keys, err := it.GetAll(dsts)
 	if err != nil {
 		return nil, "", err
 	}
