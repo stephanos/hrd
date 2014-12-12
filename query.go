@@ -190,20 +190,23 @@ func (qry *Query) GetKeys() ([]*Key, string, error) {
 func (qry *Query) GetAll(dsts interface{}) ([]*Key, string, error) {
 	useHybridQry := qry.inner.Limit != 1 && qry.inner.TypeOf == types.FullQuery && !qry.opts.NoGlobalCache
 	if useHybridQry {
-		keys, cursor, err := qry.GetKeys()
-		if err == nil && len(keys) > 0 {
-			keys, err = newLoader(qry.ctx, qry.kind).Keys(keys).GetAll(dsts)
-		}
-		return keys, cursor, err
+		return qry.getAllByHybrid(dsts)
 	}
 
 	it := qry.Run()
-	keys, err := it.GetAll(dsts)
+	keys, err := refactorit.GetAll(dsts)
 	if err != nil {
 		return nil, "", err
 	}
-
 	cursor, err := it.Cursor()
+	return keys, cursor, err
+}
+
+func (qry *Query) getAllByHybrid(dsts interface{}) ([]*Key, string, error) {
+	keys, cursor, err := qry.GetKeys()
+	if err == nil && len(keys) > 0 {
+		keys, err = newLoader(qry.ctx, qry.kind).Keys(keys).GetAll(dsts)
+	}
 	return keys, cursor, err
 }
 

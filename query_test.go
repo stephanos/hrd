@@ -257,7 +257,7 @@ var _ = Describe("Query", func() {
 					return nil, fmt.Errorf("an error")
 				}
 
-				_, _, err := query.GetAll(&entities)
+				_, _, err := query.NoGlobalCache().GetAll(&entities)
 				Check(err, HasOccurred)
 			})
 		})
