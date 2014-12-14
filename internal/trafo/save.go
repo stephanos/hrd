@@ -160,7 +160,7 @@ func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool
 	}
 
 	if p.Value == nil {
-		err = fmt.Errorf("unsupported struct field type %q (unidentifiable)", v.Type())
+		err = fmt.Errorf("unsupported struct field type %q", v.Type())
 	}
 
 	return

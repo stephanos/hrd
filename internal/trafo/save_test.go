@@ -121,6 +121,26 @@ var _ = Describe("Doc Save", func() {
 			Check(*props[0], Equals, ds.Property{"Data", "", true, false})
 			Check(*props[1], Equals, ds.Property{"embedded.Data", "", true, false})
 		})
+
+		It("should skip ignored fields", func() {
+			type MyModel struct {
+				Ignored string `datastore:"-"`
+			}
+
+			props, err := save(&MyModel{})
+			Check(err, IsNil)
+			Check(props, IsEmpty)
+		})
+
+		// ==== ERRORS
+
+		It("should report unsupported field type", func() {
+			type InvalidModel struct {
+				Complex128 complex128
+			}
+			_, err := save(&InvalidModel{complex(2, -2)})
+			Check(err, Contains, `unsupported struct field type "complex128"`)
+		})
 	})
 
 	Context("tags", func() {
@@ -151,6 +171,8 @@ var _ = Describe("Doc Save", func() {
 			Check(*props[0], Equals, ds.Property{"Field", "something", false, false})
 			Check(*props[1], Equals, ds.Property{"Empty", "", true, false})
 		})
+
+		// ==== ERRORS
 
 		It("should report invalid tag", func() {
 			type MyModel struct {
@@ -218,6 +240,8 @@ var _ = Describe("Doc Save", func() {
 			Check(hooks, Equals, []string{"before", "after"})
 		})
 
+		// ==== ERRORS
+
 		It("should return an error when BeforeSave fails", func() {
 			entity := &HookEntity{}
 			entity.beforeSave = func() error {
@@ -238,8 +262,6 @@ var _ = Describe("Doc Save", func() {
 			Check(err, HasOccurred)
 		})
 	})
-
-	// ==== ERRORS
 })
 
 func save(src interface{}) ([]*ds.Property, error) {
