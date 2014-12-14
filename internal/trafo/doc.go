@@ -57,8 +57,8 @@ func newDocFromType(typ reflect.Type) (*Doc, error) {
 
 // Nil sets the value of the entity to nil.
 func (doc *Doc) Nil() {
-	dst := doc.val()
-	dst.Set(reflect.New(dst.Type()).Elem())
+	val := doc.val()
+	val.Set(reflect.Zero(val.Type()))
 }
 
 // Pipe returns a PropertyLoadSaver to load/save an entity.

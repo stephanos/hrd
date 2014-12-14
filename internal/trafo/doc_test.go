@@ -16,7 +16,7 @@ var _ = Describe("Doc", func() {
 		CodecSet.AddMust(MyModel{})
 	})
 
-	Context("instance", func() {
+	Context("create from instance", func() {
 
 		It("should create new Doc from known struct", func() {
 			doc, err := newDocFromInst(MyModel{})
@@ -56,7 +56,7 @@ var _ = Describe("Doc", func() {
 		})
 	})
 
-	Context("type", func() {
+	Context("create from type", func() {
 
 		It("should create new Doc from pointer to known struct", func() {
 			doc, err := newDocFromType(reflect.TypeOf(&MyModel{}))
@@ -70,6 +70,17 @@ var _ = Describe("Doc", func() {
 			Check(err, ErrorContains, "no registered codec found for type 'trafo.UnknownModel'")
 		})
 	})
+
+//	It("should set to nil", func() {
+//		entity := &MyModel{}
+//
+//		doc, err := newDocFromInst(&entity)
+//		Check(err, IsNil)
+//		Check(entity, NotNil)
+//
+//		doc.Nil()
+//		Check(entity, IsNil)
+//	})
 
 	Context("set key", func() {
 
