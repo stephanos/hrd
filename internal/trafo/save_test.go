@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	. "github.com/101loops/bdd"
+	"github.com/101loops/hrd/entity"
 
 	ae "appengine"
 	ds "appengine/datastore"
@@ -159,6 +160,38 @@ var _ = Describe("Doc Save", func() {
 
 			Check(props, IsEmpty)
 			Check(err, Contains, `unknown tag "invalid-tag"`)
+		})
+	})
+
+	Context("timestamp", func() {
+
+		now := time.Now()
+		nowFunc = func() time.Time {
+			return now
+		}
+
+		It("should set created at", func() {
+			type MyModel struct {
+				entity.CreatedTime
+			}
+			entity := &MyModel{}
+			props, err := save(entity)
+
+			Check(err, IsNil)
+			Check(props, HasLen, 1)
+			Check(*props[0], Equals, ds.Property{"created_at", now, false, false})
+		})
+
+		It("should set updated at", func() {
+			type MyModel struct {
+				entity.UpdatedTime
+			}
+			entity := &MyModel{}
+			props, err := save(entity)
+
+			Check(err, IsNil)
+			Check(props, HasLen, 1)
+			Check(*props[0], Equals, ds.Property{"updated_at", now, false, false})
 		})
 	})
 

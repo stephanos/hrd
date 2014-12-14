@@ -53,5 +53,5 @@ func (mdl *UpdatedTime) UpdatedAt() time.Time {
 
 // SetUpdatedAt sets the entity's last update time.
 func (mdl *UpdatedTime) SetUpdatedAt(t time.Time) {
-	mdl.EntityUpdatedAt = time.Now()
+	mdl.EntityUpdatedAt = t
 }

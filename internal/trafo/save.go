@@ -14,6 +14,12 @@ import (
 	ds "appengine/datastore"
 )
 
+var (
+	nowFunc = func() time.Time {
+		return time.Now()
+	}
+)
+
 // Save saves the entity to datastore properties.
 func (doc *Doc) Save(ctx ae.Context) (props []*ds.Property, err error) {
 	src := doc.get()
@@ -26,7 +32,7 @@ func (doc *Doc) Save(ctx ae.Context) (props []*ds.Property, err error) {
 	}
 
 	// timestamp
-	now := time.Now()
+	now := nowFunc()
 	if ts, ok := src.(entity.CreateTimestamper); ok {
 		ts.SetCreatedAt(now)
 	}
