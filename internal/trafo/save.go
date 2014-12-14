@@ -151,10 +151,12 @@ func fieldToProps(ctx ae.Context, prefix, name string, tags []string, multi bool
 			if !v.CanAddr() {
 				return nil, fmt.Errorf("unsupported property %q (unaddressable)", name)
 			}
+
 			sub, err := newDocFromInst(v.Addr().Interface())
 			if err != nil {
 				return nil, fmt.Errorf("unsupported property %q (%v)", name, err)
 			}
+
 			return sub.toProperties(ctx, name, tags, multi)
 		}
 	}

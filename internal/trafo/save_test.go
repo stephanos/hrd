@@ -5,6 +5,7 @@ import (
 	"time"
 	. "github.com/101loops/bdd"
 	"github.com/101loops/hrd/entity"
+	"github.com/101loops/hrd/internal/types"
 
 	ae "appengine"
 	ds "appengine/datastore"
@@ -57,23 +58,27 @@ var _ = Describe("Doc Save", func() {
 				B  []byte
 				T  time.Time
 				K  *ds.Key
+				KC types.DSKeyConverter
 				BK ae.BlobKey
 				GP ae.GeoPoint
 			}
 
 			dsKey := ds.NewKey(ctx, "kind", "", 42, nil)
 			entity := &MyModel{
-				[]byte("test"), time.Now(), dsKey, ae.BlobKey("bkey"), ae.GeoPoint{1, 2},
+				[]byte("test"), time.Now(),
+				dsKey, types.ImportKey(dsKey),
+				ae.BlobKey("bkey"), ae.GeoPoint{1, 2},
 			}
 			props, err := save(entity)
 			Check(err, IsNil)
-			Check(props, NotNil).And(HasLen, 5)
+			Check(props, NotNil).And(HasLen, 6)
 
 			Check(*props[0], Equals, ds.Property{"B", entity.B, true, false})
 			Check(*props[1], Equals, ds.Property{"T", entity.T, true, false})
 			Check(*props[2], Equals, ds.Property{"K", entity.K, true, false})
-			Check(*props[3], Equals, ds.Property{"BK", entity.BK, true, false})
-			Check(*props[4], Equals, ds.Property{"GP", entity.GP, true, false})
+			Check(*props[3], Equals, ds.Property{"KC", entity.K, true, false})
+			Check(*props[4], Equals, ds.Property{"BK", entity.BK, true, false})
+			Check(*props[5], Equals, ds.Property{"GP", entity.GP, true, false})
 		})
 
 		It("should serialize arbitrary complex fields", func() {
@@ -138,7 +143,19 @@ var _ = Describe("Doc Save", func() {
 			type InvalidModel struct {
 				Complex128 complex128
 			}
-			_, err := save(&InvalidModel{complex(2, -2)})
+			_, err := save(&InvalidModel{})
+			Check(err, Contains, `unsupported struct field type "complex128"`)
+		})
+
+		It("should report unsupported field type in nested struct", func() {
+			type InvalidModel struct {
+				Complex128 complex128
+			}
+			type MyModel struct {
+				InvalidModel
+			}
+
+			_, err := save(&MyModel{InvalidModel{}})
 			Check(err, Contains, `unsupported struct field type "complex128"`)
 		})
 	})
