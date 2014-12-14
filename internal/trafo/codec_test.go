@@ -9,8 +9,9 @@ var _ = Describe("Codec", func() {
 
 	It("should return codec", func() {
 		type MyModel struct {
-			Num  int
-			Text string
+			Num   int
+			Name  string `datastore:"Label"`
+			Label bool   `datastore:"-"`
 		}
 
 		entity := &MyModel{}
