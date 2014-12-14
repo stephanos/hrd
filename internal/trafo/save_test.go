@@ -126,9 +126,11 @@ var _ = Describe("Doc Save", func() {
 
 		It("should omit empty fields", func() {
 			type MyModel struct {
-				Bool    bool   `datastore:",omitempty"`
-				Integer int64  `datastore:",omitempty"`
-				String  string `datastore:",omitempty"`
+				Bool    bool      `datastore:",omitempty"`
+				Integer int64     `datastore:",omitempty"`
+				String  string    `datastore:",omitempty"`
+				Time    time.Time `datastore:",omitempty"`
+				Bytes   []byte    `datastore:",omitempty"`
 			}
 			props, err := save(&MyModel{})
 
