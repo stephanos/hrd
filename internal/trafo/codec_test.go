@@ -7,8 +7,13 @@ import (
 
 var _ = Describe("Codec", func() {
 
-	It("should return simple codec", func() {
-		entity := &SimpleModel{}
+	It("should return codec", func() {
+		type MyModel struct {
+			Num  int
+			Text string
+		}
+
+		entity := &MyModel{}
 		err := CodecSet.Add(entity)
 		Check(err, IsNil)
 
@@ -17,18 +22,6 @@ var _ = Describe("Codec", func() {
 		Check(err, IsNil)
 		Check(codec, NotNil)
 		Check(codec.Complete, IsTrue)
-	})
-
-	It("should return complex codec", func() {
-		entity := &ComplexModel{}
-
-		err := CodecSet.Add(entity)
-		Check(err, IsNil)
-
-		var codec *structor.Codec
-		codec, err = getCodec(entity)
-		Check(err, IsNil)
-		Check(codec, NotNil)
 	})
 
 	// ==== ERRORS

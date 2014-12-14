@@ -2,10 +2,8 @@ package trafo
 
 import (
 	"testing"
-	"time"
 
 	. "github.com/101loops/bdd"
-	"github.com/101loops/hrd/entity"
 	"github.com/101loops/hrd/entity/fixture"
 
 	"appengine/aetest"
@@ -23,9 +21,6 @@ func TestSuite(t *testing.T) {
 	}
 	defer ctx.Close()
 
-	CodecSet.AddMust(SimpleModel{})
-	CodecSet.AddMust(ComplexModel{})
-
 	CodecSet.AddMust(&fixture.EntityWithNumID{})
 	CodecSet.AddMust(&fixture.EntityWithTextID{})
 	CodecSet.AddMust(&fixture.EntityWithParentNumID{})
@@ -34,71 +29,40 @@ func TestSuite(t *testing.T) {
 	RunSpecs(t, "HRD Trafo Suite")
 }
 
-// ==== MODELS
+type HookEntity struct {
+	A string
+	B int
 
-type SimpleModel struct {
-	entity.NumID
-	entity.CreatedTime
-	entity.UpdatedTime
-
-	Ignore string    `datastore:"-"`
-	Num    int64     `datastore:"num"`
-	Data   []byte    `datastore:",index"`
-	Text   string    `datastore:"html,index"`
-	Time   time.Time `datastore:"timing,index,omitempty"`
-
-	lifecycle []string
+	beforeLoad func() error
+	afterLoad  func() error
+	beforeSave func() error
+	afterSave  func() error
 }
 
-func (mdl *SimpleModel) BeforeLoad() error {
-	mdl.lifecycle = append(mdl.lifecycle, "before-load")
+func (h *HookEntity) BeforeLoad() error {
+	if h.beforeLoad != nil {
+		return h.beforeLoad()
+	}
 	return nil
 }
 
-func (mdl *SimpleModel) AfterLoad() error {
-	mdl.lifecycle = append(mdl.lifecycle, "after-load")
+func (h *HookEntity) AfterLoad() error {
+	if h.afterLoad != nil {
+		return h.afterLoad()
+	}
 	return nil
 }
 
-func (mdl *SimpleModel) BeforeSave() error {
-	mdl.lifecycle = append(mdl.lifecycle, "before-save")
+func (h *HookEntity) BeforeSave() error {
+	if h.beforeSave != nil {
+		return h.beforeSave()
+	}
 	return nil
 }
 
-func (mdl *SimpleModel) AfterSave() error {
-	mdl.lifecycle = append(mdl.lifecycle, "after-save")
+func (h *HookEntity) AfterSave() error {
+	if h.afterSave != nil {
+		return h.afterSave()
+	}
 	return nil
-}
-
-type ComplexModel struct {
-	Pair Pair `datastore:"tag"`
-	//PairPtr  *Pair   `datastore:"pair"`
-	Pairs []Pair `datastore:"tags"`
-	//PairPtrs []*Pair `datastore:"pairs"`
-	lifecycle string `datastore:"-"`
-}
-
-func (mdl *ComplexModel) BeforeLoad() error {
-	mdl.lifecycle = "before-load"
-	return nil
-}
-
-func (mdl *ComplexModel) AfterLoad() error {
-	mdl.lifecycle = "after-load"
-	return nil
-}
-
-func (mdl *ComplexModel) BeforeSave() error {
-	mdl.lifecycle = "before-save"
-	return nil
-}
-
-func (mdl *ComplexModel) AfterSave() error {
-	mdl.lifecycle = "after-save"
-	return nil
-}
-
-type Pair struct {
-	Key string `datastore:"key,index,omitempty"`
-	Val string
 }

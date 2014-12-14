@@ -71,16 +71,16 @@ var _ = Describe("Doc", func() {
 		})
 	})
 
-//	It("should set to nil", func() {
-//		entity := &MyModel{}
-//
-//		doc, err := newDocFromInst(&entity)
-//		Check(err, IsNil)
-//		Check(entity, NotNil)
-//
-//		doc.Nil()
-//		Check(entity, IsNil)
-//	})
+	//	It("should set to nil", func() {
+	//		entity := &MyModel{}
+	//
+	//		doc, err := newDocFromInst(&entity)
+	//		Check(err, IsNil)
+	//		Check(entity, NotNil)
+	//
+	//		doc.Nil()
+	//		Check(entity, IsNil)
+	//	})
 
 	Context("set key", func() {
 

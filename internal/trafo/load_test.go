@@ -7,38 +7,16 @@ import (
 	ds "appengine/datastore"
 )
 
-type loadEntity struct {
-	A string
-	B int
-
-	beforeFunc func() error
-	afterFunc  func() error
-}
-
-func (l *loadEntity) BeforeLoad() error {
-	if l.beforeFunc != nil {
-		return l.beforeFunc()
-	}
-	return nil
-}
-
-func (l *loadEntity) AfterLoad() error {
-	if l.afterFunc != nil {
-		return l.afterFunc()
-	}
-	return nil
-}
-
 var _ = Describe("Doc: Load", func() {
 
-	var entity loadEntity
+	var entity HookEntity
 	var validProps = []ds.Property{
 		{Name: "A", Value: "abc"},
 		{Name: "B", Value: int64(1)},
 	}
 
 	BeforeEach(func() {
-		entity = loadEntity{}
+		entity = HookEntity{}
 		CodecSet.AddMust(entity)
 	})
 
@@ -52,7 +30,7 @@ var _ = Describe("Doc: Load", func() {
 		Check(err, IsNil)
 		Check(c, IsClosed)
 
-		res := (doc.get()).(*loadEntity)
+		res := (doc.get()).(*HookEntity)
 		Check(res.A, Equals, "abc")
 		Check(res.B, EqualsNum, 1)
 	})
@@ -84,18 +62,20 @@ var _ = Describe("Doc: Load", func() {
 		Check(res.InnerModel2.Name, Equals, "her")
 	})
 
+	// ==== ERRORS
+
 	It("should return an error when loading fails", func() {
 		doc, _ := newDocFromInst(&entity)
 
 		c := newPropertyChannel([]ds.Property{{Name: "Invalid"}})
 		err := doc.Load(c)
 
-		Check(err, ErrorContains, `cannot load field "Invalid" into a "trafo.loadEntity": no such struct field`)
+		Check(err, ErrorContains, `cannot load field "Invalid" into a "trafo.HookEntity": no such struct field`)
 		Check(c, IsClosed)
 	})
 
 	It("should return an error when BeforeLoad fails", func() {
-		entity.beforeFunc = func() error {
+		entity.beforeLoad = func() error {
 			return fmt.Errorf("an error")
 		}
 
@@ -106,12 +86,12 @@ var _ = Describe("Doc: Load", func() {
 		Check(err, ErrorContains, "an error")
 		Check(c, IsClosed)
 
-		res := (doc.get()).(*loadEntity)
+		res := (doc.get()).(*HookEntity)
 		Check(res.A, Equals, "")
 	})
 
 	It("should return an error when AfterLoad fails", func() {
-		entity.afterFunc = func() error {
+		entity.afterLoad = func() error {
 			return fmt.Errorf("an error")
 		}
 
@@ -122,7 +102,7 @@ var _ = Describe("Doc: Load", func() {
 		Check(err, ErrorContains, "an error")
 		Check(c, IsClosed)
 
-		res := (doc.get()).(*loadEntity)
+		res := (doc.get()).(*HookEntity)
 		Check(res.A, Equals, "abc")
 		Check(res.B, EqualsNum, 1)
 	})
