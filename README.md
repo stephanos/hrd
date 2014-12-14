@@ -26,6 +26,7 @@ Internally it uses [nds](https://github.com/qedus/nds),
 - field name & name transformer
 - allow to pass-in logger
 - RPC listener
+- catch more errors at codec creation
 - delete from query
 - namespace support
 
