@@ -170,12 +170,10 @@ func (qry *Query) GetKeys() ([]*Key, string, error) {
 	keysQry.inner.TypeOf = types.KeysOnlyQuery
 
 	it := keysQry.Run()
-
 	keys, err := it.GetAll(nil)
 	if err != nil {
 		return nil, "", err
 	}
-
 	cursor, err := it.Cursor()
 	return keys, cursor, err
 }
