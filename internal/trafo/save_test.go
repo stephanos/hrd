@@ -165,10 +165,14 @@ var _ = Describe("Doc Save", func() {
 
 	Context("timestamp", func() {
 
-		now := time.Now()
-		nowFunc = func() time.Time {
-			return now
-		}
+		var now time.Time
+
+		BeforeEach(func() {
+			now = time.Now()
+			nowFunc = func() time.Time {
+				return now
+			}
+		})
 
 		It("should set created at", func() {
 			type MyModel struct {
