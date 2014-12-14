@@ -1,6 +1,7 @@
 package trafo
 
 import (
+	"fmt"
 	"time"
 	. "github.com/101loops/bdd"
 
@@ -123,7 +124,7 @@ var _ = Describe("Doc Save", func() {
 
 	Context("tags", func() {
 
-		It("should omit fields", func() {
+		It("should omit empty fields", func() {
 			type MyModel struct {
 				Bool    bool   `datastore:",omitempty"`
 				Integer int64  `datastore:",omitempty"`
@@ -158,13 +159,57 @@ var _ = Describe("Doc Save", func() {
 			Check(err, Contains, `unknown tag "invalid-tag"`)
 		})
 	})
+
+	Context("lifecycle hooks", func() {
+
+		It("should run lifecycle hooks", func() {
+			var hooks []string
+			entity := &HookEntity{}
+			entity.beforeSave = func() error {
+				hooks = append(hooks, "before")
+				return nil
+			}
+			entity.afterSave = func() error {
+				hooks = append(hooks, "after")
+				return nil
+			}
+
+			_, err := save(entity)
+			Check(err, IsNil)
+			Check(hooks, Equals, []string{"before", "after"})
+		})
+
+		It("should return an error when BeforeSave fails", func() {
+			entity := &HookEntity{}
+			entity.beforeSave = func() error {
+				return fmt.Errorf("an error")
+			}
+
+			_, err := save(entity)
+			Check(err, HasOccurred)
+		})
+
+		It("should return an error when AfterSave fails", func() {
+			entity := &HookEntity{}
+			entity.afterSave = func() error {
+				return fmt.Errorf("an error")
+			}
+
+			_, err := save(entity)
+			Check(err, HasOccurred)
+		})
+	})
+
+	// ==== ERRORS
 })
 
 func save(src interface{}) ([]*ds.Property, error) {
 	CodecSet.AddMust(src)
+
 	doc, err := newDocFromInst(src)
 	if err != nil {
 		panic(err)
 	}
+
 	return doc.Save(ctx)
 }
