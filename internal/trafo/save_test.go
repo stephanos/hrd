@@ -18,15 +18,6 @@ type saveEntity struct {
 
 var _ = Describe("Doc Save", func() {
 
-	toProps := func(src interface{}) ([]*ds.Property, error) {
-		CodecSet.AddMust(src)
-		doc, err := newDocFromInst(src)
-		if err != nil {
-			panic(err)
-		}
-		return doc.Save(ctx)
-	}
-
 	Context("fields", func() {
 
 		It("should serialize primitives", func() {
@@ -42,7 +33,7 @@ var _ = Describe("Doc Save", func() {
 				F64 float64
 			}
 
-			props, err := toProps(&MyModel{
+			props, err := save(&MyModel{
 				int(1), int8(2), int16(3), int32(4), int64(5), true, "test", float32(1.0), float64(2.0),
 			})
 			Check(err, IsNil)
@@ -72,7 +63,7 @@ var _ = Describe("Doc Save", func() {
 			entity := &MyModel{
 				[]byte("test"), time.Now(), dsKey, ae.BlobKey("bkey"), ae.GeoPoint{1, 2},
 			}
-			props, err := toProps(entity)
+			props, err := save(entity)
 			Check(err, IsNil)
 			Check(props, NotNil).And(HasLen, 5)
 
@@ -94,7 +85,7 @@ var _ = Describe("Doc Save", func() {
 				Slice  []Pair `datastore:"tags"`
 			}
 
-			props, err := toProps(&MyModel{
+			props, err := save(&MyModel{
 				Struct: Pair{"life", "42"},
 				Slice:  []Pair{Pair{"Bill", "Bob"}, Pair{"Barb", "Betty"}},
 			})
@@ -122,7 +113,7 @@ var _ = Describe("Doc Save", func() {
 				Embedded2 `datastore:"embedded"`
 			}
 
-			props, err := toProps(&MyModel{})
+			props, err := save(&MyModel{})
 			Check(err, IsNil)
 			Check(props, NotNil).And(HasLen, 2)
 			Check(*props[0], Equals, ds.Property{"Data", "", true, false})
@@ -138,7 +129,7 @@ var _ = Describe("Doc Save", func() {
 				Integer int64  `datastore:",omitempty"`
 				String  string `datastore:",omitempty"`
 			}
-			props, err := toProps(&MyModel{})
+			props, err := save(&MyModel{})
 
 			Check(err, IsNil)
 			Check(props, NotNil).And(HasLen, 0)
@@ -149,7 +140,7 @@ var _ = Describe("Doc Save", func() {
 				Field string `datastore:",index"`
 				Empty string `datastore:",index:omitempty"`
 			}
-			props, err := toProps(&MyModel{"something", ""})
+			props, err := save(&MyModel{"something", ""})
 
 			Check(err, IsNil)
 			Check(props, NotNil).And(HasLen, 2)
@@ -161,10 +152,19 @@ var _ = Describe("Doc Save", func() {
 			type MyModel struct {
 				Field string `datastore:",invalid-tag"`
 			}
-			props, err := toProps(&MyModel{})
+			props, err := save(&MyModel{})
 
 			Check(props, IsEmpty)
 			Check(err, Contains, `unknown tag "invalid-tag"`)
 		})
 	})
 })
+
+func save(src interface{}) ([]*ds.Property, error) {
+	CodecSet.AddMust(src)
+	doc, err := newDocFromInst(src)
+	if err != nil {
+		panic(err)
+	}
+	return doc.Save(ctx)
+}

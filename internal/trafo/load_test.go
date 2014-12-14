@@ -21,12 +21,7 @@ var _ = Describe("Doc: Load", func() {
 	})
 
 	It("should load an entity from channel of properties", func() {
-		doc, err := newDocFromInst(&entity)
-		Check(err, IsNil)
-		Check(doc, NotNil)
-
-		c := newPropertyChannel(validProps)
-		err = doc.Load(c)
+		doc, c, err := load(&HookEntity{}, validProps)
 		Check(err, IsNil)
 		Check(c, IsClosed)
 
@@ -47,15 +42,12 @@ var _ = Describe("Doc: Load", func() {
 			InnerModel2 `datastore:"inner"`
 		}
 
-		CodecSet.AddMust(&MyModel{})
-		doc, _ := newDocFromInst(&MyModel{})
-		c := newPropertyChannel([]ds.Property{
+		doc, c, err := load(&MyModel{}, []ds.Property{
 			{Name: "Name", Value: "him"},
 			{Name: "inner.name", Value: "her"},
 		})
-
-		err := doc.Load(c)
 		Check(err, IsNil)
+		Check(c, IsClosed)
 
 		res := (doc.get()).(*MyModel)
 		Check(res.InnerModel1.Name, Equals, "him")
@@ -65,11 +57,7 @@ var _ = Describe("Doc: Load", func() {
 	// ==== ERRORS
 
 	It("should return an error when loading fails", func() {
-		doc, _ := newDocFromInst(&entity)
-
-		c := newPropertyChannel([]ds.Property{{Name: "Invalid"}})
-		err := doc.Load(c)
-
+		_, c, err := load(&entity, []ds.Property{{Name: "Invalid"}})
 		Check(err, ErrorContains, `cannot load field "Invalid" into a "trafo.HookEntity": no such struct field`)
 		Check(c, IsClosed)
 	})
@@ -79,10 +67,7 @@ var _ = Describe("Doc: Load", func() {
 			return fmt.Errorf("an error")
 		}
 
-		doc, _ := newDocFromInst(&entity)
-		c := newPropertyChannel(validProps)
-
-		err := doc.Load(c)
+		doc, c, err := load(&entity, validProps)
 		Check(err, ErrorContains, "an error")
 		Check(c, IsClosed)
 
@@ -95,10 +80,7 @@ var _ = Describe("Doc: Load", func() {
 			return fmt.Errorf("an error")
 		}
 
-		doc, _ := newDocFromInst(&entity)
-		c := newPropertyChannel(validProps)
-
-		err := doc.Load(c)
+		doc, c, err := load(&entity, validProps)
 		Check(err, ErrorContains, "an error")
 		Check(c, IsClosed)
 
@@ -108,7 +90,13 @@ var _ = Describe("Doc: Load", func() {
 	})
 })
 
-func newPropertyChannel(props []ds.Property) chan ds.Property {
+func load(src interface{}, props []ds.Property) (*Doc, chan ds.Property, error) {
+	CodecSet.AddMust(src)
+	doc, err := newDocFromInst(src)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	c := make(chan ds.Property)
 	go func() {
 		for _, p := range props {
@@ -116,5 +104,7 @@ func newPropertyChannel(props []ds.Property) chan ds.Property {
 		}
 		close(c)
 	}()
-	return c
+
+	err = doc.Load(c)
+	return doc, c, err
 }
