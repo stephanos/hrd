@@ -40,6 +40,6 @@ func dsTransactTests(crossGroup bool) {
 			Check(tx, NotNil)
 			return txErr
 		})
-		Check(err, Contains, "tx error")
+		Check(err, ErrorContains, "tx error")
 	})
 }

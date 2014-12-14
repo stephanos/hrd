@@ -144,19 +144,19 @@ var _ = Describe("Doc Save", func() {
 				Complex128 complex128
 			}
 			_, err := save(&InvalidModel{})
-			Check(err, Contains, `unsupported struct field type "complex128"`)
+			Check(err, ErrorContains, `unsupported struct field type "complex128"`)
 		})
 
-		It("should report unsupported field type in nested struct", func() {
+		It("should report unsupported field type in slice", func() {
 			type InvalidModel struct {
 				Complex128 complex128
 			}
 			type MyModel struct {
-				InvalidModel
+				Slice []InvalidModel
 			}
 
-			_, err := save(&MyModel{InvalidModel{}})
-			Check(err, Contains, `unsupported struct field type "complex128"`)
+			_, err := save(&MyModel{[]InvalidModel{{}}})
+			Check(err, ErrorContains, `unsupported struct field type "complex128"`)
 		})
 	})
 
@@ -198,7 +198,7 @@ var _ = Describe("Doc Save", func() {
 			props, err := save(&MyModel{})
 
 			Check(props, IsEmpty)
-			Check(err, Contains, `unknown tag "invalid-tag"`)
+			Check(err, ErrorContains, `unknown tag "invalid-tag"`)
 		})
 	})
 
