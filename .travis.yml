@@ -1,6 +1,8 @@
 language: go
 go:
-  - 1.2
+  - 1.5
+  - 1.6
+  - 1.7
 
 before_install:
   - chmod +x bin/*.sh
@@ -9,10 +11,9 @@ before_install:
 
 install:
   - goapp get github.com/qedus/nds
-  - goapp get github.com/101loops/bdd
-  - goapp get github.com/101loops/iszero
-  - goapp get github.com/101loops/structor
-  - goapp get code.google.com/p/go.tools/cmd/cover
+  - goapp get github.com/stephanos/bdd
+  - goapp get github.com/stephanos/iszero
+  - goapp get github.com/stephanos/structor
 
 script:
   - bin/test-coverage.sh
